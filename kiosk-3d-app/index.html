@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:," />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D 키오스크 교육 (배리어프리)</title>
+  <!-- 프리미엄 모던 텍스트(Pretendard) 웹 폰트 적용 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <!-- 외부 스타일시트 연결: 모던(Toss) 스타일 및 배리어프리 대응 CSS -->
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+
+<body>
+  <!-- 
+      [상단 컨트롤 바] 
+      고령층 사용자가 언제든 시점을 변경하거나 전체 상황을 초기화할 수 있도록 
+      접근성(a11y) 기준에 맞춰 명확한 텍스트와 큰 버튼으로 구성했습니다.
+    -->
+  <header class="top-bar">
+    <h1>키오스크 연습하기</h1>
+    <div class="controls">
+      <label for="camera-mode" class="a11y-label">사용자 시점 설정:</label>
+      <select id="camera-mode" class="a11y-select">
+        <option value="senior">일반 사용자</option>
+        <option value="wheelchair">휠체어 사용자</option>
+      </select>
+    </div>
+  </header>
+
+  <!-- 
+      [메인 1:2:1 레이아웃 구조] 
+      1(좌): 현재 목표(퀘스트) 및 시스템 상태 피드백 영역
+      2(중앙): 3D WebGL 및 CSS3DRenderer가 렌더링되는 핵심 키오스크 존
+      1(우): 상호작용 가능한 3D 도구(신용카드 등)를 설명하는 가이드 존
+    -->
+  <main class="app-container">
+
+    <!-- 1: 퀘스트(학습 목표) 영역 -->
+    <section class="pane quest-pane" aria-label="현재 학습 목표와 진행 상태">
+      <!-- 브랜드 선택 단계 (초기 화면) -->
+      <div id="brand-selection">
+        <h2>어떤 키오스크를<br>연습할까요?</h2>
+        <div class="brand-grid">
+          <button class="brand-btn" data-brand="mcdonalds">🍔<br>맥도날드</button>
+          <button class="brand-btn" data-brand="compose">☕<br>컴포즈커피</button>
+          <button class="brand-btn" data-brand="hospital">🏥<br>병원</button>
+          <button class="brand-btn" data-brand="cgv">🎬<br>CGV</button>
+          <button class="brand-btn" data-brand="busterminal">🚌<br>버스터미널</button>
+        </div>
+      </div>
+
+      <!-- 실제 퀘스트 진행 단계 (브랜드 선택 후 표시됨) -->
+      <div id="quest-content" style="display: none;">
+        <h2>이번 목표</h2>
+        <div class="quest-card">
+          <p class="quest-text" id="quest-text-1">1. 키오스크 화면에서 메뉴를 직접 클릭해 주문하세요.</p>
+          <p class="quest-text">2. 오른쪽 카드를 드래그해서 키오스크 하단의 <strong class="glow-text">결제 투입구(빛나는 곳)</strong>에 넣으세요.</p>
+        </div>
+        <!-- 상태 메시지 알림 -->
+        <div id="status-message" class="status-message" role="alert" aria-live="assertive">
+          현재 상태: 결제 대기 중
+        </div>
+      </div>
+    </section>
+
+    <!-- 2: 3D 키오스크 렌더링 영역 (메인 뷰) -->
+    <section class="pane render-pane" aria-label="3D 키오스크 화면">
+      <div id="css-container"></div>
+      <div id="canvas-container"></div>
+      <!-- 에러 슬라이드 알림창 (Toast) -->
+      <div id="custom-toast" class="toast" role="alert" aria-live="assertive"></div>
+
+      <!-- 줌 인/아웃 버튼 (고령층 친화적인 큰 버튼) -->
+      <div class="zoom-controls">
+        <button id="zoom-in-btn" class="zoom-btn" aria-label="확대">+</button>
+        <button id="zoom-out-btn" class="zoom-btn" aria-label="축소">−</button>
+      </div>
+    </section>
+
+    <!-- 3: 조작 도구 영역 -->
+    <section class="pane tools-pane" aria-label="조작 도구">
+      <h2>내 물건</h2>
+      <p class="helper-text">아래 <strong>신용카드</strong>를 클릭하면 화면에 카드가 나타납니다.<br>카드를 드래그해서 투입구에 넣으세요.</p>
+
+      <button id="spawn-card-btn" class="card-spawn-btn" aria-label="신용카드 꺼내기">
+        <div class="legend-icon color-blue"></div>
+        <span>내 신용카드 꺼내기</span>
+      </button>
+
+      <!-- 하단으로 이동한 리셋 버튼 -->
+      <button id="reset-btn" class="a11y-button reset-btn-bottom">처음부터 다시하기</button>
+    </section>
+  </main>
+
+  <script type="module" src="./src/core/main.js"></script>
+</body>
+
+</html>

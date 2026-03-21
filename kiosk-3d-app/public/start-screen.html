@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Kiosk Start Screen</title>
+  <!-- 프리텐다드 웹 글꼴 연동 -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f2f4f6; /* 토스 스타일 연회색 배경 */
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      text-align: center;
+      user-select: none;
+    }
+    .welcome-container {
+      background: #ffffff;
+      padding: 60px 80px;
+      border-radius: 24px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+      transform: translateY(-20px);
+    }
+    h1 {
+      font-size: 52px;
+      color: #1a73e8; /* 포인팅 블루 */
+      margin: 0 0 24px 0;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    p {
+      font-size: 28px;
+      color: #4e5968; /* 다크 그레이 텍스트 */
+      line-height: 1.5;
+      margin: 0;
+      font-weight: 600;
+    }
+    /* 반짝이는 장식 요소 */
+    .icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      display: inline-block;
+      animation: bounce 2s infinite ease-in-out;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="welcome-container">
+    <div class="icon">👋</div>
+    <h1>환영합니다</h1>
+    <p>왼쪽 패널에서 연습할<br><strong>브랜드를 선택해주세요</strong></p>
+  </div>
+</body>
+</html>

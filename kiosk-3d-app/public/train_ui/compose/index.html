@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>컴포즈커피 키오스크</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 첫 화면: 매장 / 포장 선택 -->
+  <section id="order-type-screen" class="screen active">
+    <div class="choice-wrap">
+      <div class="brand-box">
+        <h1 class="brand-title">COMPOSE COFFEE</h1>
+        <p class="brand-subtitle">주문 방법을 선택해주세요</p>
+      </div>
+
+      <div class="choice-buttons">
+        <button id="eat-in-btn" class="choice-btn" type="button">
+          <span class="choice-emoji">🍽️</span>
+          <span class="choice-title">매장에서 먹기</span>
+          <span class="choice-desc">매장 안에서 음료를 이용할게요</span>
+        </button>
+
+        <button id="take-out-btn" class="choice-btn" type="button">
+          <span class="choice-emoji">🥡</span>
+          <span class="choice-title">포장해가기</span>
+          <span class="choice-desc">포장해서 가져갈게요</span>
+        </button>
+      </div>
+
+      <p class="guide-text">원하시는 주문 방식을 눌러주세요</p>
+    </div>
+  </section>
+
+  <!-- 두 번째 화면: 나중에 메뉴 화면으로 사용할 영역 -->
+  <section id="menu-screen" class="screen hidden">
+    <header class="header">
+      <h1>컴포즈커피</h1>
+      <p id="order-type-label">주문 방식이 여기에 표시됩니다</p>
+    </header>
+
+    <main class="container">
+      <section class="menu-section">
+        <div class="category-tabs">
+          <button class="tab active" type="button">커피</button>
+          <button class="tab" type="button">음료</button>
+          <button class="tab" type="button">디저트</button>
+        </div>
+
+        <div id="menu-list" class="menu-list"></div>
+      </section>
+
+      <aside class="cart-section">
+        <h2>주문 내역</h2>
+        <div id="cart-list" class="cart-list"></div>
+
+        <div class="cart-footer">
+          <div class="total">
+            <span>총 금액</span>
+            <strong id="total-price">0원</strong>
+          </div>
+          <button id="pay-btn" class="pay-btn" type="button" disabled>결제하기</button>
+        </div>
+      </aside>
+    </main>
+  </section>
+
+  <script src="ui.js"></script>
+</body>
+</html>

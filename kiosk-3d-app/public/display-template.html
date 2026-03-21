@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toss Style Kiosk UI</title>
+  <style>
+    /* 
+      [모던 Toss 스타일 미니멀 CSS] 
+      키오스크 디스플레이 전용 템플릿입니다. 
+      깔끔한 흰/회색 배경, 부드러운 그림자, 파란색 강조 컬러, 
+      그리고 크게 읽히는 둥근 글꼴(Pretendard)을 채택했습니다.
+    */
+    :root {
+      --toss-blue: #3182f6;
+      --toss-bg: #f2f4f6;
+      --toss-white: #ffffff;
+      --toss-text: #191f28;
+      --toss-subtext: #8b95a1;
+      --toss-border: #e2e8f0;
+      --toss-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      --toss-radius-lg: 20px;
+      --toss-radius-md: 12px;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+
+    body {
+      background-color: var(--toss-bg);
+      color: var(--toss-text);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      /* Prevent text selection to feel like native kiosk */
+      user-select: none; 
+    }
+
+    .header {
+      padding: 24px;
+      background: var(--toss-white);
+      border-bottom: 1px solid var(--toss-border);
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .content {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--toss-white);
+      padding: 20px 24px;
+      border-radius: var(--toss-radius-lg);
+      box-shadow: var(--toss-shadow);
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+
+    .menu-item:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-info h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .menu-info p {
+      font-size: 16px;
+      color: var(--toss-subtext);
+    }
+
+    .price {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--toss-blue);
+    }
+
+    .footer {
+      background: var(--toss-white);
+      padding: 24px;
+      border-top: 1px solid var(--toss-border);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .total-amount {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .pay-btn {
+      width: 100%;
+      background-color: var(--toss-blue);
+      color: white;
+      border: none;
+      padding: 20px;
+      border-radius: var(--toss-radius-md);
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .pay-btn:hover {
+      background-color: #2768c7;
+    }
+    
+    .pay-btn:disabled {
+      background-color: #cfd8dc;
+      cursor: not-allowed;
+    }
+
+    /* Overlay for Payment Phase */
+    .payment-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .payment-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .payment-overlay h2 {
+      font-size: 32px;
+      color: var(--toss-text);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .payment-overlay p {
+      font-size: 20px;
+      color: var(--toss-blue);
+      font-weight: bold;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>더조은 카페</h1>
+  </div>
+
+  <div class="content" style="justify-content: center; align-items: center;">
+    <button class="pay-btn" id="pay-btn" onclick="startPayment()" style="padding: 40px; font-size: 32px; border-radius: var(--toss-radius-lg); background-color: var(--toss-blue); color: white; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(49, 130, 246, 0.3);">
+      💳 임시 결제 테스트 버튼
+    </button>
+  </div>
+
+  <div class="payment-overlay" id="payment-overlay">
+    <h2>기기 아래의<br>투입구에 카드를 꽂아주세요</h2>
+    <p>결제 대기 중...</p>
+  </div>
+
+  <script>
+    // URL에서 넘겨받은 브랜드 이름으로 상단 헤더 동적 변경
+    const urlParams = new URLSearchParams(window.location.search);
+    const brandParam = urlParams.get('brand');
+    if (brandParam) {
+      document.querySelector('.header h1').innerText = brandParam;
+    }
+
+    // 현재 선택된 메뉴의 합산 가격
+    let total = 0;
+    
+    // UI 업데이트를 위한 대상 DOM 노드들
+    const priceEl = document.getElementById('total-price');
+    const btnEl = document.getElementById('pay-btn');
+    const overlayEl = document.getElementById('payment-overlay');
+
+    /**
+     * 사용자가 중앙의 메뉴(아메리카노 등)를 클릭했을 때 호출됩니다.
+     * @param {string} name - 메뉴 이름
+     * @param {number} price - 메뉴 가격
+     */
+    function addItem(name, price) {
+      if (overlayEl.classList.contains('active')) return; // 결제 대기 중 클릭 방지
+      
+      total += price;
+      // 천 단위 쉼표(,) 포맷팅하여 어르신들도 단위 읽기가 편하게 적용
+      priceEl.innerText = total.toLocaleString() + '원';
+      
+      if (total > 0) {
+        btnEl.disabled = false;
+        btnEl.innerText = `${total.toLocaleString()}원 결제하기`;
+      }
+    }
+
+    /**
+     * 하단 '결제하기' 파란색 버튼 클릭 시 호출됩니다.
+     */
+    function startPayment() {
+      // 투명 블러 된 결제 대기 화면(overlay)을 위로 띄움
+      overlayEl.classList.add('active');
+      
+      // [핵심] iframe 밖(main.js)으로 메시지를 보내, 물리적인 카드 투입 과정을 안내하도록 트리거
+      window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+    }
+
+    /**
+     * 바깥 Three.js 씬(main.js)에서 물리적 카드가 투입구 경계(BoundingBox)에 
+     * 알맞게 들어갔다고 판정되었을 때 수신하는 이벤트 리스너입니다.
+     */
+    window.addEventListener('message', (event) => {
+      // main.js의 handleCardInsertion() 성공 로직에서 보낸 신호 확인
+      if (event.data && event.data.type === 'CARD_INSERTED') {
+        // 결제 완료 텍스트 애니메이션 연출
+        overlayEl.innerHTML = `
+          <h2 style="color: #3182f6;">결제가<br>완료되었습니다!</h2>
+          <p style="animation: none; color: #191f28; font-size: 24px; margin-top: 24px;">이용해 주셔서 감사합니다</p>
+        `;
+        
+        // 4초 후 메인화면으로 복구하는 초기화 로직
+        setTimeout(() => {
+          total = 0;
+          priceEl.innerText = '0원';
+          btnEl.disabled = true;
+          btnEl.innerText = '결제하기';
+          overlayEl.classList.remove('active');
+          
+          overlayEl.innerHTML = `
+            <h2>기기 아래의<br>투입구에 카드를 꽂아주세요</h2>
+            <p>결제 대기 중...</p>
+          `;
+          
+          // 부모 WebGL 창(main.js)에도 '초기화 완료' 신호를 보내 카드 위치를 원상복구 시킴
+          window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        }, 4000);
+      }
+    });
+  </script>
+</body>
+</html>

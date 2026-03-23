@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>수납 및 처방전 발행</title>
+  <link rel="stylesheet" href="payment.css"> </head>
+<body>
+  <div id="payment-container">
+    
+    <header class="gradient-header">
+      <div class="logo-small">세종충남대학교병원</div>
+      <h1>수납 및 처방전발행</h1>
+      <div class="step-nav">
+        <span class="step active">2 금액확인 및 수납여부선택</span>
+        <span class="step off">3</span>
+        <span class="step off">4</span>
+      </div>
+    </header>
+
+    <main class="payment-content">
+      
+      <table class="bill-table">
+        <thead>
+          <tr>
+            <th>진료일</th>
+            <th>진료과</th>
+            <th>진료+검사(처치)비</th>
+            <th>수납금액</th>
+            <th>수납여부선택</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2023.08.31</td>
+            <td>척추센터(신경외)</td>
+            <td class="right-align">0원<br>(+) 6,300원</td>
+            <td class="right-align">6,300원</td>
+            <td class="check-col">
+              <span class="check-box checked">✔</span>
+              <span class="check-text">수납제외</span>
+            </td>
+          </tr>
+          <tr><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3" class="total-label">총 수납액 :</td>
+            <td colspan="2" class="total-price">6,300 원</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="scroll-arrows">
+        <button>▲</button>
+        <button>▼</button>
+      </div>
+
+      <div class="patient-info-box">
+        <div class="info-row"><span class="label">환 자 성 명:</span><span class="value">홍길동</span></div>
+        <div class="info-row"><span class="label">주민등록번호:</span><span class="value">800101 - ******</span></div>
+      </div>
+
+      <div class="payment-methods">
+        <h2>결제방법을 선택해주세요</h2>
+        <div class="method-buttons">
+          <button class="btn-outline">일시불</button>
+          <button class="btn-outline">처방전만<br>발행</button>
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="bottom-actions">
+      <button id="final-pay-btn" class="yellow-btn">번호표 발행</button> 
+      <button id="home-btn" class="home-btn">처음</button>
+    </footer>
+
+  </div>
+
+  <script src="payment.js"></script> </body>
+</html>

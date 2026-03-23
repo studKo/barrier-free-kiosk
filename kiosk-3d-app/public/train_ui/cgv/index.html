@@ -1,12 +1,101 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-  <meta charset="UTF-8">
-  <title>cgv UI</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시네마 키오스크 통합 시스템</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <h1>cgv Ű����ũ ȭ��</h1>
-  <script src="ui.js"></script>
+
+    <div class="kiosk-container">
+        <div id="step-start" class="screen active">
+            <button class="btn primary start-btn" onclick="nextStep('step-menu')">🎬 터치하여 시작하기</button>
+        </div>
+
+        <div id="step-menu" class="screen">
+            <h2>서비스를 선택하세요</h2>
+            <div class="menu-grid">
+                <button class="btn menu-btn" onclick="nextStep('step-movie')">🎟️ 티켓구매</button>
+                <button class="btn menu-btn" onclick="alert('준비 중')">📄 예매티켓출력</button>
+                <button class="btn menu-btn" onclick="nextStep('step-shop')">🍿 매점구매</button>
+                <button class="btn menu-btn" onclick="alert('준비 중')">🎁 쿠폰으로주문</button>
+                <button class="btn menu-btn refund-btn" onclick="nextStep('step-refund')">↺ 환불</button>
+            </div>
+            <div class="footer"><button class="btn" onclick="location.reload()">처음으로</button></div>
+        </div>
+
+        <div id="step-movie" class="screen">
+            <h2>영화를 선택하세요</h2>
+            <div class="movie-list">
+                <div class="movie-item" onclick="selectMovie('어벤져스')">🦸 어벤져스</div>
+                <div class="movie-item" onclick="selectMovie('타이타닉')">🚢 타이타닉</div>
+                <div class="movie-item" onclick="selectMovie('기생충')">🏠 기생충</div>
+            </div>
+            <div class="footer"><button class="btn" onclick="nextStep('step-menu')">이전으로</button></div>
+        </div>
+
+        <div id="step-seat" class="screen">
+            <h2 id="selected-movie-name"></h2>
+            <div class="screen-bar">SCREEN</div>
+            <div id="seat-container" class="seat-grid"></div>
+            <div class="footer">
+                <p>선택된 좌석: <span id="seat-count">0</span>개</p>
+                <button class="btn primary" onclick="completeBooking()">예매 완료</button>
+                <button class="btn" onclick="nextStep('step-movie')">이전으로</button>
+            </div>
+        </div>
+
+        <div id="step-shop" class="screen">
+            <h2>🍿 매점 메뉴</h2>
+            <div class="shop-item">
+                <span>🥤 콜라 (3,000원)</span>
+                <div class="count-control">
+                    <button class="count-btn" onclick="changeCount('coke', -1)">-</button>
+                    <span id="coke-count">0</span>
+                    <button class="count-btn" onclick="changeCount('coke', 1)">+</button>
+                </div>
+            </div>
+            <div class="shop-item">
+                <span>🍿 팝콘 (5,000원)</span>
+                <div class="count-control">
+                    <button class="count-btn" onclick="changeCount('popcorn', -1)">-</button>
+                    <span id="popcorn-count">0</span>
+                    <button class="count-btn" onclick="changeCount('popcorn', 1)">+</button>
+                </div>
+            </div>
+            <div class="footer">
+                <h3>총 금액: <span id="total-price">0</span>원</h3>
+                <button class="btn primary" onclick="completeShop()">결제하기</button>
+                <button class="btn" onclick="nextStep('step-menu')">이전으로</button>
+            </div>
+        </div>
+
+        <div id="step-refund" class="screen">
+            <h2>↺ 예매 환불</h2>
+            <p>예매 번호 8자리를 입력해 주세요.</p>
+            <div class="refund-display" id="refund-display">________</div>
+            <div class="keypad">
+                <button class="key-btn" onclick="pressKey('1')">1</button>
+                <button class="key-btn" onclick="pressKey('2')">2</button>
+                <button class="key-btn" onclick="pressKey('3')">3</button>
+                <button class="key-btn" onclick="pressKey('4')">4</button>
+                <button class="key-btn" onclick="pressKey('5')">5</button>
+                <button class="key-btn" onclick="pressKey('6')">6</button>
+                <button class="key-btn" onclick="pressKey('7')">7</button>
+                <button class="key-btn" onclick="pressKey('8')">8</button>
+                <button class="key-btn" onclick="pressKey('9')">9</button>
+                <button class="key-btn" onclick="clearKey()">C</button>
+                <button class="key-btn" onclick="pressKey('0')">0</button>
+                <button class="key-btn primary" onclick="submitRefund()">확인</button>
+            </div>
+            <div class="footer"><button class="btn" onclick="nextStep('step-menu')">이전으로</button></div>
+        </div>
+    </div>
+
+    <script src="ui.js"></script>
 </body>
+
 </html>

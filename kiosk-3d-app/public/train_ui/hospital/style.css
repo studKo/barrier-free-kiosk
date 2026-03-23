@@ -1,1 +1,234 @@
-/* hospital Styles */
+/* 기본 브라우저 여백 제거 (가장 중요) */
+* {
+    box-sizing: border-box; /* 크기 계산 시 테두리 포함 */
+}
+
+/* 1. 기본 도화지를 투명하게 복구 */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: transparent; 
+    font-family: 'Malgun Gothic', dotum, sans-serif;
+}
+
+#kiosk-container {
+    width: 100vw;
+    height: 100vh; 
+    margin: 0; 
+    display: flex;
+    flex-direction: column;
+    background-color: #eef2f8; 
+}
+
+/* 헤더 */
+header {
+    height: 50vh; 
+    background-color: #666361;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 25px;
+}
+
+.logo { font-size: 1.5rem; font-weight: bold; }
+.step-indicator { 
+    font-size: 1.5rem; 
+    color: #333; /* 글씨는 어둡게 */
+    background-color: #ffffff; /* 🌟 네모칸은 흰색으로 */
+    padding: 8px 15px; /* 네모칸 크기 확보 */
+    border-radius: 5px; /* 모서리 살짝 둥글게 */
+    font-weight: bold;
+}
+
+/* 입력창 영역 비율 설정 */
+#input-screen {
+    flex: 1; /* 🌟 90vh 대신 flex:1을 써서 밑에 남는 회색 빈공간을 흰색으로 완전히 덮음 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 🌟 위, 중간, 아래 간격을 최대로 벌려서 UI를 아래로 내림 */
+    padding-top: 8px;
+    background-color: #fff; 
+}
+/* 안내 문구 */
+.instruction {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #fff;
+}
+
+h2 { 
+    margin: 5px 0; 
+    font-size: 1.8rem; /* 🌟 1.4rem에서 1.7rem으로 크기 대폭 확대 */
+    color: #333; 
+    font-weight: normal; /* 전체 글씨는 얇게 */
+    line-height: 1.6; /* 줄 간격 띄우기 */
+}
+
+h2 strong {
+    font-weight: 900; /* <strong>으로 감싼 특정 글씨만 아주 두껍게! */
+}
+
+/* 1. 입력창과 키패드 사이 공백 최소화 (입력창 하단 여백 제거) */
+.input-display {
+    padding: 10px 0 5px 0; /* 🌟 아래쪽 패딩을 없애 키패드와 바짝 붙임 */
+    background-color: #fff;
+    display: flex;
+    justify-content: center;
+}
+
+/* 번호 표시창 (입력칸) */
+#patient-number {
+    width: 80%; /* 🌟 85%였던 너비를 키패드와 똑같은 70%로 맞춤! */
+    height: 70px; /* 🌟 버튼이 길어진 만큼 입력창도 살짝 더 도톰하게(60->70) 키움 */
+    font-size: 2rem;
+    text-align: center;
+    border: 2px solid #333;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+/* 키패드 영역 */
+.keypad-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 🌟 키패드를 상단에 고정 */
+    padding-top: 5px; /* 입력창과 최소한의 간격만 유지 */
+    background-color: #fff;
+}
+
+/* 키패드 영역 */
+/* 2. 키패드 너비 좁게 (가로 슬림화) */
+.keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px; /* 간격 살짝 축소 */
+    width: 80%; /* 🌟 85%였던 너비를 70%로 확 줄여 좁게 만듦 */
+    margin: 0 auto;
+}
+
+/* 3. 버튼 높이 길게 + 숫자 크게 (세로 확대 및 숫자 확대) */
+.num-btn, #confirm-btn {
+    height: 85px; /* 🌟 65px이었던 버튼 높이를 85px로 크게 늘려 세로로 길게 */
+    font-size: 2.2rem; /* 🌟 1.6rem에서 2.2rem으로 숫자 크기 대폭 확대 */
+    font-weight: bold;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.num-btn:active { background-color: #ddd; }
+.clear { background-color: #666 !important; color: white; }
+/* 확인 버튼 */
+#confirm-btn { 
+    background-color: #7a5c4f; /* 🌟 원본과 똑같은 갈색 느낌 적용 */
+    color: white; 
+    border: none; 
+}
+
+/* -------------------------------------
+   하단 바코드 안내 및 주차 영역
+------------------------------------- */
+/* -------------------------------------
+   하단 바코드 안내 및 주차 영역 (위아래 세로 배치)
+------------------------------------- */
+/* -------------------------------------
+   하단 바코드 안내 및 주차 영역 (완성본)
+------------------------------------- */
+.bottom-info-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 기본적으로 가운데 정렬 */
+    background-color: #fff;
+    padding: 10px 0 25px 0; 
+    width: 100%;
+    gap: 15px;
+}
+
+/* 안내 글씨 (양옆으로 회색 선이 뻗어나가도록 수정) */
+.divider-text-box {
+    display: flex;
+    align-items: center; 
+    text-align: center; 
+    color: #222; /* 🌟 기존 #777(회색)에서 진한 검은색으로 변경 */
+    font-size: 1.5rem; /* 🌟 1.05rem에서 1.3rem으로 크기 대폭 확대 */
+    width: 90%;
+    margin-top: 10px;
+}
+
+/* 글씨 왼쪽, 오른쪽에 생기는 가짜 선 만들기 */
+.divider-text-box::before,
+.divider-text-box::after {
+    content: "";
+    flex: 1; /* 글씨가 차지하고 남은 양옆 공간을 쫙 채움 */
+    border-bottom: 1px solid #ddd; /* 원본과 같은 얇은 회색 선 */
+}
+
+/* 선과 글씨 사이가 너무 안 붙게 살짝 띄워주기 */
+.divider-text-box::before {
+    margin-right: 10px;
+}
+.divider-text-box::after {
+    margin-left: 10px;
+}
+
+/* 노란색 말풍선 본체 (크기 확대) */
+.speech-bubble {
+    background-color: #ffca43; 
+    padding: 10px 30px; /* 🌟 위아래, 양옆 여백을 팍 늘려서 크기를 키움 */
+    border-radius: 15px; /* 크기가 커진 만큼 모서리도 살짝 더 둥글게 */
+    text-align: center;
+    position: relative;
+    color: #333;
+    font-size: 1.5rem; /* 🌟 전체 글씨 크기도 살짝 키움 */
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+    
+    /* 여기서 말풍선을 오른쪽으로 보냅니다! */
+    align-self: flex-end; 
+    margin-right: 10%; /* 화면 오른쪽 끝에서 살짝 띄움 */
+}
+
+/* 말풍선 뾰족한 꼬리 (본체가 커진 만큼 꼬리도 키움) */
+.speech-bubble::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -18px; /* 🌟 꼬리가 시작되는 위치를 살짝 더 밖으로 */
+    transform: translateY(-50%);
+    border-width: 15px 20px 15px 0; /* 🌟 꼬리 크기 확대 */
+    border-style: solid;
+    border-color: transparent #ffca43 transparent transparent;
+}
+
+.speech-bubble .highlight {
+    font-size: 1.8rem;
+    display: block;
+    margin-bottom: 3px;
+    color: #000;
+}
+
+/* 주차등록 버튼 */
+.parking-btn {
+    background-color: #666; 
+    color: white;
+    border: none;
+    border-radius: 30px; 
+    padding: 12px 45px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+    margin-top: 5px;
+    align-self: flex-end; 
+    margin-right: 19%; /* 화면 오른쪽 끝에서 살짝 띄움 (수치 조절 가능) */
+}
+
+.parking-btn:active {
+    background-color: #46586b;
+}

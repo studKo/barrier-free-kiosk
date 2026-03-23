@@ -2,11 +2,58 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>hospital UI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세종충남대학교병원 키오스크</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>hospital Ű����ũ ȭ��</h1>
+  <div id="kiosk-container">
+    <header>
+      <div class="logo">세종충남대학교병원</div>
+      <div class="step-indicator">대기  0  명</div>
+    </header>
+
+    <main id="input-screen">
+      <div class="instruction">
+        <h2><strong>진료안내문 · 진료카드 · 영수증 없으신 분</strong>은<br>환자번호 또는 주민등록번호를 입력바랍니다.</h2>
+      </div>
+      
+      <div class="input-display">
+        <input type="text" id="patient-number" readonly>
+      </div>
+
+      <div class="keypad-area">
+        <div class="keypad">
+          <button class="num-btn">1</button>
+          <button class="num-btn">2</button>
+          <button class="num-btn">3</button>
+          <button class="num-btn">4</button>
+          <button class="num-btn">5</button>
+          <button class="num-btn">6</button>
+          <button class="num-btn">7</button>        
+          <button class="num-btn">8</button>
+          <button class="num-btn">9</button>
+          <button class="num-btn clear">정정</button>
+          <button class="num-btn">0</button>
+          <button id="confirm-btn">확인</button>
+        </div>
+      </div> 
+
+      <div class="bottom-info-area">
+        <div class="divider-text-box">
+          진료안내문 · 진료카드 · 영수증이 있으신 분은
+        </div>
+        
+        <div class="speech-bubble">
+          <span class="highlight">화면 밑에!</span>
+          바코드를 인식 할 수 있어요!
+        </div>
+
+        <button class="parking-btn">주차등록/변경</button>
+      </div>
+
+    </main>
+
   <script src="ui.js"></script>
 </body>
 </html>

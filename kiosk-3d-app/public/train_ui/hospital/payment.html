@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>수납 및 처방전 발행</title>
-  <link rel="stylesheet" href="payment.css"> </head>
+  <link rel="stylesheet" href="payment.css"> 
+</head>
 <body>
   <div id="payment-container">
     
@@ -12,51 +13,56 @@
       <div class="logo-small">세종충남대학교병원</div>
       <h1>수납 및 처방전발행</h1>
       <div class="step-nav">
-        <span class="step active">2 금액확인 및 수납여부선택</span>
+        <span class="step active"><span class="step-num">2</span> 금액확인 및 수납여부선택</span>
         <span class="step off">3</span>
         <span class="step off">4</span>
       </div>
     </header>
 
     <main class="payment-content">
-      
-      <table class="bill-table">
-        <thead>
-          <tr>
-            <th>진료일</th>
-            <th>진료과</th>
-            <th>진료+검사(처치)비</th>
-            <th>수납금액</th>
-            <th>수납여부선택</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2023.08.31</td>
-            <td>척추센터(신경외)</td>
-            <td class="right-align">0원<br>(+) 6,300원</td>
-            <td class="right-align">6,300원</td>
-            <td class="check-col">
-              <span class="check-box checked">✔</span>
-              <span class="check-text">수납제외</span>
-            </td>
-          </tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-          <tr><td></td><td></td><td></td><td></td><td></td></tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3" class="total-label">총 수납액 :</td>
-            <td colspan="2" class="total-price">6,300 원</td>
-          </tr>
-        </tfoot>
-      </table>
+      <div class="grey-wrapper">
+        <table class="bill-table">
+          <thead>
+            <tr>
+              <th style="width: 16%;">진료일</th>
+              <th style="width: 22%;">진료과</th>
+              <th style="width: 25%;">진료+검사(처치)비</th>
+              <th style="width: 15%;">수납금액</th>
+              <th style="width: 22%;">수납여부선택</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>2023.08.31</td>
+              <td>척추센터(신경외)</td>
+              <td class="right-align">0원<br>(+) 6,300원</td>
+              <td class="right-align">6,300원</td>
+              <td class="check-col">
+                <div class="check-wrap">
+                  <span class="red-check">✔</span>
+                  <span class="green-box">수납제외</span>
+                </div>
+              </td>
+            </tr>
+            <tr class="empty-row"><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr class="empty-row"><td></td><td></td><td></td><td></td><td></td></tr>
+            <tr class="empty-row"><td></td><td></td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
 
-      <div class="scroll-arrows">
-        <button>▲</button>
-        <button>▼</button>
-      </div>
+        <div class="arrow-controls">
+          <button>▲</button>
+          <button>▼</button>
+        </div>
+
+        <div class="total-box">
+          <div class="total-label">총 수납액 :</div>
+          <div class="total-value">
+            <span class="black-num">6,300</span>
+            <span class="white-unit">원</span>
+          </div>
+        </div>
+      </div> 
 
       <div class="patient-info-box">
         <div class="info-row"><span class="label">환 자 성 명:</span><span class="value">홍길동</span></div>
@@ -66,19 +72,89 @@
       <div class="payment-methods">
         <h2>결제방법을 선택해주세요</h2>
         <div class="method-buttons">
-          <button class="btn-outline">일시불</button>
-          <button class="btn-outline">처방전만<br>발행</button>
+            <button id="lump-sum-btn" class="btn-outline">일시불</button>
+            <button class="btn-outline">처방전만<br>발행</button>
         </div>
       </div>
-
     </main>
 
     <footer class="bottom-actions">
       <button id="final-pay-btn" class="yellow-btn">번호표 발행</button> 
-      <button id="home-btn" class="home-btn">처음</button>
+      <button id="home-btn" class="home-btn">🏠 처음</button>
     </footer>
-
   </div>
 
-  <script src="payment.js"></script> </body>
+
+  <!--결제 팝업-->
+  <div id="card-modal" class="modal-overlay hidden">
+      <div class="card-modal-content">
+          <h2>카드 결제</h2>
+          <div class="insert-guide">
+              <p class="main-text">카드를 투입해 주십시오</p>
+              <p class="red-text">투입 후 빼지 마세요</p>
+          </div>
+          
+          <div class="card-img-box">
+              <p>💳 카드 넣는 이미지 삽입</p>
+          </div>
+          
+          <div class="modal-summary-row">
+              <div class="summary-total">
+                  <span class="label">총수납액 :</span>
+                  <div>
+                      <span class="value">6,300</span><span class="unit">원</span>
+                  </div>
+              </div>
+              <div class="summary-inst">
+                  <span class="label">할부개월수 :</span>
+                  <span class="value">일시불</span>
+              </div>
+          </div>
+          
+          <div class="modal-summary-row">
+              
+          </div>
+          
+          <div class="modal-bottom-actions">
+              <button id="prev-btn" class="modal-nav-btn">⬅ 이전</button>
+              <button id="home-btn-modal" class="modal-nav-btn">🏠 처음</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="payment.js"></script> 
+
+  <div id="card-modal" class="modal-overlay hidden">
+     ...
+  </div>
+
+<!--결제 완료 팝업-->
+  <div id="payment-complete-modal" class="modal-overlay hidden">
+      <div class="complete-modal-content">
+          
+          <div class="orange-alert-box">
+              <span class="small-text">결제완료</span>
+              <span class="large-text">카드를 꺼내주세요.</span>
+          </div>
+          
+          <div class="card-img-box">
+              <p>💳 카드 빼는 이미지 삽입 (⬇)</p>
+          </div>
+
+          <div class="modal-summary-row">
+              <div class="summary-total">
+                  <span class="label">총수납액 :</span>
+                  <div>
+                      <span class="value">6,300</span><span class="unit">원</span>
+                  </div>
+              </div>
+              <div class="summary-inst">
+                  <span class="label">할부개월수 :</span>
+                  <span class="value">일시불</span>
+              </div>
+          </div>
+
+      </div>
+  </div>
+</body>
 </html>

@@ -1,0 +1,442 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Malgun Gothic', dotum, sans-serif;
+    background-color: #e9ecef; 
+    width: 100vw; height: 100vh;
+    overflow: hidden;
+}
+
+#payment-container {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+}
+
+/* 상단 헤더 */
+.gradient-header {
+    background: linear-gradient(180deg, #7a73ff 0%, #4dd0e1 100%);
+    color: white; padding: 15px 20px;
+    display: flex; flex-direction: column; justify-content: center;
+}
+.logo-small { font-size: 0.9rem; margin-bottom: 5px; display: none; }
+.gradient-header h1 { font-size: 2.2rem; text-align: center; margin: 0; }
+
+/* 🌟 수정: 폴더 탭 영역 (왼쪽 여백 0으로 만들어서 왼쪽에 완전 밀착!) */
+.step-nav {
+    display: flex; 
+    align-items: flex-end; 
+    gap: 0; 
+    padding: 10px 20px 0 0; /* 🌟 기존에 있던 왼쪽 여백(20px)을 0으로 없앴습니다 */
+    margin-left: -20px;
+    background-color: transparent;
+    position: relative; 
+    top: 15px; /* 아래 하얀 판과 세로 틈새 제거 (덮어쓰기) */
+    z-index: 10;
+    width: 100%;
+}
+
+/* '금액확인 및 수납여부 선택' 하얀색 탭 */
+.step.active {
+    background: #ffffff; 
+    color: #333;
+    padding: 0 20px; 
+    white-space: nowrap; 
+    justify-content: flex-start; 
+    height: 48px; 
+    border-radius: 0 15px 0 0; 
+    border: 1px solid #ddd; 
+    border-left: none; 
+    border-right: none; /* 🔥 오른쪽 테두리 선을 지워서 3번 버튼과 경계를 없앱니다 */
+    border-bottom: none; 
+    font-weight: bold;
+    display: flex; align-items: center; font-size: 1.1rem;
+    
+    position: relative;
+    z-index: 5; /* 탭이 3번 버튼보다 더 앞(위)으로 튀어나오게 합니다 */
+}
+
+/* 3, 4 회색 버튼 */
+.step.off {
+    background-color: #e2e5e9; 
+    color: #ffffff; /* 🔥 요청하신 대로 숫자 글씨를 하얀색으로 변경했습니다! */
+    
+    width: 48px; 
+    height: 48px; 
+    
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0; 
+    border: 1px solid #ccc; 
+    border-left: none; 
+    border-bottom: none;
+    font-weight: bold; font-size: 1.2rem;
+    
+    position: relative;
+    z-index: 1; /* 하얀색 탭보다 뒤에 있게 합니다 */
+    margin: 0; 
+    padding: 0;
+}
+
+/* '금액확인 및 수납여부 선택' 하얀색 탭 */
+.step.active {
+    background: #ffffff; 
+    color: #333;
+    
+    /* 🔥 수정: 원하시던 대로 하얀 탭 길이를 길게 복구! (오른쪽으로 160px 여백) */
+    padding: 0 160px 0 20px; 
+    
+    white-space: nowrap; 
+    justify-content: flex-start; 
+    height: 48px; 
+    border-radius: 0 15px 0 0; 
+    border: 1px solid #ddd; 
+    border-left: none; 
+    border-right: none; 
+    border-bottom: none; 
+    font-weight: bold;
+    display: flex; align-items: center; font-size: 1.1rem;
+    
+    position: relative;
+    z-index: 5; 
+}
+
+/* 2라고 쓰여있는 네모 버튼 */
+.step-num {
+    background: #4285f4; color: white;
+    width: 24px; height: 24px; 
+    text-align: center; line-height: 24px;
+    margin-right: 8px; 
+    border-radius: 4px; 
+    font-weight: bold;
+    /* 🔥 수정: 하얀 탭 안의 공간이 좁아져도 2번 네모가 절대 찌그러지지 않게 막아줍니다 */
+    flex-shrink: 0; 
+}
+
+/* 3, 4 회색 버튼 */
+.step.off {
+    background-color: #585a5b; 
+    color: #ffffff; 
+    
+    width: 48px; 
+    height: 48px; 
+    
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 0; 
+    
+    /* 🔥 하얀 선의 원인이었던 테두리 코드를 지우고 투명하게(none) 만들었습니다 */
+    border: none; 
+    
+    font-weight: bold; font-size: 1.2rem;
+    
+    position: relative;
+    z-index: 1; 
+    margin: 0; 
+    padding: 0;
+}
+
+/* 🔥 핵심: 3번 버튼은 10px만큼 숨겨지므로, 가로 길이를 10px 늘려주어 4번과 눈에 보이는 길이를 똑같이 맞춥니다 */
+.step.active + .step.off {
+    margin-left: -10px; /* 하얀 탭 뒤로 10px 숨기기 */
+    width: 58px; /* 48px + 숨겨진 10px = 58px */
+    padding-left: 10px; /* 글씨도 가운데로 오게 밀어줌 */
+}
+
+/* 마지막 4번 버튼 오른쪽 위 모서리 둥글게 */
+.step.off:last-child {
+    border-radius: 0 12px 0 0;
+}
+
+/* 짧은 검은색 줄 (3번과 4번 사이) */
+.step.off:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0; 
+    top: 30%; 
+    height: 40%; 
+    width: 2px; 
+    background-color: #444; 
+}
+
+/* 하얀색 화면 본문 */
+.payment-content {
+    flex: 1;
+    margin: 0; 
+    padding: 20px 25px;
+    display: flex; flex-direction: column; gap: 15px;
+    background-color: #ffffff;
+    border-radius: 0 0 12px 12px;
+    border: 1px solid #ddd;
+    border-left: none; /* 🌟 탭과 맞추기 위해 화면 맨 끝 선 제거 */
+    border-right: none;
+    border-top: none; 
+    z-index: 5;
+    width: 100%; 
+}
+
+/* 회색 네모칸 배경 및 수납여부 선택칸 */
+.grey-wrapper {
+    background-color: #e2e5e9; 
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.bill-table {
+    width: 100%; border-collapse: collapse; table-layout: fixed;
+    background-color: white; 
+}
+/* 🌟 1. 표 제목 줄바꿈 방지 추가 */
+.bill-table th {
+    background-color: #e2e5e9; 
+    color: #333;
+    padding: 10px 2px; 
+    border: 1px solid #ccc; 
+    font-size: 0.95rem;
+    white-space: nowrap; /* 글씨가 좁아도 절대 줄바꿈되지 않게 강제합니다! */
+}
+.bill-table td {
+    padding: 10px 2px; border: 1px solid #ccc; text-align: center; font-size: 1rem;
+}
+.right-align { text-align: right !important; padding-right: 15px !important; }
+.empty-row td { height: 40px; }
+
+/* 5번째 열 회색 통일 */
+.bill-table th:nth-child(5),
+.bill-table td:nth-child(5) {
+    background-color: #e2e5e9;
+}
+
+.check-wrap { display: flex; align-items: center; justify-content: center; gap: 5px; }
+.red-check { color: red; border: 1px solid #ccc; width: 24px; height: 24px; line-height: 24px; background: white; font-weight: bold;}
+
+.green-box { 
+    background-color: #8bc34a; 
+    color: white; 
+    padding: 4px 8px; 
+    font-size: 0.85rem; 
+    border-radius: 3px;
+    white-space: nowrap; 
+}
+
+/* 화살표 컨트롤 */
+/* 🌟 2. 화살표 위아래 여백 추가 */
+.arrow-controls {
+    display: flex; justify-content: flex-end;
+    padding-right: 22%; /*숫자 클수록 화살표 버튼들이 세트로 왼쪽으로 이동*/
+    gap: 5px; /*작을수록 위 아래 화살표 간의 간격 좁아짐*/
+    margin-top: 10px; /* 표와 화살표 사이를 떨어뜨립니다 */
+    margin-bottom: 10px; /* 화살표와 총 수납액 사이도 살짝 떨어뜨립니다 */
+}
+.arrow-controls button { width: 45px; height: 35px; background: white; border: 1px solid #999; cursor: pointer; border-radius: 5px; }
+
+/* 총액 네모칸 */
+.total-box {
+    background-color: #4dd0e1;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 1.4rem; font-weight: bold;
+}
+.total-label, .white-unit { color: white; }
+.black-num { color: black; }
+.white-unit { margin-left: 5px; }
+
+/* 환자 정보 박스 2줄 */
+.patient-info-box {
+    background: #f5f5f5; border: 1px solid #ddd; border-radius: 8px;
+    padding: 15px 30px; margin: 5px auto; width: fit-content; 
+    display: flex; flex-direction: column; 
+    align-items: center; gap: 8px;
+    font-size: 1.1rem; color: #333; font-weight: bold;
+}
+.info-row { display: flex; gap: 10px; align-items: center; }
+
+/* 결제 방법 텍스트 & 버튼 */
+.payment-methods h2 { font-size: 1.3rem; text-align: center; margin: 5px 0; color: #333; }
+
+.method-buttons {
+    display: flex; flex-direction: row; justify-content: center; 
+    gap: 250px; /*클수록 일시불, 처방전만 발행 버튼 간의 간격 넓어짐*/
+    width: 100%; margin-bottom: 10px;
+}
+/* 🌟 3. 일시불 / 처방전만 발행 버튼 크기 축소 */
+.btn-outline {
+    width: 110px; 
+    height: 80px; 
+    background: white; border: 3px solid #6c8cd5;
+    color: #6c8cd5; 
+    font-size: 1.2rem; /* 글씨 크기도 비율에 맞게 살짝 축소 (기존 1.4rem) */
+    font-weight: bold; border-radius: 12px;
+}
+
+/* 하단 액션바 */
+.bottom-actions {
+    position: relative; 
+    height: 105px; 
+    display: flex;
+    justify-content: center; align-items: center;
+    background: #2b2b2b; 
+    width: 100%;
+}
+
+.yellow-btn {
+    padding: 15px 40px; 
+    background: #fae16b; 
+    color: #333; border: 2px solid #fff; 
+    border-radius: 8px; font-size: 1.6rem; 
+    font-weight: bold; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+    transition: 0.1s; 
+}
+
+.home-btn {
+    position: absolute; right: 20px;
+    width: 65px; height: 65px;
+    background: #555; color: white; border-radius: 10px;
+    border: 2px solid #777; font-size: 1rem; font-weight: bold;
+}
+
+.ticket-btn {
+    position: absolute; left: 20px;
+    width: 100px; height: 65px;
+    background: #555; color: white; border-radius: 10px;
+    border: 2px solid #777; font-size: 1rem; font-weight: bold;
+}
+
+
+/* 팝업창 */
+/* 숨김 처리 */
+.hidden { display: none !important; }
+
+/* 🌟 모달 오버레이 (반투명 까만 배경) */
+.modal-overlay {
+    position: fixed; 
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.65); 
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; 
+}
+
+/* 🌟 신용카드 결제 팝업창 본체 */
+.card-modal-content {
+    background: #ffffff;
+    width: 600px;
+    padding: 40px;
+    border: 3px solid #555;
+    border-radius: 12px;
+    box-shadow: 0px 10px 40px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;
+}
+
+.card-modal-content h2 {
+    font-size: 2.2rem; color: #333; margin: 0 0 10px 0; font-weight: bold;
+}
+.insert-guide .main-text {
+    font-size: 1.5rem; font-weight: bold; color: #555; margin-bottom: 10px;
+}
+.insert-guide .red-text {
+    font-size: 1.5rem; color: #e53935; font-weight: bold; line-height: 1.4;
+}
+.card-img-box {
+    width: 100%; height: 280px; background: #f0f0f0; border: 3px dashed #bbb;
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    color: #888; font-size: 1.2rem;
+}
+/* 🌟 팝업창 하단 버튼 감싸는 영역 */
+.modal-bottom-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* 양쪽 끝으로 밀어내기! */
+    margin-top: 10px;
+}
+
+/* 🌟 이전 / 처음 버튼 디자인 */
+.modal-nav-btn {
+    padding: 10px 20px; 
+    font-size: 1.2rem; 
+    font-weight: bold;
+    background: #667285; /* 사진과 비슷한 약간 푸른빛 도는 회색 */
+    color: white; 
+    border: 2px solid #fff; 
+    border-radius: 4px; 
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.modal-nav-btn:active {
+    background: #4a5463; 
+}
+.cancel-btn:active { background: #333; }
+
+/* 🌟 1. 전체 감싸는 투명한 틀 (테두리 삭제) */
+.modal-summary-row {
+    display: flex;
+    width: 100%;
+    height: 45px;
+    border: none; /* 부모 틀의 테두리를 없앱니다 */
+    background-color: transparent; /* 배경도 투명하게 */
+    margin-top: -5px; 
+    margin-bottom: 10px;
+}
+
+/* 🌟 2. 왼쪽 하늘색 상자 (개별 테두리 추가) */
+.summary-total {
+    flex: 1.3; 
+    background-color: #55d6f5; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    
+    margin-right: 5px; /* 두 상자 사이의 틈새 */
+    border: 1px solid #777; /* 👈 진한 회색/검정 테두리 추가! */
+}
+.summary-total .label { color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: bold; }
+.summary-total .value { color: #333; font-size: 1.3rem; font-weight: bold; }
+.summary-total .unit { color: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: normal; margin-left: 4px; }
+
+/* 🌟 3. 오른쪽 하얀색 상자 (개별 테두리 추가) */
+.summary-inst {
+    flex: 1;
+    background-color: #ffffff; /* 하얀색 상자 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    
+    border: 1px solid #777; /* 👈 진한 회색/검정 테두리 추가! */
+    font-size: 1.1rem;
+    color: #666;
+}
+.summary-inst .value { color: #333; font-weight: bold; }
+
+/* 🌟 결제 완료(카드 제거) 팝업창 본체 */
+.complete-modal-content {
+    background: #ffffff;
+    width: 600px;
+    padding: 40px;
+    border: 3px solid #555;
+    border-radius: 12px;
+    box-shadow: 0px 10px 40px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px;
+}
+
+/* 🌟 주황색 안내 상자 */
+.orange-alert-box {
+    width: 100%;
+    background-color: #f16b36; /* 원본 사진의 주황색 */
+    color: white;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    padding: 25px 0;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+.orange-alert-box .small-text {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    opacity: 0.9;
+}
+.orange-alert-box .large-text {
+    font-size: 2.8rem;
+    font-weight: bold;
+    letter-spacing: -1.5px;
+}

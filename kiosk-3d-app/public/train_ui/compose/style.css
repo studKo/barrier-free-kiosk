@@ -268,3 +268,58 @@ button {
   background: #c9beb0;
   cursor: not-allowed;
 }
+
+/* 새로 추가된 하단 버튼 영역 스타일 */
+.footer-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.clear-btn {
+  flex: 1;
+  border: 2px solid #5b3b22;
+  background: #ffffff;
+  color: #5b3b22;
+  padding: 16px;
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.pay-btn {
+  flex: 2; /* 결제 버튼을 더 넓게 설정 */
+}
+
+/* 장바구니 아이템 컨트롤 영역 스타일 */
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #c9beb0;
+  background: #ffffff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  color: #2d241c;
+}
+
+.del-btn {
+  border: none;
+  background: none;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto; /* 오른쪽 끝으로 밀어내기 */
+}

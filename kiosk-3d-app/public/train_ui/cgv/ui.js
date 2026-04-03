@@ -1,90 +1,161 @@
-// 상태 데이터
-let selectedMovie = "";
-let selectedSeats = [];
-let shopData = { coke: 0, popcorn: 0 };
-let refundNumber = "";
-const prices = { coke: 3000, popcorn: 5000 };
+const schedules = [
+    { title: "파묘", time: "10:30", age: "15", color: "#1a1a1a" },
+    { title: "인사이드 아웃 2", time: "11:15", age: "All", color: "#3498db" },
+    { title: "범죄도시4", time: "12:50", age: "15", color: "#2980b9" },
+    { title: "듄: 파트2", time: "13:30", age: "12", color: "#d35400" },
+    { title: "쿵푸팬더 4", time: "14:10", age: "All", color: "#27ae60" },
+    { title: "퓨리오사: 매드맥스", time: "15:40", age: "15", color: "#e67e22" },
+    { title: "설계자", time: "16:20", age: "15", color: "#2c3e50" },
+    { title: "하이재킹", time: "17:45", age: "12", color: "#34495e" },
+    { title: "핸섬가이즈", time: "19:10", age: "15", color: "#f39c12" },
+    { title: "탈주", time: "20:30", age: "12", color: "#7f8c8d" },
+    { title: "명탐정 코난", time: "21:50", age: "12", color: "#c0392b" },
+    { title: "콰이어트 플레이스", time: "23:10", age: "15", color: "#000" }
+];
 
-// 화면 전환
-function nextStep(stepId) {
+const seatZones = [{ id: "A", cols: 2 }, { id: "B", cols: 6 }, { id: "C", cols: 2 }];
+let selection = { "일반": 0, "청소년": 0, "우대": 0, "경로": 0 };
+let posX = 0, posY = 0;
+let currentMovie = "";
+let currentTime = "";
+
+function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(stepId).classList.add('active');
-    
-    if (stepId === 'step-seat') renderSeats();
-    if (stepId === 'step-refund') clearKey();
+    document.getElementById(screenId).classList.add('active');
+    if(screenId === 'schedule-screen') renderSchedules();
+    if(screenId === 'people-screen') renderPeople();
+    if(screenId === 'seat-screen') renderSeats();
 }
 
-// 1. 영화 예매 로직
-function selectMovie(name) {
-    selectedMovie = name;
-    document.getElementById('selected-movie-name').innerText = "🎥 " + name;
-    nextStep('step-seat');
+function handleRefund() {
+    const pin = prompt("환불하실 티켓의 예매번호 15자리를 입력해주세요.");
+    if(pin) alert("확인되었습니다. 환불 처리를 진행합니다.");
+}
+
+function renderSchedules() {
+    const list = document.getElementById('schedule-list');
+    list.innerHTML = '';
+    schedules.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'schedule-item';
+        div.onclick = () => {
+            currentMovie = s.title;
+            currentTime = s.time;
+            showScreen('people-screen');
+        };
+        div.innerHTML = `
+            <div class="item-poster" style="background:${s.color}">
+                <span class="age-badge" style="background:${s.age==='All'?'#2ecc71':(s.age==='12'?'#f1c40f':'#e67e22')}">${s.age}</span>
+            </div>
+            <div class="item-info">
+                <span class="item-time">${s.time}</span>
+                <span class="item-title">${s.title}</span>
+            </div>`;
+        list.appendChild(div);
+    });
+}
+
+function renderPeople() {
+    const rows = document.getElementById('people-rows');
+    rows.innerHTML = '';
+    ["일반", "청소년", "우대", "경로"].forEach(cat => {
+        const row = document.createElement('div');
+        row.className = 'category-row';
+        let btns = '';
+        for(let i=0; i<=8; i++) {
+            const sel = selection[cat] === i ? 'selected' : '';
+            btns += `<button class="num-btn ${sel}" onclick="updateCount('${cat}', ${i})">${i}</button>`;
+        }
+        row.innerHTML = `<span class="category-name">${cat}</span><div class="num-group">${btns}</div>`;
+        rows.appendChild(row);
+    });
+    document.getElementById('total-count').innerText = Object.values(selection).reduce((a,b)=>a+b,0);
+}
+
+function updateCount(cat, count) {
+    const total = Object.values(selection).reduce((a,b)=>a+b,0) - selection[cat] + count;
+    if(total > 8) return alert("최대 8명!");
+    selection[cat] = count;
+    renderPeople();
+}
+
+function completePeople() {
+    if(Object.values(selection).reduce((a,b)=>a+b,0) === 0) alert("인원을 선택하세요.");
+    else showScreen('seat-screen');
 }
 
 function renderSeats() {
-    const container = document.getElementById('seat-container');
-    container.innerHTML = "";
-    selectedSeats = [];
-    document.getElementById('seat-count').innerText = "0";
+    const map = document.getElementById('seat-map');
+    map.innerHTML = '';
+    const rowLabels = ['A','B','C','D','E','F','G','H'];
+    const total = Object.values(selection).reduce((a, b) => a + b, 0);
 
-    for (let i = 1; i <= 25; i++) {
-        const seat = document.createElement('div');
-        seat.classList.add('seat');
-        seat.innerText = i;
-        seat.onclick = () => {
-            seat.classList.toggle('selected');
-            if (seat.classList.contains('selected')) {
-                selectedSeats.push(i);
-            } else {
-                selectedSeats = selectedSeats.filter(s => s !== i);
+    seatZones.forEach(zone => {
+        const zoneGrid = document.createElement('div');
+        zoneGrid.className = 'zone-grid';
+        zoneGrid.id = `zone-${zone.id}`;
+        rowLabels.forEach(r => {
+            for (let c = 1; c <= zone.cols; c++) {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.id = `${zone.id}-${r}-${c}`;
+                seat.innerText = r + c;
+                seat.onclick = function() {
+                    document.querySelectorAll('.seat.selected').forEach(el => el.classList.remove('selected'));
+                    for(let j=0; j < total; j++) {
+                        const target = document.getElementById(`${zone.id}-${r}-${c + j}`);
+                        if(target) target.classList.add('selected');
+                    }
+                    updateSeatInfo();
+                };
+                zoneGrid.appendChild(seat);
             }
-            document.getElementById('seat-count').innerText = selectedSeats.length;
-        };
-        container.appendChild(seat);
+        });
+        map.appendChild(zoneGrid);
+    });
+    posX = 0; posY = 0; applyMapTransform();
+}
+
+function moveMap(dir) {
+    const step = 50;
+    if(dir === 'up') posY += step; if(dir === 'down') posY -= step;
+    if(dir === 'left') posX += step; if(dir === 'right') posX -= step;
+    applyMapTransform();
+}
+
+function applyMapTransform() {
+    const map = document.getElementById('seat-map');
+    map.style.transform = `scale(1.6) translate(${posX/1.6}px, ${posY/1.6}px)`;
+}
+
+function updateSeatInfo() {
+    const sel = Array.from(document.querySelectorAll('.seat.selected')).map(s => s.innerText);
+    document.getElementById('seat-info').innerText = sel.join(', ') || '-';
+}
+
+function renderPayment() {
+    const selSeats = document.getElementById('seat-info').innerText;
+    if(selSeats === '-') return alert("좌석을 먼저 선택해 주세요.");
+
+    document.getElementById('pay-title').innerText = currentMovie;
+    document.getElementById('pay-time').innerText = currentTime;
+    document.getElementById('pay-seats').innerText = selSeats;
+    
+    let peopleTxt = [];
+    let totalAmt = 0;
+    for(let key in selection) {
+        if(selection[key] > 0) {
+            peopleTxt.push(`${key} ${selection[key]}`);
+            totalAmt += selection[key] * (key === '일반' ? 15000 : 10000);
+        }
     }
+    document.getElementById('pay-people').innerText = peopleTxt.join(', ');
+    document.getElementById('pay-amount').innerText = totalAmt.toLocaleString();
+    
+    showScreen('payment-screen');
 }
 
-function completeBooking() {
-    if (selectedSeats.length === 0) return alert("좌석을 선택해 주세요.");
-    alert(`[${selectedMovie}] ${selectedSeats.length}개 좌석 예매 완료!`);
-    location.reload();
-}
-
-// 2. 매점 구매 로직
-function changeCount(item, delta) {
-    shopData[item] += delta;
-    if (shopData[item] < 0) shopData[item] = 0;
-    document.getElementById(`${item}-count`).innerText = shopData[item];
-    const total = (shopData.coke * prices.coke) + (shopData.popcorn * prices.popcorn);
-    document.getElementById('total-price').innerText = total.toLocaleString();
-}
-
-function completeShop() {
-    const total = (shopData.coke * prices.coke) + (shopData.popcorn * prices.popcorn);
-    if (total === 0) return alert("상품을 선택해 주세요.");
-    alert(`총 ${total.toLocaleString()}원 결제 완료!`);
-    location.reload();
-}
-
-// 3. 환불 로직
-function pressKey(num) {
-    if (refundNumber.length < 8) {
-        refundNumber += num;
-        updateRefundDisplay();
-    }
-}
-
-function clearKey() {
-    refundNumber = "";
-    updateRefundDisplay();
-}
-
-function updateRefundDisplay() {
-    document.getElementById('refund-display').innerText = refundNumber.padEnd(8, '_');
-}
-
-function submitRefund() {
-    if (refundNumber.length < 8) return alert("예매 번호 8자리를 입력해 주세요.");
-    alert(`예매번호 [${refundNumber}] 환불 처리가 완료되었습니다.`);
+function finishPayment() {
+    alert("결제가 완료되었습니다! 티켓을 확인해 주세요.");
     location.reload();
 }

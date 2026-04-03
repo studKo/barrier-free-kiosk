@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>출력 중</title>
+  <link rel="stylesheet" href="output.css"> 
+</head>
+<body>
+  <div id="payment-container">
+    
+    <header class="gradient-header">
+      <div class="logo-small">세종충남대학교병원</div>
+      <h1>수납 및 처방전발행</h1>
+      <div class="step-nav">
+        <span class="step active"><span class="step-num">3</span> 출력중</span>
+        <span class="step off">4</span>
+      </div>
+    </header>
+
+    <main class="payment-content">
+      <div class="printing-screen">
+          <h2 class="print-title">출력 중입니다<br>잠시만 기다려 주세요</h2>
+          
+          <div class="print-divider"></div>
+
+          <table class="print-info-table">
+            <tr>
+              <th>환 자 명</th>
+              <td>홍길동 <span class="small-text">님</span></td>
+            </tr>
+            <tr>
+              <th>출력현황</th>
+              <td><span id="print-status" class="highlight-text">0/1장</span></td>
+            </tr>
+          </table>
+
+          <div class="loading-bar-bg">
+            <div class="loading-bar-fill"></div>
+          </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="output.js"></script> 
+</body>
+</html>

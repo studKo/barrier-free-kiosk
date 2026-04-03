@@ -1,0 +1,140 @@
+/* 기본 세팅 (앞선 파일들과 동일) */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { 
+    font-family: 'Malgun Gothic', dotum, sans-serif; 
+    background-color: #ffffff; 
+    width: 100vw; height: 100vh; 
+    overflow: hidden; 
+}
+#payment-container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+
+/* 상단 헤더 및 탭 */
+.gradient-header { 
+    background: linear-gradient(180deg, #7a73ff 0%, #4dd0e1 100%); 
+    color: white; padding: 15px 20px; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+}
+.logo-small { 
+    font-size: 0.9rem; 
+    margin-bottom: 5px; 
+    display: none; 
+}
+.gradient-header h1 { font-size: 2.2rem; text-align: center; margin: 0; }
+.step-nav { display: flex; align-items: flex-end; 
+    gap: 0; padding: 10px 20px 0 0; margin-left: -20px; 
+    background-color: transparent; 
+    position: relative; top: 15px; z-index: 10; width: 100%; 
+}
+.step.active { 
+    background: #ffffff; 
+    color: #333; padding: 0 160px 0 20px; 
+    white-space: nowrap; justify-content: flex-start; 
+    height: 48px; border-radius: 0 15px 0 0; 
+    border: 1px solid #ddd; 
+    border-left: none; 
+    border-bottom: none; 
+    font-weight: bold; display: flex; 
+    align-items: center; font-size: 1.1rem; 
+    position: relative; z-index: 5; 
+}
+.step-num { 
+    background: #4285f4; 
+    color: white; 
+    width: 24px; height: 24px; 
+    text-align: center; 
+    line-height: 24px; 
+    margin-right: 8px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    flex-shrink: 0; 
+}
+
+/* 본문 영역 */
+.payment-content { 
+    flex: 1; 
+    margin: 0; 
+    padding: 20px 25px; 
+    display: flex; 
+    flex-direction: column; 
+    background-color: #ffffff; 
+    border-radius: 0; 
+    border: none; 
+    z-index: 5; width: 100%; 
+}
+
+/* 🌟 최종 완료 화면 디자인 */
+.final-complete-screen { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    height: 100%; 
+    padding-bottom: 50px; 
+}
+.final-title { 
+    font-size: 2.2rem; 
+    color: #555; font-weight: bold; 
+    text-align: center; 
+    line-height: 1.6; 
+    margin-bottom: 20px; 
+}
+.teal-divider { 
+    width: 350px; 
+    height: 2px; 
+    background-color: #4dd0e1; 
+    margin-bottom: 40px; 
+}
+
+/* 🌟 출력물 그래픽 (CSS 드로잉) */
+.printer-graphic { 
+    position: relative; 
+    width: 260px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+.printer-slot { 
+    width: 100%; 
+    height: 25px; 
+    background-color: #333; 
+    border-radius: 12px; 
+    position: relative; 
+    z-index: 2; 
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.5); 
+}
+.print-paper { 
+    width: 70%; height: 110px; 
+    background-color: #d1f4f9; border: 2px solid #82d8e3; border-radius: 0 0 8px 8px; 
+    margin-top: -10px; 
+    position: relative; 
+    z-index: 1; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    color: #008fa1; 
+    font-size: 1.4rem; font-weight: bold; 
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1); 
+}
+
+/* 하단 주차등록 버튼 및 바 */
+.bottom-actions { 
+    position: relative; 
+    height: 105px; display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    background: #5a7b9e; 
+    width: 100%; 
+}
+.parking-btn { 
+    padding: 15px 40px; 
+    background: #fae16b; 
+    color: #333; border: 2px solid #fff; 
+    border-radius: 8px; font-size: 1.6rem; 
+    font-weight: bold; 
+    cursor: pointer; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+    transition: 0.1s; 
+}
+.parking-btn:active { background: #e0c855; }

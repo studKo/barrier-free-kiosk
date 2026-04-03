@@ -1,3 +1,4 @@
+// 파일명: src/core/main.js
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment } from '../scene/camera.js';
@@ -9,11 +10,15 @@ let container, clock, cssContainer;
 let statusMessageEl, resetBtn, cameraSelect;
 let sceneObjects;
 
+// 즉시 실행 함수를 통해 초기화 및 애니메이션 루프 시작
 (async () => {
   await init();
   animate();
 })();
 
+/**
+ * 3D 씬(Scene), 렌더러(WebGL & CSS3D), 카메라 및 기본 UI 이벤트를 초기화하는 메인 함수입니다.
+ */
 async function init() {
   container = document.getElementById('canvas-container');
   cssContainer = document.getElementById('css-container');
@@ -39,14 +44,21 @@ async function init() {
   cssRenderer.setSize(container.clientWidth, container.clientHeight);
   cssContainer.appendChild(cssRenderer.domElement);
 
+  // 3D 객체 생성
   sceneObjects = await createSceneObjects(scene);
 
+  // 마우스/터치 상호작용(드래그 앤 드롭) 설정
   setupInteraction(document.querySelector('.render-pane'), camera, sceneObjects);
 
+  // 상호작용에서 카드가 투입구에 완전히 들어갔을 때의 콜백 설정
   onCardInserted(() => {
-    if (sceneObjects.kioskGroup.userData.iframeElement) {
-      sceneObjects.kioskGroup.userData.iframeElement.postMessage({ type: 'CARD_INSERTED' }, '*');
+    // 안전하게 최신 iframe 내부 윈도우 객체를 가져옵니다.
+    const iframeWin = sceneObjects.kioskGroup.userData.iframeDOM?.contentWindow || document.querySelector('iframe')?.contentWindow;
+    if (iframeWin) {
+      // ★ 산학캡 복원: 기존 UI와 호환되도록 'cardInserted' 문자열 전송
+      iframeWin.postMessage('cardInserted', '*');
     }
+
     if (sceneObjects.kioskGroup.userData.arrowMesh) {
       sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
     }
@@ -54,6 +66,7 @@ async function init() {
     statusMessageEl.classList.add('success');
   });
 
+  // 카메라 모드(시니어, 휠체어) 변경 이벤트 리스너
   cameraSelect.addEventListener('change', (e) => {
     setCameraMode(e.target.value);
   });
@@ -65,7 +78,9 @@ async function init() {
   const questContentEl = document.getElementById('quest-content');
   const spawnReceiptBtn = document.getElementById('spawn-receipt-btn');
 
-  // ★ [핵심 추가] 3D 오브젝트와 UI 상태를 완벽히 초기화하는 통합 함수
+  /**
+   * 키오스크의 3D 객체(카드, 영수증, 불빛 등)와 UI 상태를 완전히 초기화하는 함수입니다.
+   */
   function resetKioskState() {
     unlockCard();
     resetCardPosition();
@@ -73,7 +88,6 @@ async function init() {
     statusMessageEl.textContent = '현재 상태: 대기 중';
     statusMessageEl.classList.remove('success');
 
-    // 영수증 숨기고 위치/회전값 복구
     if (sceneObjects.kioskGroup.userData.paperMesh) {
       const paper = sceneObjects.kioskGroup.userData.paperMesh;
       paper.visible = false;
@@ -81,27 +95,24 @@ async function init() {
       paper.rotation.set(-Math.PI / 16, 0, 0);
     }
 
-    // 카드 투입구 글로우(불빛) 노란색으로 초기화
     if (sceneObjects.slotGlowMesh) {
       sceneObjects.slotGlowMesh.material.opacity = 0.3;
       sceneObjects.slotGlowMesh.material.color.setHex(0xffff00);
     }
 
-    // 바코드 스캐너 글로우(불빛) 노란색으로 초기화
     if (sceneObjects.scannerGlowMesh) {
       sceneObjects.scannerGlowMesh.material.opacity = 0.3;
       sceneObjects.scannerGlowMesh.material.color.setHex(0xffff00);
     }
 
-    // 화살표 가이드 숨김
     if (sceneObjects.kioskGroup.userData.arrowMesh) {
       sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
     }
   }
 
+  // 브랜드 선택 버튼 클릭 이벤트 설정
   document.querySelectorAll('.brand-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      // ★ 브랜드를 이동할 때 무조건 모든 상태를 리셋하여 새 게임처럼 만듦!
       resetKioskState();
 
       const brand = e.currentTarget.dataset.brand;
@@ -134,10 +145,12 @@ async function init() {
     });
   });
 
+  // 강제 카드 생성 버튼 이벤트
   document.getElementById('spawn-card-btn').addEventListener('click', () => {
     spawnCard();
   });
 
+  // 강제 영수증 생성 버튼 이벤트
   if (spawnReceiptBtn) {
     spawnReceiptBtn.addEventListener('click', () => {
       if (sceneObjects && sceneObjects.spawnReceipt) {
@@ -146,15 +159,12 @@ async function init() {
     });
   }
 
+  // 처음부터 다시하기 버튼 이벤트
   resetBtn.addEventListener('click', () => {
-    // ★ 처음부터 다시하기 버튼을 눌렀을 때도 동일하게 리셋!
     resetKioskState();
-
     brandSelectionEl.style.display = 'block';
     questContentEl.style.display = 'none';
-
     if (spawnReceiptBtn) spawnReceiptBtn.style.display = 'none';
-
     resetZoom();
 
     if (sceneObjects.kioskGroup.userData.iframeDOM) {
@@ -162,6 +172,7 @@ async function init() {
     }
   });
 
+  // iframe(웹 UI) 내부에서 보내는 postMessage 수신 및 처리
   window.addEventListener('message', (event) => {
     if (!event.data) return;
 
@@ -179,9 +190,12 @@ async function init() {
       if (sceneObjects.kioskGroup.userData.paperMesh) {
         const paper = sceneObjects.kioskGroup.userData.paperMesh;
         paper.visible = true;
-
         paper.position.y = 0.53;
         const targetY = 0.47;
+
+        /**
+         * 영수증이 위에서 아래로 스윽 나오는 애니메이션을 처리하는 내부 함수입니다.
+         */
         function animateReceipt() {
           if (paper.position.y > targetY) {
             paper.position.y -= 0.002;
@@ -196,16 +210,24 @@ async function init() {
     }
   });
 
+  // 브라우저 리사이즈 대응
   window.addEventListener('resize', handleResize);
   handleResize();
 }
 
+/**
+ * 브라우저 창 크기가 변할 때 렌더러와 카메라 비율을 맞춰주는 함수입니다.
+ */
 function handleResize() {
   onWindowResize(container.clientWidth, container.clientHeight);
   renderer.setSize(container.clientWidth, container.clientHeight);
   cssRenderer.setSize(container.clientWidth, container.clientHeight);
 }
 
+/**
+ * 매 프레임마다 화면을 다시 그리는 메인 렌더링 루프 함수입니다.
+ * 애니메이션 효과(화살표 둥둥 떠다니기 등)도 이곳에서 처리합니다.
+ */
 function animate() {
   requestAnimationFrame(animate);
   const delta = clock.getDelta();
@@ -213,6 +235,7 @@ function animate() {
 
   updateCamera(delta);
 
+  // 화살표 상하 이동 애니메이션 (사인 곡선 이용)
   if (sceneObjects && sceneObjects.kioskGroup.userData.arrowMesh) {
     const arrow = sceneObjects.kioskGroup.userData.arrowMesh;
     arrow.position.y = 0.65 + Math.sin(time * 5) * 0.01;
@@ -222,6 +245,10 @@ function animate() {
   cssRenderer.render(scene, camera);
 }
 
+/**
+ * 화면 하단에 일시적인 알림(토스트 메시지)을 띄우는 유틸리티 함수입니다.
+ * @param {string} message - 화면에 표시할 텍스트
+ */
 export function showToast(message) {
   const toastEl = document.getElementById('custom-toast');
   if (!toastEl) return;

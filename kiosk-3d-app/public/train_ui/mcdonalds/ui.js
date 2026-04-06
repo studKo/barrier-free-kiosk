@@ -9,115 +9,115 @@ const STATE = {
 };
 
 const sidebarTabs = [
-    { id: 'burger', name: '🍔 버거' },
-    { id: 'happysnack', name: '🍟 해피스낵' },
-    { id: 'side', name: '🍟 사이드' },
-    { id: 'coffee', name: '☕ 커피' },
-    { id: 'dessert', name: '🍦 디저트' },
-    { id: 'drink', name: '🥤 음료' }
+    { id: 'burger', name: '버거' },
+    { id: 'happysnack', name: '해피스낵' },
+    { id: 'side', name: '사이드' },
+    { id: 'coffee', name: '커피' },
+    { id: 'dessert', name: '디저트' },
+    { id: 'drink', name: '음료' }
 ];
 
 const setSideOptions = [
-    { name: "후렌치 후라이 - 미디엄", price: 0, cal: "332 Kcal", img: "https://www.mcdonalds.co.kr/upload/2025/08/%ED%9B%84%EB%A0%8C%EC%B9%98_%ED%9B%84%EB%9D%BC%EC%9D%B4_Medium.png" },
-    { name: "후렌치 후라이 - 라지", price: 700, cal: "389 Kcal", img: "https://www.mcdonalds.co.kr/upload/2025/08/%ED%9B%84%EB%A0%8C%EC%B9%98_%ED%9B%84%EB%9D%BC%EC%9D%B4_Large.png" },
-    { name: "골든 모짜렐라 치즈스틱 2조각", price: 500, cal: "158 Kcal", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201902080435496530.png" },
-    { name: "코울슬로", price: 0, cal: "179 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1680761626050.png" },
-    { name: "맥너겟® 4조각", price: 0, cal: "171 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1612402131024.png" }
+    { name: "후렌치 후라이 - 미디엄", price: 0, cal: "332 Kcal", img: "사진/후렌치_후라이_Medium.png" },
+    { name: "후렌치 후라이 - 라지", price: 700, cal: "389 Kcal", img: "사진/후렌치_후라이_Large.png" },
+    { name: "골든 모짜렐라 치즈스틱 2조각", price: 500, cal: "158 Kcal", img: "사진/치즈 2.png" },
+    { name: "코울슬로", price: 0, cal: "179 Kcal", img: "사진/코울슬로.png" },
+    { name: "맥너겟® 4조각", price: 0, cal: "171 Kcal", img: "사진/맥너겟 4.png" }
 ];
 
 const setDrinkOptions = [
-    { name: "코카-콜라 제로 - 미디엄", price: 0, cal: "0 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1583890021601.png" },
-    { name: "코카-콜라 - 미디엄", price: 0, cal: "143 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1583889967380.png" },
-    { name: "스프라이트 - 미디엄", price: 0, cal: "149 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1703512982605.png" },
-    { name: "환타 - 미디엄", price: 0, cal: "113 Kcal", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1631160688795.png" },
-    { name: "바닐라 쉐이크 - 미디엄", price: 1200, cal: "338 Kcal", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290255488970.png" }
+    { name: "코카-콜라 제로 - 미디엄", price: 0, cal: "0 Kcal", img: "사진/코카콜라.png" },
+    { name: "코카-콜라 - 미디엄", price: 0, cal: "143 Kcal", img: "사진/코카콜라.png" },
+    { name: "스프라이트 - 미디엄", price: 0, cal: "149 Kcal", img: "사진/스프라이트.png" },
+    { name: "환타 - 미디엄", price: 0, cal: "113 Kcal", img: "사진/환타.png" },
+    { name: "바닐라 쉐이크 - 미디엄", price: 1200, cal: "338 Kcal", img: "사진/바닐라 쉐이크.png" }
 ];
 
 const menuData = {
     recommend: [
-        { name: "빅맥® 세트", price: 7500, img: "https://www.mcdonalds.co.kr/upload/2025/08/%EB%B9%85%EB%A7%A5%C2%AE_%EC%84%B8%ED%8A%B8.png" },
-        { name: "맥스파이시 상하이 버거 세트", price: 7500, img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723562660091.png" },
-        { name: "1955 버거 세트", price: 8400, img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723564262197.png" },
-        { name: "슈슈 버거 세트", price: 6700, img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563590522.png" }
+        { name: "빅맥® 세트", price: 7500, img: "사진/빅맥 세트.png" },
+        { name: "상하이 버거 세트", price: 7500, img: "사진/상하이 스파이시 버거.png" },
+        { name: "1955 버거 세트", price: 8400, img: "사진/1955버거 세트.png" },
+        { name: "슈슈 버거 세트", price: 6700, img: "사진/슈슈버거 세트.png" }
     ],
     burger: [
-        { name: "빅맥®", price: 5500, type: "beef", img: "https://i.namu.wiki/i/8QvXSR26KtopPgetehJXwlRCeXoE1fVZowrD7qQHLE6NE4jw3GSGJfRRkBvlwJtZaZ-jSybHFP3N2XiE2X_OWul7tV6lEsQ80zpl0Nv3BTXThz5BSkXLvMQCpjOc-nhUTCaj8-IW6-_nGjDrTc-mWg.webp", setImg: "https://www.mcdonalds.co.kr/upload/2025/08/%EB%B9%85%EB%A7%A5%C2%AE_%EC%84%B8%ED%8A%B8.png" },
-        { name: "1955 버거", price: 6400, type: "beef", img: "https://i.namu.wiki/i/5Pcfn8E2KZ2PKxvWzIEht6oEAmkMPVRcp35XVMABbUsKM3Mw2FD_gBs6nlVZmKVT1ax0Zr_vnyJMpVZq5iS0fhljvS54iIQL8HBCY0IHWZwlq2c6uKQNbAveDnhy4gMYFoe3A6ujDHNkI5LSml6ZMw.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723564262197.png" },
-        { name: "베이컨 토마토 디럭스", price: 5800, type: "beef", img: "https://i.namu.wiki/i/mLoN0grnL8zD-4lY2WN-v6HqNME-8YBXBFFmzCDFtY-umdNq-kGtuW4RmpR_pM2ACb5ckXIZ50lUsTVyxaMsPyVBU2-l2WEaWfSkYKOcFGx9n-N-YCtWMaMc2HXh9DUExM4Kh1OivC7hO_pCKNUrdg.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563896442.png" },
-        { name: "더블 쿼터파운더 치즈", price: 7400, type: "beef", img: "https://i.namu.wiki/i/HIxgWskMC7XbZbk8UMvXvXc1htDTnAQePoF-2855YOlgLHBTpolnmHI2CaVJ9YZqkzG5ZpSXx8-8GTKj8mu6C9PX4Z7k9Cy_ozJqWntqSfKwMCGpV-bKPw7ImvTyKNay_8gpBK_XV0VZMOSl-2iGwQ.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563759418.png" },
-        { name: "쿼터파운더 치즈", price: 5500, type: "beef", img: "https://i.namu.wiki/i/LZ1z5XiC7WAatqYmn5HD-IMKt2taz2xEK3IlPbk-gn_Nxhtk3yynqv3TZhTH48uIRYBb-PBOSoKdToocVeThpPAsw9SfZ33hJ5ktoxJckMbIhKODWjjtusGKGUCpZWkWgTJbGMovxw3OXb2vnVUe2Q.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563812629.png" },
-        { name: "토마토 치즈 비프 버거", price: 4900, type: "beef", img: "https://i.namu.wiki/i/-3EptIZiicV_dYwB0sahOLUaLpEFLH8p6KgspU5D9xlYVAU5yg-zW9i8VUaNzwqvblKZGhILQO-2wB0LR2aFwaLxnrZ3em5m4lXfo-ELTqRwLPl3IzUpRkGytWvh2pPVEbKXHrONqxw0i55-BzrHzA.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1742426716721.png" },
-        { name: "트리플 치즈 버거", price: 7000, type: "beef", img: "https://i.namu.wiki/i/SWGB57NBjxmVN-TApTYiLrduzGk3HfnUmju0RMJK6SZEAs3zo6aeZ--qj3JK7kspkRKD10BG0ynDvBycHYHiYCEoypW0cQvy0mTHJG29zZmVqyJhMt0n2OdlmJlladR9C8TN9WBqbbYYVz0nQNknBA.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1744956010637.png" },
-        { name: "더블 치즈 버거", price: 5900, type: "beef", img: "https://i.namu.wiki/i/l-rku9sp_jN-E7M249zVIKabVTa6HE8iUUWJ909PjMjXFCV5mXv6YzuVuKE6syrUriWkknKjqRLe0SY--NxtAQg3ha7p1oI-w7Cc4ifJX0pIu1nTnBTDY2DjDMGBd3itWoX013jRwLFns7Lx844jnw.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563512104.png" },
-        { name: "치즈 버거", price: 4100, type: "beef", img: "https://i.namu.wiki/i/9sU-9EviTzMN8uIkVkUqj_YbuJ-Zf1NE6RIR1oJrU-Ii3iJEomW23HraTf1vBIN6XwUGSlPpu1Z9mnvZXzmIQINyIe0Z7H9DhcjdB0o30IZuadKlwxypTEzlhydzZdFEuH2zuK4iw-nK0kCKT5Yt2A.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563067813.png" },
-        { name: "햄버거", price: 3700, type: "beef", img: "https://www.mcdonalds.co.kr/upload/2025/08/%ED%96%84%EB%B2%84%EA%B1%B0.png" },
-        { name: "더블 맥스파이시 상하이 버거", price: 9300, type: "chicken", img: "https://i.namu.wiki/i/dcFQOMDgk8uHmH2CQnnL1aTSnag9MjW_y3QPBAlZo9UkBf0w5ZMwpksfJaWYvTZSGF2P66WPrYA8fHYP8C4Kmh2jzXxmIjeZcZMbBnq627KHBk0TwUcQRusxAdkfvkdgnFfHZjEbNHVCulksdRvHCg.webp", setImg: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_772x530_%EB%8D%94%EB%B8%94%EC%83%81%ED%95%98%EC%9D%B4_EVM.png" },
-        { name: "맥스파이시 상하이 버거", price: 5500, type: "chicken", img: "https://i.namu.wiki/i/IaTLtN71kkGV3JR3o-reXdMEX2jOjjmyueKXhgMrJ6JmxfL_b3iAeSxi7spI4YJrkYzPZqqXRHg9Bpfa898hW46vU2vhFE9UJ3NyO6pqiuvjYOPb-bbty_DIQ-vQVIhA8uH5rvEz-vQOlIbs7eDJlA.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723562660091.png" },
-        { name: "맥크리스피 치킨 디럭스", price: 6800, type: "chicken", img: "https://i.namu.wiki/i/sqeV27P9gJ5lbkscZoYXVDjPo2ZkjiVhEXfsWlyDonWNqysgvsWRylFPx3vnOxCZhgtQJLrixK8rqsPLT0i03wN_a8ybIbzEJtpNiYmMkOv6aEktaqOvHIImGDZSea1XYbH63P-vHtWNtIKyCI_qMQ.webp", setImg: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_%EB%A7%A5%ED%81%AC%EB%A6%AC%ED%94%BC_%EC%B9%98%ED%82%A8_%EB%94%94%EB%9F%AD%EC%8A%A4_772x530_new.png" },
-        { name: "맥크리스피 치킨 클래식", price: 5900, type: "chicken", img: "https://i.namu.wiki/i/fnBdh8UzymJ2ILDkw5dgkbZ-kiabW6ucjsytnCYy_r7PLhFQ-cH7WIZWPtrb4XnCKDw02QqTA-nkBQIoavp6AnfB1ALNpEN2fD3tQanV9uS0NEGklQPTo3IF1GIBmfH5fA3_lEFFlpQZuCGolyR8LA.webp", setImg: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_%EB%A7%A5%ED%81%AC%EB%A6%AC%ED%94%BC_%EC%B9%98%ED%82%A8_%ED%81%B4%EB%9E%98%EC%8B%9D_772x530_new.png" },
-        { name: "맥치킨 모짜렐라", price: 5000, type: "chicken", img: "https://i.namu.wiki/i/QrYxfF_3zkArfAaOGBn8iz7rjQ1QcOHyqKrNPJYAvvr-zUSLNBfe6DZCGx1sbVHbQxNf1xI2BMy8ATcN5BQ4dPY6LQE5EsY6LBOqOgFFDCvAdUN1togyChsVik-_bbs_cYFP3x_QMOz9nS0qCa-rEQ.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563301214.png" },
-        { name: "맥치킨", price: 3500, type: "chicken", img: "https://i.namu.wiki/i/Wmb5_Q7CYZ_RbfU7bM9EGVmszC9oFUtw4urGZzRkqVVf9JBpK3MfpCBmsZMrn1b7bH5epDobXzZNDoEvyXR9J3J5cer3gZ-Z_5V-JYoTTyvK_m_j8M5jlPq9JADB3t2MiCqqJiR0ridfOssfUpBIww.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563415066.png" },
-        { name: "슈슈 버거", price: 4700, type: "seafood", img: "https://i.namu.wiki/i/LWiNEqDMbtPp7eNpv_jvgOtLrFAhYNZwNiSbAvc33T18GH6uZXHzXGMgfiCdzgSB9PruAcCldJF37_9pf6muTKxjSgwZTCNmsedZDvflM7FkdKxiSWNlJU-Odlxpi5Yp6vXredUswCeTtL6GUMIUPw.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563590522.png" },
-        { name: "슈비 버거", price: 5800, type: "seafood", img: "https://i.namu.wiki/i/DSkf47N_MzutvlaAB5BBno5xtoKVvmitytf5ZSVRWWLXt-rC_FmuMvvmGHObc2WOtGkUMnH_kLLsmX4JTH6FDeRSMhGpPm4uuldpzmdnmmAmh8t5eiYF5Nf_BNYTTAZOE_qoGRqe-RKQIzXarL-0BA.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723564188909.png" },
-        { name: "더블 불고기 버거", price: 4500, type: "bulgogi", img: "https://i.namu.wiki/i/h2DgS1WCkyi3F40ge5lriDf7ZiSyorAY3ae4wq7l3Yi_FfFoJ0zNmv9HK_PmYq-2oahys6vdHGuE2jGSb_eRYXbpBPExnsud2E2o_R7VIq4QPpfZKP_tCX6dH3EMdoeL6APTXk-gyVz-wWg2YnS9gg.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723563975095.png" },
-        { name: "불고기 버거", price: 3500, type: "bulgogi", img: "https://i.namu.wiki/i/wLV6rT_qFlkPlUQXF3Xutlw9PDRsjG6HR0nrdCLONNcd76EUQxwrsJvWlZduy_WPnzwuaiYih6q6LVy-tP-qmMjqKc3TJvFmhs_dkMuoiQZ5s293GwHrWbB8YkcRBKL-F5vbkBW8SOLU1pZiz2XnAA.webp", setImg: "https://www.mcdonalds.co.kr/upload/product/pcfile/1723564031536.png" }
+        { name: "빅맥®", price: 5500, type: "beef", img: "사진/빅맥.webp", setImg: "사진/빅맥 세트.png" },
+        { name: "1955 버거", price: 6400, type: "beef", img: "사진/1955버거.webp", setImg: "사진/1955버거 세트.png" },
+        { name: "베이컨 토마토 디럭스", price: 5800, type: "beef", img: "사진/베이컨 토마토 디럭스.webp", setImg: "사진/베이컨 토마토 디럭스 세트.png" },
+        { name: "더블 쿼터파운더 치즈", price: 7400, type: "beef", img: "사진/더블 쿼터파운드.webp", setImg: "사진/더블 쿼터파운드 세트.png" },
+        { name: "쿼터파운더 치즈", price: 5500, type: "beef", img: "사진/쿼터파운드 치즈.webp", setImg: "사진/쿼터파운드 세트.png" },
+        { name: "토마토 치즈 비프 버거", price: 4900, type: "beef", img: "사진/토마토 치즈.webp", setImg: "사진/토마토 치즈 세트.png" },
+        { name: "트리플 치즈 버거", price: 7000, type: "beef", img: "사진/트리플 치즈 버거.webp", setImg: "사진/트리플 치즈 세트.png" },
+        { name: "더블 치즈 버거", price: 5900, type: "beef", img: "사진/더블 치즈.webp", setImg: "사진/더블 치즈 세트.png" },
+        { name: "치즈 버거", price: 4100, type: "beef", img: "사진/치즈버거.webp", setImg: "사진/치즈 세트.png" },
+        { name: "햄버거", price: 3700, type: "beef", img: "사진/햄버거.png" },
+        { name: "더블 맥스파이시 상하이 버거", price: 9300, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/더블 상하이 세트.png" },
+        { name: "맥스파이시 상하이 버거", price: 5500, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/상하이 스파이시 버거.png" },
+        { name: "맥크리스피 치킨 디럭스", price: 6800, type: "chicken", img: "사진/맥크리스피 치킨 디럭스.webp", setImg: "사진/치킨 디럭스 세트.png" },
+        { name: "맥크리스피 치킨 클래식", price: 5900, type: "chicken", img: "사진/맥크리스피 클래식.webp", setImg: "사진/치킨 클래식 세트.png" },
+        { name: "맥치킨 모짜렐라", price: 5000, type: "chicken", img: "사진/맥치킨 모짜렐라.webp", setImg: "사진/맥치킨 모짜렐라 세트.png" },
+        { name: "맥치킨", price: 3500, type: "chicken", img: "사진/맥치킨.webp", setImg: "사진/맥치킨 세트.png" },
+        { name: "슈슈 버거", price: 4700, type: "seafood", img: "사진/슈슈버거.webp", setImg: "사진/슈슈버거 세트.png" },
+        { name: "슈비 버거", price: 5800, type: "seafood", img: "사진/슈비버거.webp", setImg: "사진/슈비 세트.png" },
+        { name: "더블 불고기 버거", price: 4500, type: "bulgogi", img: "사진/더블 불고기.webp", setImg: "사진/더블 불고기 세트.png" },
+        { name: "불고기 버거", price: 3500, type: "bulgogi", img: "사진/불고기.webp", setImg: "사진/불고기 세트.png" }
     ],
     happysnack: [
-        { name: "아이스 드립 커피 Medium", price: 1500, type: "drink", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1708663234209.png" },
-        { name: "아이스 드립커피 Large", price: 2000, type: "drink", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1753862426041.png" },
-        { name: "바닐라 쉐이크 Medium", price: 2500, type: "drink", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1651228037031.png" },
-        { name: "맥너겟 4조각", price: 2000, type: "snack", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1715674478138.png" },
-        { name: "한입 초코 츄러스 3조각", price: 2500, type: "snack", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1736299008239.png" }
+        { name: "아이스 드립 커피 Medium", price: 1500, type: "drink", img: "사진/아이스 드립 M.png" },
+        { name: "아이스 드립커피 Large", price: 2000, type: "drink", img: "사진/아이스 드립 라지.png" },
+        { name: "바닐라 쉐이크 Medium", price: 2500, type: "drink", img: "사진/바닐라 쉐이크.png" },
+        { name: "맥너겟 4조각", price: 2000, type: "snack", img: "사진/맥너겟 4.png" },
+        { name: "한입 초코 츄러스 3조각", price: 2500, type: "snack", img: "사진/초코 츄러스.png" }
     ],
     side: [
-        { name: "후렌치 후라이(L)", price: 2700, type: "fries", img: "https://www.mcdonalds.co.kr/upload/2025/08/%ED%9B%84%EB%A0%8C%EC%B9%98_%ED%9B%84%EB%9D%BC%EC%9D%B4_Large.png" },
-        { name: "후렌치 후라이(M)", price: 2000, type: "fries", img: "https://www.mcdonalds.co.kr/upload/2025/08/%ED%9B%84%EB%A0%8C%EC%B9%98_%ED%9B%84%EB%9D%BC%EC%9D%B4_Medium.png" },
-        { name: "맥너겟® 6조각", price: 5000, type: "chicken", img: "https://www.mcdonalds.co.kr/upload/2025/08/%EB%A7%A5%EB%84%88%EA%B2%9F%C2%AE6%EC%A1%B0%EA%B0%81.png" },
-        { name: "맥너겟® 4조각", price: 3700, type: "chicken", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1612402131024.png" },
-        { name: "골든 모짜렐라 치즈스틱 2조각", price: 2500, type: "cheese", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201902080435496530.png" },
-        { name: "코울슬로", price: 1900, type: "other", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1680761626050.png" }
+        { name: "후렌치 후라이(L)", price: 2700, type: "fries", img: "사진/후렌치_후라이_Large.png" },
+        { name: "후렌치 후라이(M)", price: 2000, type: "fries", img: "사진/후렌치_후라이_Medium.png" },
+        { name: "맥너겟® 6조각", price: 5000, type: "chicken", img: "사진/맥너겟 6.png" },
+        { name: "맥너겟® 4조각", price: 3700, type: "chicken", img: "사진/맥너겟 4.png" },
+        { name: "골든 모짜렐라 치즈스틱 2조각", price: 2500, type: "cheese", img: "사진/치즈 2.png" },
+        { name: "코울슬로", price: 1900, type: "other", img: "사진/코울슬로.png" }
     ],
     coffee: [
-        { name: "아이스 아메리카노", price: 2700, type: "iced", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1610887631017.png" },
-        { name: "아이스 드립 커피M", price: 2400, type: "iced", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1610889861261.png" },
-        { name: "아이스 드립 커피L", price: 2800, type: "iced", img: "https://www.mcdonalds.co.kr/upload/2025/08/%EC%95%84%EC%9D%B4%EC%8A%A4_%EB%93%9C%EB%A6%BD_%EC%BB%A4%ED%94%BC_Large.png" },
-        { name: "아이스 카페라떼", price: 3400, type: "iced", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1610885477469.png" },
-        { name: "아이스 바닐라 라떼", price: 3900, type: "iced", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1654652269651.png" },
-        { name: "카페라떼", price: 3400, type: "hot", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677680118201.png" },
-        { name: "바닐라 라떼", price: 3900, type: "hot", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677678794782.png" },
-        { name: "카푸치노", price: 3400, type: "hot", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677679951061.png" },
-        { name: "드립 커피", price: 2400, type: "hot", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677680459621.png" },
-        { name: "디카페인 아메리카노", price: 2900, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677679725954.png" },
-        { name: "디카페인 아이스 아메리카노", price: 2900, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1610889486625.png" },
-        { name: "디카페인 카페라떼", price: 3600, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677679216326.png" },
-        { name: "디카페인 아이스 카페라떼", price: 3600, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1610887233610.png" },
-        { name: "디카페인 바닐라 라떼", price: 4100, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_772x530_%EB%94%94%EC%B9%B4%ED%8E%98%EC%9D%B8_%EB%B0%94%EB%8B%90%EB%9D%BC%EB%9D%BC%EB%97%B4_M.png" },
-        { name: "디카페인 아이스 바닐라 라떼", price: 4100, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_772x530_%EB%B0%94%EB%8B%90%EB%9D%BC%EB%9D%BC%EB%96%BC_%EB%94%94%EC%B9%B4%ED%8E%98_M.png" },
-        { name: "디카페인 카푸치노", price: 3600, type: "decaf", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1677679486199.png" }
-    ],            
+        { name: "아이스 아메리카노", price: 2700, type: "iced", img: "사진/아이스 아메리카노.png" },
+        { name: "아이스 드립 커피M", price: 2400, type: "iced", img: "사진/아이스 드립 M.png" },
+        { name: "아이스 드립 커피L", price: 2800, type: "iced", img: "사진/아이스 드립 라지.png" },
+        { name: "아이스 카페라떼", price: 3400, type: "iced", img: "사진/아이스 카페.png" },
+        { name: "아이스 바닐라 라떼", price: 3900, type: "iced", img: "사진/아이스 바닐라.png" },
+        { name: "카페라떼", price: 3400, type: "hot", img: "사진/카페라떼.png" },
+        { name: "바닐라 라떼", price: 3900, type: "hot", img: "사진/바닐라 라떼.png" },
+        { name: "카푸치노", price: 3400, type: "hot", img: "사진/카푸치노.png" },
+        { name: "드립 커피", price: 2400, type: "hot", img: "사진/드립 커피.png" },
+        { name: "디카페인 아메리카노", price: 2900, type: "decaf", img: "사진/디카페인 아메리카노.png" },
+        { name: "디카페인 아이스 아메리카노", price: 2900, type: "decaf", img: "사진/디카페인 아이스.png" },
+        { name: "디카페인 카페라떼", price: 3600, type: "decaf", img: "사진/디카페인 카페라떼.png" },
+        { name: "디카페인 아이스 카페라떼", price: 3600, type: "decaf", img: "사진/디카페인 아이스 카페.png" },
+        { name: "디카페인 바닐라 라떼", price: 4100, type: "decaf", img: "사진/디카페인 바닐라.png" },
+        { name: "디카페인 아이스 바닐라 라떼", price: 4100, type: "decaf", img: "사진/디카페인 아이스 바닐라.png" },
+        { name: "디카페인 카푸치노", price: 3600, type: "decaf", img: "사진/디카페인 카푸치노.png" }
+    ],
     dessert: [
-        { name: "스트로베리콘", price: 3000, type: "icecream", img: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_772x530_%EC%8A%A4%ED%8A%B8%EB%A1%9C%EB%B2%A0%EB%A6%AC%EC%BD%98.png" },
-        { name: "아이스크림콘", price: 3000, type: "icecream", img: "https://www.mcdonalds.co.kr/upload/2026/02/Corp_PC_VIEW_772x530_%EC%95%84%EC%9D%B4%EC%8A%A4%ED%81%AC%EB%A6%BC%EC%BD%98.png" },
-        { name: "초코 선데이 아이스크림", price: 3000, type: "icecream", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290248295110.png" },
-        { name: "딸기 선데이 아이스크림", price: 3000, type: "icecream", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290248522410.png" },
-        { name: "바닐라 선데이 아이스크림", price: 3000, type: "icecream", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1657246845162.png" },
-        { name: "오레오 맥플러리", price: 3000, type: "mcflurry", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1615378578396.png" },
-        { name: "딸기 오레오 맥플러리", price: 3000, type: "mcflurry", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1615378509519.png" },
-        { name: "초코 오레오 맥플러리", price: 3000, type: "mcflurry", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1615378451271.png" },
-        { name: "베리 스트로베리 맥플러리", price: 3000, type: "mcflurry", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1617837982953.png" },
-        { name: "한입 초코 츄러스 3조각", price: 2500, type: "other", img: "https://www.mcdonalds.co.kr/upload/2026/01/Corp_PC_VIEW_772x530_%EC%B4%88%EC%BD%94%EC%B8%84%EB%9F%AC%EC%8A%A4.png" }
+        { name: "스트로베리콘", price: 3000, type: "icecream", img: "사진/스트로베리.png" },
+        { name: "아이스크림콘", price: 3000, type: "icecream", img: "사진/아이스크림.png" },
+        { name: "초코 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/초코 선데.png" },
+        { name: "딸기 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/딸기 선데.png" },
+        { name: "바닐라 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/바닐라 선데.png" },
+        { name: "오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/오레오.png" },
+        { name: "딸기 오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/딸기 오레오.png" },
+        { name: "초코 오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/초코 오레오.png" },
+        { name: "베리 스트로베리 맥플러리", price: 3000, type: "mcflurry", img: "사진/베리 스트로베리.png" },
+        { name: "한입 초코 츄러스 3조각", price: 2500, type: "other", img: "사진/초코 츄러스.png" }
     ],
     drink: [
-        { name: "코카 콜라 제로", price: 2000, type: "soda", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1583890021601.png" },
-        { name: "코카 콜라", price: 2000, type: "soda", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1583889967380.png" },
-        { name: "스프라이트", price: 2000, type: "soda", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1703512982605.png" },
-        { name: "환타", price: 2000, type: "soda", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1631160688795.png" },
-        { name: "바닐라 쉐이크", price: 2800, type: "shake", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290255488970.png" },
-        { name: "딸기 쉐이크", price: 2800, type: "shake", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290257347040.png" },
-        { name: "초코 쉐이크", price: 2800, type: "shake", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290257444650.png" },
-        { name: "망고 피치 아이스티", price: 3400, type: "tea", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1742516397001.png" },
-        { name: "피치 아이스티", price: 3100, type: "tea", img: "https://www.mcdonalds.co.kr/upload/product/pcfile/1742516130042.png" },
-        { name: "생수", price: 1300, type: "water", img: "https://www.mcdonalds.co.kr/uploadFolder/product/prov_201901290258201760.png" }
+        { name: "코카 콜라 제로", price: 2000, type: "soda", img: "사진/코카콜라.png" },
+        { name: "코카 콜라", price: 2000, type: "soda", img: "사진/코카콜라.png" },
+        { name: "스프라이트", price: 2000, type: "soda", img: "사진/스프라이트.png" },
+        { name: "환타", price: 2000, type: "soda", img: "사진/환타.png" },
+        { name: "바닐라 쉐이크", price: 2800, type: "shake", img: "사진/바닐라 쉐이크.png" },
+        { name: "딸기 쉐이크", price: 2800, type: "shake", img: "사진/딸기 쉐이크.png" },
+        { name: "초코 쉐이크", price: 2800, type: "shake", img: "사진/초코 쉐이크.png" },
+        { name: "망고 피치 아이스티", price: 3400, type: "tea", img: "사진/망고 피치 아이스티.png" },
+        { name: "피치 아이스티", price: 3100, type: "tea", img: "사진/피치 아이스티.png" },
+        { name: "생수", price: 1300, type: "water", img: "사진/생수.png" }
     ]
 };
 const categoryFilters = { burger: [{ id: 'all', name: '전체' }, { id: 'beef', name: '비프' }, { id: 'chicken', name: '치킨' }, { id: 'bulgogi', name: '불고기' }, { id: 'seafood', name: '씨푸드' }] };
@@ -216,10 +216,10 @@ function renderSidebar() {
     let tabsHtml = `
         <div class="k-menu-group" id="category-tabs-top">
             <div class="k-menu-item" style="justify-content:center; height:auto; padding: 25px 0;">
-                <img src="https://i.namu.wiki/i/pYdtlj-fQNTInL7V6QVzRNAB_9Ip74fCiowUbuIEb03dzfy9olYTgA6-SLOD4GRe-Uub5_zWT-hocLHOcJDBxw.svg" alt="맥도날드 로고" style="width: 60px; height: auto;">
+                <img src="사진/mc.jpeg" alt="맥도날드 로고" style="width: 60px; height: auto;">
             </div>
-            <div class="k-menu-item" onclick="location.reload()">🏠 홈</div>
-            <div class="k-menu-item ${STATE.currentCategory === 'recommend' ? 'active' : ''}" onclick="changeCategory('recommend')">⭐ 추천메뉴</div>
+            <div class="k-menu-item" onclick="location.reload()">홈</div>
+            <div class="k-menu-item ${STATE.currentCategory === 'recommend' ? 'active' : ''}" onclick="changeCategory('recommend')">추천메뉴</div>
         </div>
         <div class="k-menu-group" style="margin-top: 12px;">
     `;
@@ -276,7 +276,7 @@ function renderBottom() {
         <div class="k-bottom-qr"><div class="qr-text">포인트를 적립하세요<br>결제 전 선택 필수</div></div>
         <div class="k-bottom-center">
             <div class="cart-price-row">
-                <div class="cart-icon-wrap">🛍️<div class="cart-badge" id="k-count">${totalQty}</div></div>
+                <div class="cart-icon-wrap"><div class="cart-badge" id="k-count">${totalQty}</div></div>
                 <div class="k-total">₩ <span>${totalPrice.toLocaleString()}</span></div>
             </div>
             <div class="action-btn-row"><button class="action-btn" onclick="resetCartConfirm()">처음으로</button></div>
@@ -591,7 +591,7 @@ window.onload = () => { initApp(); window.addEventListener('resize', updateScrol
 // ==========================================
 window.addEventListener('message', (event) => {
     // 3D 밖에서 카드가 투입구에 꽂혔다는 신호가 오면!
-    if (event.data && event.data.type === 'CARD_INSERTED') {
+    if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
         completeCreditCardPayment();
     }
 });
@@ -603,7 +603,6 @@ window.addEventListener('message', (event) => {
 function openPaymentMethod() {
     const cartModalInner = document.getElementById('cart-modal-inner');
     
-    // 불필요한 결제 수단 다 날리고 '신용카드'와 '취소' 딱 2개만 남김
     let payHtml = `
         <div class="pay-method-wrapper">
             <div class="pay-title">결제 수단을 선택해 주세요</div>
@@ -623,6 +622,34 @@ function openPaymentMethod() {
         </div>
     `;
     cartModalInner.innerHTML = payHtml;
+}
+
+function completeCreditCardPayment() {
+    // 장바구니 모달 닫기
+    if (STATE.cartItems.length === 0) return;
+    const cartModal = document.getElementById('cart-modal');
+    if (cartModal) cartModal.style.display = 'none';
+
+    // 총 금액 계산
+    let totalPrice = 0;
+    STATE.cartItems.forEach(item => { totalPrice += item.price * item.qty; });
+
+    // 결제 완료 화면 표시
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div id="payment-complete-screen">
+            <div class="payment-complete-inner">
+                <div class="payment-complete-icon">✓</div>
+                <div class="payment-complete-title">결제가 완료되었습니다</div>
+                <div class="payment-complete-amount">₩ ${totalPrice.toLocaleString()}</div>
+                <div class="payment-complete-msg">영수증이 출력됩니다.<br>잠시만 기다려 주세요.</div>
+            </div>
+        </div>
+    `;
+
+    // 장바구니 초기화 후 5초 뒤 처음 화면으로
+    STATE.cartItems = [];
+    setTimeout(() => { initApp(); }, 5000);
 }
 // ==========================================
 // 스크롤 썸(노란 막대) 직접 드래그
@@ -731,4 +758,35 @@ function initDragScroll(grid) {
     grid.addEventListener('touchend', (e) => {
         if (touchMoved) e.preventDefault();
     });
+}
+
+function processPayment(method) {
+    if (method === '신용카드') {
+        const cartModalInner = document.getElementById('cart-modal-inner');
+        
+        // 카드 투입 안내 화면 렌더링 (아이콘 없이 텍스트 중심)
+        cartModalInner.innerHTML = `
+            <div class="pay-method-wrapper" style="text-align: center;">
+                <div class="pay-title" style="margin-bottom: 20px; font-size: 42px;">결제 단말기에 카드를 꽂아주세요</div>
+                <div style="font-size: 26px; color: #db0007; margin-bottom: 60px; font-weight: 800;">IC칩이 위를 향하게 넣어주세요</div>
+                
+                <div style="font-size: 50px; color: #ffbc0d; margin-bottom: 60px; letter-spacing: 15px; animation: blink 1.5s infinite;">
+                    •••
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="modal-cancel-btn" onclick="openPaymentMethod()" style="padding: 15px 50px; font-size: 20px;">이전으로</button>
+                </div>
+                
+                <style>
+                    /* 점 깜빡임 애니메이션 */
+                    @keyframes blink {
+                        0% { opacity: 0.2; }
+                        50% { opacity: 1; }
+                        100% { opacity: 0.2; }
+                    }
+                </style>
+            </div>
+        `;
+    }
 }

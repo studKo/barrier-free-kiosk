@@ -231,4 +231,32 @@ h2 strong {
 
 .parking-btn:active {
     background-color: #46586b;
+
+}
+
+/* 🌟 에러 팝업 전체 화면 덮기 */
+#error-popup {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.4); 
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999; 
+}
+
+/* 🌟 숨김 처리 강제 (이 코드가 꼭 있어야 합니다!) */
+#error-popup.hidden {
+    display: none !important;
+}
+
+/* 🌟 에러 경고창 하얀 박스 디자인 */
+.error-content {
+    background: #ffffff;
+    padding: 40px 60px;
+    border-radius: 12px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #e53935;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 3px solid #e53935;
 }

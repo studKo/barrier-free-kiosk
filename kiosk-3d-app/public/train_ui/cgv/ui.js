@@ -117,7 +117,7 @@ function renderSeats() {
 }
 
 function moveMap(dir) {
-    const step = 50;
+    const step = 60; // 화면이 커졌으므로 이동 거리도 약간 늘림
     if(dir === 'up') posY += step; if(dir === 'down') posY -= step;
     if(dir === 'left') posX += step; if(dir === 'right') posX -= step;
     applyMapTransform();
@@ -125,7 +125,8 @@ function moveMap(dir) {
 
 function applyMapTransform() {
     const map = document.getElementById('seat-map');
-    map.style.transform = `scale(1.6) translate(${posX/1.6}px, ${posY/1.6}px)`;
+    // 화면에 맞춰 스케일을 1.4로 살짝 낮추어 전체가 잘 보이게 조정
+    map.style.transform = `scale(1.4) translate(${posX/1.4}px, ${posY/1.4}px)`;
 }
 
 function updateSeatInfo() {
@@ -155,7 +156,23 @@ function renderPayment() {
     showScreen('payment-screen');
 }
 
+/**
+ * 결제 완료 메시지를 수신하는 함수
+ */
 function finishPayment() {
-    alert("결제가 완료되었습니다! 티켓을 확인해 주세요.");
-    location.reload();
+    // 메시지 핸들러 함수를 별도로 정의 (삭제 시 참조하기 위함)
+    const handlePaymentMessage = (event) => {
+        // [보안] 신뢰할 수 있는 도메인인지 반드시 확인하세요!
+        // if (event.origin !== "https://trusted-payment-gateway.com") return;
+
+        if (event.data === 'cardInserted') {
+            alert("결제가 완료되었습니다!");
+            
+            // 결제 완료 후에는 더 이상 메시지를 들을 필요가 없으므로 리스너 제거 (선택 사항)
+            window.removeEventListener('message', handlePaymentMessage);
+        }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('message', handlePaymentMessage);
 }

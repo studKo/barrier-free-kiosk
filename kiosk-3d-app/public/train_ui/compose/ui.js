@@ -155,47 +155,62 @@ function renderCart() {
   payBtn.disabled = total === 0;
 }
 
-// 9. 결제 흐름 제어 로직
+// 9. 결제 흐름 제어 로직 (3D 환경과 통신 연동)
 payBtn.addEventListener("click", () => {
-  // 결제하기 클릭 -> 결제 대기 화면(카드 투입 안내)으로 이동
+  // 1. 결제 대기 화면으로 이동
   menuScreen.classList.add("hidden");
   paymentWaitScreen.classList.remove("hidden");
+  
+  // 2. 3D 환경(부모 창)에 결제 준비가 되었다고 알림 (카메라 줌 및 화살표 표시 트리거)
+  window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
 });
 
 cancelPaymentBtn.addEventListener("click", () => {
-  // 결제 취소 -> 다시 메뉴 화면으로 복귀
+  // 1. 결제 취소 -> 다시 메뉴 화면으로 복귀
   paymentWaitScreen.classList.add("hidden");
   menuScreen.classList.remove("hidden");
+
+  // 2. 3D 환경에 결제가 종료(취소)되었음을 알림 (카드 원위치 및 화살표 숨김 트리거)
+  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
 });
 
-// 10. 외부 연동용 결제 완료 트리거 함수 (전역 함수)
-// 메인 프로젝트의 카드 드래그 앤 드롭 로직에서 이 함수를 호출해야 합니다.
-window.triggerPaymentComplete = function() {
-  // 사용자가 결제 대기 화면에 있을 때만 작동하도록 확인
-  if (!paymentWaitScreen.classList.contains("hidden")) {
+// 10. 3D 환경(부모 창)에서 보내는 '카드 삽입' 신호 수신 로직
+window.addEventListener('message', (event) => {
+  // 전달받은 메시지가 'cardInserted'인지 확인
+  if (event.data === 'cardInserted') {
     
-    // 대기 화면 숨기고 결제 완료 화면 표시
-    paymentWaitScreen.classList.add("hidden");
-    completeScreen.classList.remove("hidden");
-    
-    // 주문번호 화면에 업데이트 후 다음 번호를 위해 증가
-    document.getElementById("order-number").textContent = `주문번호: ${orderCounter}`;
-    orderCounter++; 
-
-    // 3초 후 키오스크 초기화
-    setTimeout(() => {
-      completeScreen.classList.add("hidden");
-      orderTypeScreen.classList.remove("hidden"); // 첫 화면으로 복귀
-      cart = []; // 장바구니 데이터 비우기
-      renderCart(); // 장바구니 UI 비우기
+    // 사용자가 현재 결제 대기 화면에 있을 때만 결제 진행
+    if (!paymentWaitScreen.classList.contains("hidden")) {
       
-      // 탭도 기본값(커피)으로 초기화
-      currentCategory = "커피";
-      categoryTabs.forEach(t => t.classList.remove("active"));
-      categoryTabs[0].classList.add("active");
-    }, 3000);
+      // 대기 화면 숨기고 결제 완료 화면 표시
+      paymentWaitScreen.classList.add("hidden");
+      completeScreen.classList.remove("hidden");
+      
+      // 주문번호 화면에 업데이트 후 다음 번호를 위해 증가
+      document.getElementById("order-number").textContent = `주문번호: ${orderCounter}`;
+      orderCounter++; 
+
+      // 3D 환경에 영수증 출력 애니메이션 요청
+      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, '*');
+
+      // 3초 후 키오스크 초기화
+      setTimeout(() => {
+        completeScreen.classList.add("hidden");
+        orderTypeScreen.classList.remove("hidden"); // 첫 화면으로 복귀
+        cart = []; // 장바구니 데이터 비우기
+        renderCart(); // 장바구니 UI 비우기
+        
+        // 탭도 기본값(커피)으로 초기화
+        currentCategory = "커피";
+        categoryTabs.forEach(t => t.classList.remove("active"));
+        categoryTabs[0].classList.add("active");
+
+        // 3D 환경에 결제가 완전히 끝났음을 알림 (카드 락 해제 및 원위치)
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+      }, 3000);
+    }
   }
-};
+});
 
 // 최초 실행 시 장바구니 UI 초기화
 renderCart();

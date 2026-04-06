@@ -392,3 +392,29 @@ body { background-color: #333; display: block !important; height: 100vh; width: 
 #k-grid.dragging {
     cursor: grabbing;
 }
+/* --- 결제 완료 화면 --- */
+#payment-complete-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #fff; z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+}
+.payment-complete-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+.payment-complete-icon {
+    width: 120px; height: 120px; border-radius: 50%;
+    background: #ffbc0d; color: #fff;
+    font-size: 70px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    animation: popUp 0.4s ease-out;
+}
+.payment-complete-title {
+    font-size: 42px; font-weight: 900; color: #222; letter-spacing: -1px;
+}
+.payment-complete-amount {
+    font-size: 36px; font-weight: 900; color: #ffbc0d;
+}
+.payment-complete-msg {
+    font-size: 20px; color: #888; font-weight: 600;
+    text-align: center; line-height: 1.6;
+}

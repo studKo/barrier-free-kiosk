@@ -11,23 +11,16 @@ let isSnapping = false, snapStartTime = 0, snappingCard = null, onCardInsertedCa
 const SNAP_DURATION = 0.4;
 
 /**
- * 3D 환경 내에서의 사용자 상호작용(드래그, 클릭 등)을 초기화하고 이벤트를 할당하는 함수입니다.
- * @param {HTMLElement} canvas - 이벤트를 감지할 HTML 캔버스 영역
- * @param {THREE.Camera} camera - 레이캐스팅에 사용할 씬 카메라
- * @param {Object} sceneObjects - 조작 가능한 3D 오브젝트 모음
+ * 3D 환경 내에서의 사용자 상호작용을 설정합니다.
  */
 export function setupInteraction(canvas, camera, sceneObjects) {
-  const { cardMesh, slotGlowMesh, scannerGlowMesh, kioskGroup, spawnReceipt } = sceneObjects;
+  const { cardMesh, slotMesh, slotGlowMesh, scannerGlowMesh, kioskGroup, spawnReceipt } = sceneObjects;
   let pulseTime = 0;
 
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
   canvas.addEventListener('pointerup', onPointerUp);
 
-  /**
-   * 브라우저 마우스/터치 좌표를 Three.js에서 사용하는 정규화 기기 좌표(NDC: -1 ~ +1)로 변환하는 함수입니다.
-   * @param {Event} event - 포인터 이벤트
-   */
   function getMouseCoors(event) {
     const rect = canvas.getBoundingClientRect();
     mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -35,14 +28,39 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 
   /**
-   * 마우스를 클릭(터치)했을 때 호출되어 선택한 오브젝트(카드, 영수증)를 잡는(드래그 시작) 함수입니다.
-   * @param {Event} event - 포인터 이벤트
+   * 마우스를 눌렀을 때: 카드 회수 또는 드래그 시작
    */
   function onPointerDown(event) {
     if (isSnapping) return;
     getMouseCoors(event);
     raycaster.setFromCamera(mouse, camera);
 
+    // [회수 로직] 카드가 이미 꽂혀있는 상태라면?
+    if (cardMesh.userData.isInserted) {
+      const clickTargets = [cardMesh];
+      if (slotMesh) clickTargets.push(slotMesh);
+      if (slotGlowMesh) clickTargets.push(slotGlowMesh);
+
+      const intersectsTerminal = raycaster.intersectObjects(clickTargets, true);
+
+      if (intersectsTerminal.length > 0) {
+        // ★ 산학캡 수정: 카드를 리셋만 하여 화면에서 없앱니다. (spawnCard 호출 제거)
+        unlockCard();
+        resetCardPosition();    // 카드를 보이지 않는 위치로 이동시키고 visible = false 처리
+
+        showToast("카드를 회수했습니다.");
+
+        // 웹 UI(iframe) 쪽에 회수 신호를 보냅니다.
+        const iframeWin = (kioskGroup.userData.iframeDOM && kioskGroup.userData.iframeDOM.contentWindow)
+          || document.querySelector('iframe')?.contentWindow;
+        if (iframeWin) {
+          iframeWin.postMessage('cardRemoved', '*');
+        }
+        return;
+      }
+    }
+
+    // 드래그 시작 로직
     const paperMesh = kioskGroup.userData.paperMesh;
     const draggables = [];
     if (!cardMesh.userData.isInserted) draggables.push(cardMesh);
@@ -54,14 +72,10 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     if (intersects.length > 0) {
       isDragging = true;
       selectedObject = intersects[0].object;
-
-      // 그룹(Group) 구조로 인해 자식 메쉬가 클릭된 경우, 부모인 '카드'나 '영수증' 객체를 찾을 때까지 거슬러 올라감
       while (selectedObject.parent && selectedObject.parent.type !== 'Scene' && selectedObject.parent !== kioskGroup) {
         if (selectedObject.name === 'credit_card' || selectedObject.name === 'receipt_paper') break;
         selectedObject = selectedObject.parent;
       }
-
-      // 드래그할 평면을 카메라 시점 기반으로 생성
       dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), selectedObject.position);
       if (raycaster.ray.intersectPlane(dragPlane, intersection)) offset.copy(intersection).sub(selectedObject.position);
       canvas.style.cursor = 'grabbing';
@@ -69,16 +83,25 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 
   /**
-   * 객체를 잡고 드래그(마우스 이동)할 때 호출되어 객체의 위치를 업데이트하고, 투입구 근처에 갈 때 글로우 색상을 바꾸는 함수입니다.
-   * @param {Event} event - 포인터 이벤트
+   * 마우스 이동 시: 커서 스타일 변경 및 드래그 처리
    */
   function onPointerMove(event) {
     if (isSnapping) return;
     getMouseCoors(event);
 
-    // 드래그 중이 아닐 때는 호버(Hover) 상태 처리 (마우스 커서 변경)
     if (!isDragging) {
       raycaster.setFromCamera(mouse, camera);
+
+      // 카드가 꽂혀있을 때 단말기에 마우스를 올리면 포인터 커서로 변경
+      if (cardMesh.userData.isInserted) {
+        const clickTargets = [cardMesh, slotMesh, slotGlowMesh].filter(obj => obj);
+        const intersectsTerminal = raycaster.intersectObjects(clickTargets, true);
+        if (intersectsTerminal.length > 0) {
+          canvas.style.cursor = 'pointer';
+          return;
+        }
+      }
+
       const draggables = [];
       if (!cardMesh.userData.isInserted) draggables.push(cardMesh);
       if (kioskGroup.userData.paperMesh && kioskGroup.userData.paperMesh.visible) draggables.push(kioskGroup.userData.paperMesh);
@@ -88,13 +111,11 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       return;
     }
 
-    // 객체를 드래그 중인 경우 위치 이동 처리
     if (isDragging && selectedObject) {
       raycaster.setFromCamera(mouse, camera);
       if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
         selectedObject.position.copy(intersection.sub(offset));
 
-        // 카드 드래그 중 충돌 체크 및 글로우 애니메이션 (초록 불빛)
         if (selectedObject.name === 'credit_card' && slotGlowMesh) {
           if (checkCardSlotCollision(selectedObject)) {
             slotGlowMesh.material.opacity = 0.9; slotGlowMesh.material.color.setHex(0x00ff00);
@@ -104,7 +125,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
             slotGlowMesh.material.color.setHex(0xffff00);
           }
         }
-        // 영수증 드래그 중 충돌 체크 및 글로우 애니메이션 (초록 불빛)
         else if (selectedObject.name === 'receipt_paper' && scannerGlowMesh) {
           if (checkScannerCollision(selectedObject)) {
             scannerGlowMesh.material.opacity = 0.9; scannerGlowMesh.material.color.setHex(0x00ff00);
@@ -119,7 +139,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 
   /**
-   * 드래그하던 마우스(터치)를 놓았을 때 호출되며, 충돌 위치에 따라 결제/스캔을 확정 짓거나 객체를 제자리로 돌려보내는 함수입니다.
+   * 마우스를 뗐을 때: 드롭 및 이벤트 전달
    */
   function onPointerUp() {
     if (isDragging && selectedObject) {
@@ -128,12 +148,9 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       const iframeWin = (kioskGroup.userData.iframeDOM && kioskGroup.userData.iframeDOM.contentWindow)
         || document.querySelector('iframe')?.contentWindow;
 
-      // 1. 카드 드롭 로직
       if (selectedObject.name === 'credit_card') {
         if (checkCardSlotCollision(selectedObject)) {
           startSnapAnimation(selectedObject);
-
-          // ★ 산학캡 복원: 기존 웹 UI 코드와 호환되도록 문자열 전달로 원복!
           if (iframeWin) {
             iframeWin.postMessage('cardInserted', '*');
           }
@@ -144,11 +161,9 @@ export function setupInteraction(canvas, camera, sceneObjects) {
         }
         selectedObject.rotation.set(0, 0, -Math.PI / 2);
       }
-      // 2. 영수증 드롭 로직
       else if (selectedObject.name === 'receipt_paper') {
         if (checkScannerCollision(selectedObject)) {
           showToast("바코드가 성공적으로 인식되었습니다.");
-          // 바코드 스캔은 처음부터 객체 형식으로 추가해드린 기능이므로 그대로 둡니다.
           if (iframeWin) {
             iframeWin.postMessage({ type: 'BARCODE_SCANNED' }, '*');
           }
@@ -172,8 +187,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 
   /**
-   * 카드를 슬롯 근처에서 놓았을 때 스윽 빨려 들어가는 애니메이션을 연출하는 내부 함수입니다.
-   * @param {THREE.Object3D} card - 빨려 들어갈 대상 카드 객체
+   * 카드가 슬롯으로 빨려 들어가는 애니메이션
    */
   function startSnapAnimation(card) {
     isSnapping = true; snappingCard = card;
@@ -199,17 +213,10 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 }
 
-/**
- * 외부에서 '카드 삽입 완료' 이벤트를 구독하기 위해 콜백 함수를 등록하는 함수입니다.
- * @param {Function} callback - 카드 삽입 시 실행될 함수
- */
 export function onCardInserted(callback) {
   onCardInsertedCallback = callback;
 }
 
-/**
- * 결제가 끝난 후 락(Lock)이 걸린 카드의 상태를 해제하여 다시 상호작용 가능하게 만드는 함수입니다.
- */
 export function unlockCard() {
   isSnapping = false;
   snappingCard = null;

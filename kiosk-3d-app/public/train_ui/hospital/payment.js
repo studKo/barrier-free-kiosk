@@ -57,22 +57,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🌟 6. 3D 화면에서 '카드 꽂힘' 신호가 날아올 때의 처리
+    // 🌟 6. 3D 화면에서 신호가 날아올 때의 처리
     window.addEventListener('message', (event) => {
+        
+        // --- 1) 카드가 '꽂혔을 때' ---
         if (event.data === 'cardInserted') {
-            
-            // ① "카드를 넣어주세요" 팝업 숨기기
+            // "카드를 넣어주세요" 팝업을 숨기고
             if (cardModal) cardModal.classList.add('hidden');
             
-            // ② "결제 완료" 주황색 팝업 띄우기
+            // "카드를 뽑아주세요" 주황색 팝업을 띄웁니다.
             if (paymentCompleteModal) paymentCompleteModal.classList.remove('hidden');
-
-            // ③ 3초 뒤에 output.html 로 페이지 이동
-            setTimeout(() => {
-                if (paymentCompleteModal) paymentCompleteModal.classList.add('hidden');
-                window.location.href = 'output.html'; 
-            }, 3000);
+            
+            // (기존에 있던 3초 뒤 자동 이동 타이머는 완전히 삭제했습니다!)
         }
+
+        // --- 🔥 2) 카드를 '회수(뽑았을) 때' (신규) ---
+        if (event.data === 'cardRemoved') {
+            // 카드를 뽑았으니 팝업창을 깔끔하게 숨기고
+            if (paymentCompleteModal) paymentCompleteModal.classList.add('hidden');
+            
+            // 드디어 출력 대기 화면(output.html)으로 진짜 넘어갑니다!
+            window.location.href = 'output.html'; 
+        }
+        
     });
 
 });

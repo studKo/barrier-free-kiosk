@@ -116,13 +116,6 @@ function renderSeats() {
     posX = 0; posY = 0; applyMapTransform();
 }
 
-function moveMap(dir) {
-    const step = 60; // 화면이 커졌으므로 이동 거리도 약간 늘림
-    if(dir === 'up') posY += step; if(dir === 'down') posY -= step;
-    if(dir === 'left') posX += step; if(dir === 'right') posX -= step;
-    applyMapTransform();
-}
-
 function applyMapTransform() {
     const map = document.getElementById('seat-map');
     // 화면에 맞춰 스케일을 1.4로 살짝 낮추어 전체가 잘 보이게 조정
@@ -157,22 +150,76 @@ function renderPayment() {
 }
 
 /**
- * 결제 완료 메시지를 수신하는 함수
+ * 결제 완료 프로세스 (HTML 안내 버전)
  */
-function finishPayment() {
-    // 메시지 핸들러 함수를 별도로 정의 (삭제 시 참조하기 위함)
-    const handlePaymentMessage = (event) => {
-        // [보안] 신뢰할 수 있는 도메인인지 반드시 확인하세요!
-        // if (event.origin !== "https://trusted-payment-gateway.com") return;
+async function finishPayment() {
+    console.log("결제 프로세스 시작");
 
-        if (event.data === 'cardInserted') {
-            alert("결제가 완료되었습니다!");
-            
-            // 결제 완료 후에는 더 이상 메시지를 들을 필요가 없으므로 리스너 제거 (선택 사항)
-            window.removeEventListener('message', handlePaymentMessage);
-        }
-    };
+    const payContent = document.querySelector('.pay-content');
+    if (!payContent) return;
 
-    // 이벤트 리스너 등록
-    window.addEventListener('message', handlePaymentMessage);
+    // 1단계: "신용카드를 넣어주세요" 화면 표시
+    payContent.innerHTML = `
+        <div id="payment-step-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:300px; text-align:center;">
+            <div class="card-icon" style="font-size: 60px; margin-bottom: 20px;">💳</div>
+            <h2 style="font-size:32px; color:#222; margin-bottom:10px;">신용카드를 넣어주세요</h2>
+            <p style="font-size:18px; color:#666;">카드를 삽입구 끝까지 넣어주세요.</p>
+        </div>
+    `;
+    
+    console.log("카드 삽입 대기 중...");
+    
+    // 2단계: cardInserted 이벤트를 기다림
+    await waitForCardInsert();
+
+    // 3단계: "결제중..." 화면으로 교체
+    const stepContainer = document.getElementById('payment-step-container');
+    if (stepContainer) {
+        stepContainer.innerHTML = `
+            <div class="loading-spinner" style="width:50px; height:50px; border:5px solid #f3f3f3; border-top:5px solid #e71a0f; border-radius:50%; animation: spin 1s linear infinite; margin-bottom:20px;"></div>
+            <h2 id="payment-status" style="font-size:40px; color:#e71a0f; margin-bottom:10px;">결제중...</h2>
+            <p style="font-size:20px; color:#666;">잠시만 기다려 주세요.</p>
+        `;
+    }
+
+    // 4단계: 3초간 결제 처리 시뮬레이션
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // 5단계: 완료 메시지 업데이트
+    const statusText = document.getElementById('payment-status');
+    if (statusText) {
+        statusText.innerText = "결제가 완료되었습니다.";
+    }
+
+    // 6단계: 2초 후 홈 화면으로 이동
+    setTimeout(() => {
+        showScreen('home-screen');
+    }, 2000);
+}
+
+// 스피너 애니메이션을 위해 CSS 추가 (JS에서 동적 삽입)
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+/**
+ * 이벤트를 기다리는 헬퍼 함수 (기존과 동일)
+ */
+function waitForCardInsert() {
+    return new Promise((resolve) => {
+        const handleCard = (event) => {
+            if (event.type === 'cardInserted' || event.data === 'cardInserted') {
+                window.removeEventListener('cardInserted', handleCard);
+                window.removeEventListener('message', handleCard);
+                resolve();
+            }
+        };
+        window.addEventListener('cardInserted', handleCard);
+        window.addEventListener('message', handleCard);
+    });
 }

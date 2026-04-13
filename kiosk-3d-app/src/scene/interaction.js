@@ -28,7 +28,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
   }
 
   /**
-   * 마우스를 눌렀을 때: 카드 회수 또는 드래그 시작
+   * 마우스를 눌렀을 때: 카드 회수 또는 드래그 시작 및 영수증 획득 처리
    */
   function onPointerDown(event) {
     if (isSnapping) return;
@@ -44,13 +44,11 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       const intersectsTerminal = raycaster.intersectObjects(clickTargets, true);
 
       if (intersectsTerminal.length > 0) {
-        // ★ 산학캡 수정: 카드를 리셋만 하여 화면에서 없앱니다. (spawnCard 호출 제거)
         unlockCard();
-        resetCardPosition();    // 카드를 보이지 않는 위치로 이동시키고 visible = false 처리
+        resetCardPosition(); // 카드를 보이지 않는 위치로 이동
 
         showToast("카드를 회수했습니다.");
 
-        // 웹 UI(iframe) 쪽에 회수 신호를 보냅니다.
         const iframeWin = (kioskGroup.userData.iframeDOM && kioskGroup.userData.iframeDOM.contentWindow)
           || document.querySelector('iframe')?.contentWindow;
         if (iframeWin) {
@@ -60,7 +58,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       }
     }
 
-    // 드래그 시작 로직
     const paperMesh = kioskGroup.userData.paperMesh;
     const draggables = [];
     if (!cardMesh.userData.isInserted) draggables.push(cardMesh);
@@ -70,12 +67,56 @@ export function setupInteraction(canvas, camera, sceneObjects) {
 
     const intersects = raycaster.intersectObjects(draggables, true);
     if (intersects.length > 0) {
-      isDragging = true;
-      selectedObject = intersects[0].object;
-      while (selectedObject.parent && selectedObject.parent.type !== 'Scene' && selectedObject.parent !== kioskGroup) {
-        if (selectedObject.name === 'credit_card' || selectedObject.name === 'receipt_paper') break;
-        selectedObject = selectedObject.parent;
+      let clickedObject = intersects[0].object;
+
+      // 최상위 그룹 객체를 찾기 위함
+      while (clickedObject.parent && clickedObject.parent.type !== 'Scene' && clickedObject.parent !== kioskGroup) {
+        if (clickedObject.name === 'credit_card' || clickedObject.name === 'receipt_paper') break;
+        clickedObject = clickedObject.parent;
       }
+
+      // ★ 추가됨: 영수증(티켓)을 클릭한 경우 우측 인벤토리로 이동!
+      if (clickedObject.name === 'receipt_paper') {
+        clickedObject.visible = false; // 3D 공간에서 제거
+        showToast("승차권을 '내 물건'으로 옮겼습니다."); // 알림 띄우기
+
+        // 저장해둔 티켓 정보 가져오기
+        const info = clickedObject.userData.ticketInfo || { destination: '목적지', time: '시간', seat: '좌석' };
+
+        // 우측 도구함 패널(내 물건)에 DOM 요소 추가
+        const toolsPane = document.querySelector('.tools-pane');
+        if (toolsPane) {
+          let inventory = document.getElementById('my-inventory');
+
+          // 인벤토리 영역이 없으면 최초 1회 생성
+          if (!inventory) {
+            inventory = document.createElement('div');
+            inventory.id = 'my-inventory';
+            inventory.innerHTML = '<h3 style="margin-top: 2rem; font-size: 1.6rem; color: #1a73e8; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.5rem;">🎒 내 물건</h3>';
+
+            const resetBtn = document.querySelector('.reset-btn-bottom');
+            if (resetBtn) {
+              toolsPane.insertBefore(inventory, resetBtn);
+            } else {
+              toolsPane.appendChild(inventory);
+            }
+          }
+
+          // 티켓 UI 동적 생성 삽입
+          inventory.innerHTML += `
+            <div style="background: white; border: 2px solid #1a73e8; border-radius: 12px; padding: 15px; margin-top: 15px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15); animation: fade-in-up 0.4s ease;">
+              <div style="font-size: 1.2rem; color: #5f6368; font-weight: bold;">🚌 버스 승차권</div>
+              <div style="font-size: 1.6rem; font-weight: 800; color: #191f28; margin: 8px 0;">세종 ➔ ${info.destination}</div>
+              <div style="font-size: 1.3rem; color: #4e5968;">출발: ${info.time} | 좌석: ${info.seat}</div>
+            </div>
+          `;
+        }
+        return; // 영수증 처리가 끝났으므로 드래그 시작 로직 건너뛰기
+      }
+
+      // 카드 드래그 시작 로직
+      isDragging = true;
+      selectedObject = clickedObject;
       dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()), selectedObject.position);
       if (raycaster.ray.intersectPlane(dragPlane, intersection)) offset.copy(intersection).sub(selectedObject.position);
       canvas.style.cursor = 'grabbing';
@@ -92,7 +133,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     if (!isDragging) {
       raycaster.setFromCamera(mouse, camera);
 
-      // 카드가 꽂혀있을 때 단말기에 마우스를 올리면 포인터 커서로 변경
       if (cardMesh.userData.isInserted) {
         const clickTargets = [cardMesh, slotMesh, slotGlowMesh].filter(obj => obj);
         const intersectsTerminal = raycaster.intersectObjects(clickTargets, true);
@@ -107,7 +147,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       if (kioskGroup.userData.paperMesh && kioskGroup.userData.paperMesh.visible) draggables.push(kioskGroup.userData.paperMesh);
 
       const intersects = raycaster.intersectObjects(draggables, true);
-      canvas.style.cursor = intersects.length > 0 ? 'grab' : 'default';
+      canvas.style.cursor = intersects.length > 0 ? 'pointer' : 'default'; // grab 대신 pointer로 일원화
       return;
     }
 

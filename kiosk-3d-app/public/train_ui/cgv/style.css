@@ -46,7 +46,7 @@ body { margin: 0; display: flex; justify-content: center; align-items: center; m
 .age-badge { position: absolute; top: 6px; left: 6px; padding: 3px 6px; border-radius: 5px; font-size: 11px; color: white; font-weight: bold; }
 .item-info { padding: 10px 5px; text-align: center; display: flex; flex-direction: column; justify-content: center; flex: 1; }
 .item-time { font-size: 24px; font-weight: 900; color: #e71a0f; }
-.item-title { font-size: 24px; font-weight: 700; color: #222; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.item-title { font-size: 24px; font-weight: 700; color: #222; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; }
 
 /* 인원 선택 */
 .people-content { flex: 1; padding: 30px 20px; background: #f9f9f9; }

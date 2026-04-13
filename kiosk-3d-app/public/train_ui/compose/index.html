@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- 첫 화면: 매장 / 포장 선택 -->
   <section id="order-type-screen" class="screen active">
     <div class="choice-wrap">
       <div class="brand-box">
@@ -33,7 +32,6 @@
     </div>
   </section>
 
-  <!-- 두 번째 화면: 메뉴 화면 -->
   <section id="menu-screen" class="screen hidden">
     <header class="header">
       <h1>컴포즈커피</h1>
@@ -43,7 +41,6 @@
     <main class="container">
       <section class="menu-section">
         <div class="category-tabs" id="category-tabs">
-          <!-- data-category 속성을 활용해 JS에서 필터링을 수행합니다 -->
           <button class="tab active" data-category="커피" type="button">커피</button>
           <button class="tab" data-category="음료" type="button">음료</button>
           <button class="tab" data-category="디저트" type="button">디저트</button>
@@ -53,16 +50,18 @@
       </section>
 
       <aside class="cart-section">
-        <h2>주문 내역</h2>
-        <div id="cart-list" class="cart-list"></div>
+        <div class="cart-items-area">
+          <div class="cart-title">장바구니</div>
+          <div id="cart-list" class="cart-list"></div>
+        </div>
 
-        <div class="cart-footer">
+        <div class="cart-summary-area">
           <div class="total">
-            <span>총 금액</span>
+            <span>총 결제 금액</span>
             <strong id="total-price">0원</strong>
           </div>
           <div class="footer-buttons">
-            <button id="clear-all-btn" class="clear-btn" type="button">전체 삭제</button>
+            <button id="clear-all-btn" class="clear-btn" type="button">전체 취소</button>
             <button id="pay-btn" class="pay-btn" type="button" disabled>결제하기</button>
           </div>
         </div>
@@ -70,7 +69,6 @@
     </main>
   </section>
 
-  <!-- 세 번째 화면: 결제 대기 화면 (카드 삽입 대기) -->
   <section id="payment-wait-screen" class="screen hidden">
     <div class="choice-wrap">
       <div class="brand-box">
@@ -82,7 +80,6 @@
     </div>
   </section>
 
-  <!-- 네 번째 화면: 결제 완료 화면 -->
   <section id="complete-screen" class="screen hidden">
     <div class="choice-wrap">
       <div class="brand-box">

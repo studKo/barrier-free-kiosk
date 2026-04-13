@@ -9,17 +9,30 @@
     user-select: none;
 }
 
+/* ★ 수정됨: 화면 전체를 채우고 키오스크를 정중앙에 배치 */
 body,
 html {
-    width: 700px;
-    height: 900px;
-    background-color: #F4F7FB;
+    width: 100%;
+    height: 100%;
+    background-color: #333;
+    /* 웹 단독 실행 시 바깥 배경색 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
     overflow: hidden;
 }
 
+/* ★ 수정됨: 최대 크기를 700x900으로 제한하여 3D 화면과 웹 양쪽 대응 */
 #app {
     width: 100%;
     height: 100%;
+    max-width: 700px;
+    max-height: 900px;
+    background-color: #F4F7FB;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    /* 그림자 효과 */
 }
 
 .step-container {
@@ -387,7 +400,7 @@ html {
 }
 
 /* ==========================================
-   [STEP 2-B] 터미널 목록 선택 화면 (★ Flex 1 할당으로 스크롤 제거)
+   [STEP 2-B] 터미널 목록 선택 화면
    ========================================== */
 #step2_terminal header {
     background: white;
@@ -481,7 +494,7 @@ html {
     color: #333;
 }
 
-/* 터미널 목록 (이 부분만 스크롤 유지 - 터미널 개수가 많을 경우 대비) */
+/* 터미널 목록 */
 .terminal-grid {
     flex: 1;
     padding: 20px;
@@ -557,7 +570,7 @@ html {
 }
 
 /* ==========================================
-   [STEP 3, 4, 5] 및 팝업 (기존과 동일하게 유지)
+   [STEP 3, 4, 5] 및 팝업
    ========================================== */
 #step3 header {
     background-color: #1E4491;
@@ -1072,4 +1085,339 @@ html {
 .btn-confirm:active {
     background: #15306B;
     transform: scale(0.98);
+}
+
+/* ==========================================
+   [★ 반응형 추가] 스마트폰/모바일 환경 대응
+   ========================================== */
+@media (max-width: 700px) {
+
+    /* 공통 네비게이션 크기 축소 */
+    .nav-btn {
+        height: 45px;
+        font-size: 1.1rem;
+    }
+
+    .nav-btn.home {
+        width: 60px;
+        font-size: 1.5rem;
+    }
+
+    /* Step 1 */
+    #step1 header {
+        height: auto;
+        padding: 20px 0;
+    }
+
+    #step1 .header-top {
+        font-size: 1.5rem;
+        flex-wrap: wrap;
+        text-align: center;
+    }
+
+    #step1 .header-bottom {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #step1 .time-text {
+        font-size: 2.5rem;
+    }
+
+    #step1 main {
+        padding: 20px;
+        gap: 15px;
+    }
+
+    #step1 .main-btn {
+        height: auto;
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    #step1 .btn-icon {
+        margin-right: 0;
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+    }
+
+    #step1 .btn-text-group {
+        text-align: center;
+    }
+
+    #step1 .btn-title {
+        font-size: 1.8rem;
+    }
+
+    #step1 .btn-subtitle {
+        font-size: 1rem;
+    }
+
+    #step1 footer {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 10px;
+        justify-content: center;
+    }
+
+    #step1 .lang-btn {
+        font-size: 1rem;
+        padding: 8px 20px;
+    }
+
+    /* Step 2-A */
+    #step2_route header {
+        height: 60px;
+        font-size: 1.4rem;
+    }
+
+    #step2_route main {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .date-row {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+    }
+
+    .date-stepper {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .step-btn {
+        padding: 8px 15px;
+        font-size: 1rem;
+    }
+
+    .current-date {
+        font-size: 1.2rem;
+    }
+
+    .route-row {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .route-box {
+        height: 100px;
+        width: 100%;
+    }
+
+    .route-arrow {
+        transform: rotate(90deg);
+        margin: 5px 0;
+        font-size: 24px;
+    }
+
+    .route-place {
+        font-size: 1.8rem;
+    }
+
+    .btn-home-small {
+        width: 60px;
+        font-size: 1.5rem;
+    }
+
+    .btn-search {
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    /* Step 2-B */
+    .tab-half {
+        font-size: 1rem;
+        padding: 15px 10px;
+    }
+
+    .region-col {
+        width: 28%;
+    }
+
+    .region-btn {
+        font-size: 0.9rem;
+        padding: 15px 5px;
+    }
+
+    .consonant-col {
+        width: 18%;
+    }
+
+    .consonant-btn {
+        font-size: 1rem;
+        padding: 15px 0;
+    }
+
+    .terminal-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .terminal-btn {
+        font-size: 1.1rem;
+    }
+
+    /* Step 3 */
+    #step3 header {
+        font-size: 1.5rem;
+        height: 60px;
+    }
+
+    #step3 .refresh-btn {
+        font-size: 1.5rem;
+    }
+
+    #step3 .date-nav {
+        font-size: 1.2rem;
+        padding: 10px;
+    }
+
+    .list-header {
+        font-size: 0.8rem;
+        padding: 10px 5px;
+    }
+
+    .time-text {
+        font-size: 1.5rem;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info-text {
+        font-size: 1rem;
+        padding-left: 5px;
+    }
+
+    .grade-text {
+        font-size: 1rem;
+    }
+
+    .seat-text {
+        font-size: 1.1rem;
+    }
+
+    /* Step 4 */
+    #step4 .top-info {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+
+    #step4 main {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    #step4 .bus-map {
+        border-right: none;
+        border-bottom: 2px solid #ccc;
+        padding: 10px;
+    }
+
+    #step4 .seat-grid {
+        gap: 10px;
+    }
+
+    #step4 .seat {
+        height: 45px;
+        font-size: 1rem;
+    }
+
+    #step4 .right-panel {
+        padding: 15px;
+    }
+
+    .legend-box {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .prompt-text {
+        font-size: 1.5rem;
+        margin: 15px 0;
+    }
+
+    .price-value {
+        font-size: 2rem;
+    }
+
+    #step4 .modal-content {
+        width: 90%;
+    }
+
+    #step4 .age-btn {
+        font-size: 1.2rem;
+        padding: 15px;
+    }
+
+    /* Step 5 */
+    #step5 header {
+        padding: 15px;
+    }
+
+    #step5 .loc {
+        font-size: 1.2rem;
+    }
+
+    #step5 .time-info strong {
+        font-size: 1.8rem;
+    }
+
+    #step5 .pay-title {
+        font-size: 1.4rem;
+    }
+
+    #step5 .route {
+        font-size: 1.2rem;
+    }
+
+    #step5 .details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        font-size: 1rem;
+    }
+
+    .price-box {
+        padding: 15px;
+    }
+
+    .price-box strong {
+        font-size: 2rem;
+    }
+
+    .insert-guide p {
+        font-size: 1.2rem;
+    }
+
+    #step5 .btn-bottom {
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    /* Modals */
+    .alert-modal-content {
+        width: 90%;
+    }
+
+    .alert-text-main {
+        font-size: 1.3rem;
+    }
+
+    .alert-icon {
+        font-size: 40px;
+    }
+
+    .btn-confirm {
+        padding: 12px;
+        font-size: 1.2rem;
+    }
 }

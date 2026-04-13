@@ -625,6 +625,8 @@ function openPaymentMethod() {
 }
 
 function completeCreditCardPayment() {
+    if (document.getElementById('payment-complete-screen')) return;
+
     // 장바구니 모달 닫기
     if (STATE.cartItems.length === 0) return;
     const cartModal = document.getElementById('cart-modal');
@@ -647,9 +649,51 @@ function completeCreditCardPayment() {
         </div>
     `;
 
-    // 장바구니 초기화 후 5초 뒤 처음 화면으로
-    STATE.cartItems = [];
-    setTimeout(() => { initApp(); }, 5000);
+    // 3초 후 카운터 픽업 안내 화면으로 전환
+    setTimeout(() => {
+        app.innerHTML = `
+            <div id="pickup-screen">
+                <div class="pickup-inner">
+                    <div class="pickup-title">주문하신 제품을 카운터에서<br>받아주세요</div>
+                    <div class="pickup-illustration">
+                    <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" width="260" height="160">
+                        <!-- 카운터 테이블 -->
+                        <rect x="10" y="110" width="240" height="18" rx="4" fill="#F5C842"/>
+                        <rect x="10" y="128" width="240" height="28" rx="2" fill="#E8B800"/>
+
+                        <!-- 맥도날드 박스 (버거 박스) -->
+                        <rect x="55" y="72" width="62" height="40" rx="4" fill="#DA291C"/>
+                        <rect x="55" y="72" width="62" height="14" rx="4" fill="#C8001A"/>
+                        <!-- M 로고 -->
+                        <text x="86" y="100" text-anchor="middle" font-size="22" font-weight="900" fill="#FFC72C" font-family="Arial Black, sans-serif">M</text>
+
+                        <!-- 감자튀김 용기 -->
+                        <path d="M 135 110 L 142 72 L 172 72 L 179 110 Z" fill="#DA291C"/>
+                        <rect x="138" y="68" width="38" height="8" rx="2" fill="#C8001A"/>
+                        <!-- 감자튀김 막대들 -->
+                        <rect x="143" y="42" width="6" height="32" rx="3" fill="#F5C842"/>
+                        <rect x="152" y="36" width="6" height="38" rx="3" fill="#F5C842"/>
+                        <rect x="161" y="40" width="6" height="34" rx="3" fill="#F5C842"/>
+                        <rect x="147" y="38" width="6" height="36" rx="3" fill="#FFD966"/>
+                        <rect x="156" y="34" width="6" height="40" rx="3" fill="#FFD966"/>
+
+                        <!-- 음료컵 -->
+                        <path d="M 188 110 L 194 70 L 222 70 L 228 110 Z" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+                        <rect x="190" y="66" width="36" height="8" rx="3" fill="#e0e0e0"/>
+                        <!-- 빨대 -->
+                        <rect x="216" y="30" width="5" height="44" rx="2.5" fill="#DA291C"/>
+                        <!-- 컵 로고 라인 -->
+                        <rect x="195" y="80" width="18" height="3" rx="1.5" fill="#ffbc0d"/>
+                        <rect x="195" y="87" width="14" height="2" rx="1" fill="#ffbc0d"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    `;
+        // 픽업 화면에서 5초 뒤 처음 화면으로
+        STATE.cartItems = [];
+        setTimeout(() => { initApp(); }, 5000);
+    }, 3000);
 }
 // ==========================================
 // 스크롤 썸(노란 막대) 직접 드래그
@@ -762,6 +806,7 @@ function initDragScroll(grid) {
 
 function processPayment(method) {
     if (method === '신용카드') {
+        window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
         const cartModalInner = document.getElementById('cart-modal-inner');
         
         // 카드 투입 안내 화면 렌더링 (아이콘 없이 텍스트 중심)

@@ -12,8 +12,12 @@ let sceneObjects;
 
 // 즉시 실행 함수를 통해 초기화 및 애니메이션 루프 시작
 (async () => {
-  await init();
-  animate();
+  try {
+    await init();
+    animate();
+  } catch (error) {
+    console.error("초기화 중 에러 발생:", error);
+  }
 })();
 
 /**
@@ -55,15 +59,19 @@ async function init() {
     // 안전하게 최신 iframe 내부 윈도우 객체를 가져옵니다.
     const iframeWin = sceneObjects.kioskGroup.userData.iframeDOM?.contentWindow || document.querySelector('iframe')?.contentWindow;
     if (iframeWin) {
-      // ★ 산학캡 복원: 기존 UI와 호환되도록 'cardInserted' 문자열 전송
       iframeWin.postMessage('cardInserted', '*');
     }
 
     if (sceneObjects.kioskGroup.userData.arrowMesh) {
       sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
     }
-    statusMessageEl.textContent = '현재 상태: 결제 중... 주문을 완료합니다.';
+
+    // 안내 메시지 변경
+    statusMessageEl.textContent = '화면의 결제 진행 상황을 확인해주세요.';
     statusMessageEl.classList.add('success');
+
+    // ★ 카드를 꽂는 순간 팝업을 볼 수 있도록 즉시 카메라를 화면으로 당깁니다!
+    autoZoomToKiosk();
   });
 
   // 카메라 모드(시니어, 휠체어) 변경 이벤트 리스너
@@ -167,6 +175,10 @@ async function init() {
     if (spawnReceiptBtn) spawnReceiptBtn.style.display = 'none';
     resetZoom();
 
+    // 인벤토리 비우기
+    const inventory = document.getElementById('my-inventory');
+    if (inventory) inventory.remove();
+
     if (sceneObjects.kioskGroup.userData.iframeDOM) {
       sceneObjects.kioskGroup.userData.iframeDOM.src = '/start-screen.html';
     }
@@ -179,23 +191,30 @@ async function init() {
     if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
       if (sceneObjects.kioskGroup.userData.arrowMesh) sceneObjects.kioskGroup.userData.arrowMesh.visible = true;
-      autoZoomToPayment();
+      autoZoomToPayment(); // 카드를 꽂기 위해 결제 단말기로 줌인
+
     } else if (event.data.type === 'PAYMENT_COMPLETE') {
       unlockCard();
       resetCardPosition();
-      statusMessageEl.textContent = '현재 상태: 결제 대기 중';
+      statusMessageEl.textContent = '현재 상태: 결제 완료 대기 중';
       statusMessageEl.classList.remove('success');
       if (sceneObjects.kioskGroup.userData.arrowMesh) sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
+
+      autoZoomToKiosk(); // 만약을 대비한 화면 복귀
+
     } else if (event.data.type === 'PRINT_RECEIPT') {
       if (sceneObjects.kioskGroup.userData.paperMesh) {
         const paper = sceneObjects.kioskGroup.userData.paperMesh;
+
+        // iframe에서 넘어온 티켓 데이터를 객체에 저장
+        if (event.data.ticketInfo) {
+          paper.userData.ticketInfo = event.data.ticketInfo;
+        }
+
         paper.visible = true;
         paper.position.y = 0.53;
         const targetY = 0.47;
 
-        /**
-         * 영수증이 위에서 아래로 스윽 나오는 애니메이션을 처리하는 내부 함수입니다.
-         */
         function animateReceipt() {
           if (paper.position.y > targetY) {
             paper.position.y -= 0.002;
@@ -205,7 +224,9 @@ async function init() {
           }
         }
         animateReceipt();
-        statusMessageEl.textContent = '영수증을 스캐너에 스캔해주세요.';
+
+        // 스캔 대신 클릭 안내로 변경
+        statusMessageEl.textContent = '출력된 승차권을 클릭해서 내 물건으로 옮기세요.';
       }
     }
   });
@@ -226,7 +247,6 @@ function handleResize() {
 
 /**
  * 매 프레임마다 화면을 다시 그리는 메인 렌더링 루프 함수입니다.
- * 애니메이션 효과(화살표 둥둥 떠다니기 등)도 이곳에서 처리합니다.
  */
 function animate() {
   requestAnimationFrame(animate);
@@ -235,7 +255,7 @@ function animate() {
 
   updateCamera(delta);
 
-  // 화살표 상하 이동 애니메이션 (사인 곡선 이용)
+  // 화살표 상하 이동 애니메이션
   if (sceneObjects && sceneObjects.kioskGroup.userData.arrowMesh) {
     const arrow = sceneObjects.kioskGroup.userData.arrowMesh;
     arrow.position.y = 0.65 + Math.sin(time * 5) * 0.01;
@@ -247,7 +267,6 @@ function animate() {
 
 /**
  * 화면 하단에 일시적인 알림(토스트 메시지)을 띄우는 유틸리티 함수입니다.
- * @param {string} message - 화면에 표시할 텍스트
  */
 export function showToast(message) {
   const toastEl = document.getElementById('custom-toast');

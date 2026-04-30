@@ -162,7 +162,7 @@ payBtn.addEventListener("click", () => {
   paymentWaitScreen.classList.remove("hidden");
   
   // 2. 3D 환경(부모 창)에 결제 준비가 되었다고 알림 (카메라 줌 및 화살표 표시 트리거)
-  window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+  window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
 });
 
 cancelPaymentBtn.addEventListener("click", () => {
@@ -171,13 +171,14 @@ cancelPaymentBtn.addEventListener("click", () => {
   menuScreen.classList.remove("hidden");
 
   // 2. 3D 환경에 결제가 종료(취소)되었음을 알림 (카드 원위치 및 화살표 숨김 트리거)
-  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 });
 
 // 10. 3D 환경(부모 창)에서 보내는 '카드 삽입' 신호 수신 로직
 window.addEventListener('message', (event) => {
-  // 전달받은 메시지가 'cardInserted'인지 확인
-  if (event.data === 'cardInserted') {
+  if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
+  // 전달받은 메시지가 카드 삽입 신호인지 확인 (문자열/객체 양쪽 호환)
+  if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
     
     // 사용자가 현재 결제 대기 화면에 있을 때만 결제 진행
     if (!paymentWaitScreen.classList.contains("hidden")) {
@@ -191,7 +192,7 @@ window.addEventListener('message', (event) => {
       orderCounter++; 
 
       // 3D 환경에 영수증 출력 애니메이션 요청
-      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, '*');
+      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, window.location.origin);
 
       // 3초 후 키오스크 초기화
       setTimeout(() => {
@@ -206,7 +207,7 @@ window.addEventListener('message', (event) => {
         categoryTabs[0].classList.add("active");
 
         // 3D 환경에 결제가 완전히 끝났음을 알림 (카드 락 해제 및 원위치)
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
       }, 3000);
     }
   }

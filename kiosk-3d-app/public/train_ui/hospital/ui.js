@@ -78,6 +78,7 @@ document.addEventListener('click', () => {
 // --- 🌟 5. 3D 바코드 신호 처리 ---
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
         if (event.data && event.data.type === 'BARCODE_SCANNED') {
             // 🔥 바코드로 넘어갈 때는 기억 장치를 싹 비워줍니다. (기본값 홍길동이 뜨게 하기 위함)
             sessionStorage.removeItem('savedJumin');

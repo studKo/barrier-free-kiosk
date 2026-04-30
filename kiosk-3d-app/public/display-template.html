@@ -183,8 +183,14 @@
   </div>
 
   <div class="content" style="justify-content: center; align-items: center;">
-    <button class="pay-btn" id="pay-btn" onclick="startPayment()" style="padding: 40px; font-size: 32px; border-radius: var(--toss-radius-lg); background-color: var(--toss-blue); color: white; border: none; cursor: pointer; box-shadow: 0 10px 20px rgba(49, 130, 246, 0.3);">
-      💳 임시 결제 테스트 버튼
+    <!-- 합산 가격 표시 영역 (기존 코드에 누락되어 있어 addItem() 호출 시 크래시 발생) -->
+    <div class="total-amount" style="width: 100%; padding: 0 24px;">
+      <span>총 금액</span>
+      <span id="total-price">0원</span>
+    </div>
+    <button class="pay-btn" id="pay-btn" onclick="startPayment()" disabled
+      style="padding: 40px; font-size: 32px; border-radius: var(--toss-radius-lg);">
+      결제하기
     </button>
   </div>
 
@@ -203,24 +209,24 @@
 
     // 현재 선택된 메뉴의 합산 가격
     let total = 0;
-    
+
     // UI 업데이트를 위한 대상 DOM 노드들
     const priceEl = document.getElementById('total-price');
     const btnEl = document.getElementById('pay-btn');
     const overlayEl = document.getElementById('payment-overlay');
 
     /**
-     * 사용자가 중앙의 메뉴(아메리카노 등)를 클릭했을 때 호출됩니다.
+     * 사용자가 메뉴를 클릭했을 때 호출됩니다.
      * @param {string} name - 메뉴 이름
      * @param {number} price - 메뉴 가격
      */
     function addItem(name, price) {
-      if (overlayEl.classList.contains('active')) return; // 결제 대기 중 클릭 방지
-      
+      if (overlayEl.classList.contains('active')) return;
+
       total += price;
-      // 천 단위 쉼표(,) 포맷팅하여 어르신들도 단위 읽기가 편하게 적용
+      // 천 단위 쉼표(,) 포맷팅
       priceEl.innerText = total.toLocaleString() + '원';
-      
+
       if (total > 0) {
         btnEl.disabled = false;
         btnEl.innerText = `${total.toLocaleString()}원 결제하기`;
@@ -228,44 +234,46 @@
     }
 
     /**
-     * 하단 '결제하기' 파란색 버튼 클릭 시 호출됩니다.
+     * 하단 '결제하기' 버튼 클릭 시 호출됩니다.
+     * 부모 프레임에 결제 준비 메시지를 보내고 결제 대기 오버레이를 표시합니다.
      */
     function startPayment() {
-      // 투명 블러 된 결제 대기 화면(overlay)을 위로 띄움
       overlayEl.classList.add('active');
-      
-      // [핵심] iframe 밖(main.js)으로 메시지를 보내, 물리적인 카드 투입 과정을 안내하도록 트리거
-      window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+      // 보안: 와일드카드('*') 대신 부모 origin으로 제한하여 메시지 탈취 방지
+      window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
     }
 
     /**
-     * 바깥 Three.js 씬(main.js)에서 물리적 카드가 투입구 경계(BoundingBox)에 
-     * 알맞게 들어갔다고 판정되었을 때 수신하는 이벤트 리스너입니다.
+     * 부모 Three.js 씬(main.js)에서 카드 삽입 완료 메시지를 수신합니다.
+     * 기존 문제: main.js가 문자열 'cardInserted'를 보내고 여기서 { type: 'CARD_INSERTED' }를 기다림
+     * 수정: main.js가 { type: 'CARD_INSERTED' } 객체 형식으로 통일하여 프로토콜 일치
      */
     window.addEventListener('message', (event) => {
-      // main.js의 handleCardInsertion() 성공 로직에서 보낸 신호 확인
+      // 보안: origin 검증 추가
+      if (event.origin !== window.location.origin) return;
+
       if (event.data && event.data.type === 'CARD_INSERTED') {
         // 결제 완료 텍스트 애니메이션 연출
         overlayEl.innerHTML = `
           <h2 style="color: #3182f6;">결제가<br>완료되었습니다!</h2>
           <p style="animation: none; color: #191f28; font-size: 24px; margin-top: 24px;">이용해 주셔서 감사합니다</p>
         `;
-        
-        // 4초 후 메인화면으로 복구하는 초기화 로직
+
+        // 4초 후 메인화면으로 복구
         setTimeout(() => {
           total = 0;
           priceEl.innerText = '0원';
           btnEl.disabled = true;
           btnEl.innerText = '결제하기';
           overlayEl.classList.remove('active');
-          
+
           overlayEl.innerHTML = `
             <h2>기기 아래의<br>투입구에 카드를 꽂아주세요</h2>
             <p>결제 대기 중...</p>
           `;
-          
-          // 부모 WebGL 창(main.js)에도 '초기화 완료' 신호를 보내 카드 위치를 원상복구 시킴
-          window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+
+          // 부모 프레임에 초기화 완료 신호 전송
+          window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
         }, 4000);
       }
     });

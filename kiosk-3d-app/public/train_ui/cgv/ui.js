@@ -87,24 +87,37 @@ function completePeople() {
 function renderSeats() {
     const map = document.getElementById('seat-map');
     map.innerHTML = '';
-    const rowLabels = ['A','B','C','D','E','F','G','H'];
-    const total = Object.values(selection).reduce((a, b) => a + b, 0);
+    const rowLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+    const totalMax = Object.values(selection).reduce((a, b) => a + b, 0);
 
     seatZones.forEach(zone => {
         const zoneGrid = document.createElement('div');
         zoneGrid.className = 'zone-grid';
         zoneGrid.id = `zone-${zone.id}`;
+        
         rowLabels.forEach(r => {
             for (let c = 1; c <= zone.cols; c++) {
                 const seat = document.createElement('div');
                 seat.className = 'seat';
                 seat.id = `${zone.id}-${r}-${c}`;
                 seat.innerText = r + c;
+
+                // 좌석 클릭 이벤트 수정
                 seat.onclick = function() {
-                    document.querySelectorAll('.seat.selected').forEach(el => el.classList.remove('selected'));
-                    for(let j=0; j < total; j++) {
-                        const target = document.getElementById(`${zone.id}-${r}-${c + j}`);
-                        if(target) target.classList.add('selected');
+                    const currentSelected = document.querySelectorAll('.seat.selected');
+                    
+                    // 이미 선택된 좌석을 다시 누른 경우 -> 선택 해제
+                    if (this.classList.contains('selected')) {
+                        this.classList.remove('selected');
+                    } 
+                    // 새로 선택하는 경우
+                    else {
+                        // 설정한 인원수를 초과하는지 확인
+                        if (currentSelected.length >= totalMax) {
+                            alert(`이미 ${totalMax}개의 좌석을 모두 선택하셨습니다.`);
+                            return;
+                        }
+                        this.classList.add('selected');
                     }
                     updateSeatInfo();
                 };
@@ -129,8 +142,21 @@ function updateSeatInfo() {
 
 function renderPayment() {
     const selSeats = document.getElementById('seat-info').innerText;
-    if(selSeats === '-') return alert("좌석을 먼저 선택해 주세요.");
+    
+    // 1. 좌석 선택 여부 확인
+    if(selSeats === '-') {
+        return alert("좌석을 먼저 선택해 주세요.");
+    }
 
+    // 2. 인원 수와 선택된 좌석 수 비교 로직 추가
+    const totalMax = Object.values(selection).reduce((a, b) => a + b, 0); // 설정한 총 인원
+    const selectedCount = document.querySelectorAll('.seat.selected').length; // 실제 선택한 좌석 수
+
+    if (selectedCount < totalMax) {
+        return alert("좌석을 다 선택하지 않으셨습니다!");
+    }
+
+    // 결제 정보 표시 로직 (기존과 동일)
     document.getElementById('pay-title').innerText = currentMovie;
     document.getElementById('pay-time').innerText = currentTime;
     document.getElementById('pay-seats').innerText = selSeats;
@@ -210,16 +236,23 @@ document.head.appendChild(style);
 /**
  * 이벤트를 기다리는 헬퍼 함수 (기존과 동일)
  */
+let cardInsertAbortController = null;
+
 function waitForCardInsert() {
+    if (cardInsertAbortController) {
+        cardInsertAbortController.abort();
+    }
+    cardInsertAbortController = new AbortController();
+
     return new Promise((resolve) => {
         const handleCard = (event) => {
-            if (event.type === 'cardInserted' || event.data === 'cardInserted') {
-                window.removeEventListener('cardInserted', handleCard);
+            if (event.origin !== window.location.origin) return; // 보안 검증
+            if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
                 window.removeEventListener('message', handleCard);
                 resolve();
             }
         };
-        window.addEventListener('cardInserted', handleCard);
-        window.addEventListener('message', handleCard);
+        window.addEventListener('message', handleCard, { signal: cardInsertAbortController.signal });
+        window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
     });
 }

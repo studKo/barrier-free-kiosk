@@ -590,6 +590,7 @@ window.onload = () => { initApp(); window.addEventListener('resize', updateScrol
 // [추가됨] 3D 환경과 통신하기 위한 메시지 리스너
 // ==========================================
 window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
     // 3D 밖에서 카드가 투입구에 꽂혔다는 신호가 오면!
     if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
         completeCreditCardPayment();
@@ -806,7 +807,7 @@ function initDragScroll(grid) {
 
 function processPayment(method) {
     if (method === '신용카드') {
-        window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
         const cartModalInner = document.getElementById('cart-modal-inner');
         
         // 카드 투입 안내 화면 렌더링 (아이콘 없이 텍스트 중심)

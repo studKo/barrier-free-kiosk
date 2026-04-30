@@ -460,18 +460,19 @@ function renderStep5() {
 
   document.getElementById('btn-cancel-pay').addEventListener('click', () => {
     if (window.parent) {
-      window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+      window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
     }
     renderStep1();
   });
 
   if (window.parent) {
-    window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+    window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
   }
 }
 
 // 결제 통신 로직 
 window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
   if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
     if (document.getElementById('step5')) {
       const processingModal = document.getElementById('processing-modal');
@@ -487,7 +488,7 @@ window.addEventListener('message', (event) => {
       document.getElementById('btn-complete-confirm').addEventListener('click', () => {
         completeModal.style.display = 'none';
 
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 
         // ★ 추가됨: 티켓 상세 정보를 부모(3D 환경)로 전달하여 내 물건 인벤토리에 그릴 수 있게 함
         window.parent.postMessage({
@@ -497,7 +498,7 @@ window.addEventListener('message', (event) => {
             time: orderState.time,
             seat: orderState.seat
           }
-        }, '*');
+        }, window.location.origin);
 
         setTimeout(() => { renderStep1(); }, 500);
       });

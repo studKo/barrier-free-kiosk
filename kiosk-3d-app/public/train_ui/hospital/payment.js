@@ -59,9 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 🌟 6. 3D 화면에서 신호가 날아올 때의 처리
     window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
         
-        // --- 1) 카드가 '꽂혔을 때' ---
-        if (event.data === 'cardInserted') {
+        // --- 1) 카드가 '꽂혔을 때' (문자열/객체 양쪽 호환) ---
+        if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
             // "카드를 넣어주세요" 팝업을 숨기고
             if (cardModal) cardModal.classList.add('hidden');
             
@@ -71,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // (기존에 있던 3초 뒤 자동 이동 타이머는 완전히 삭제했습니다!)
         }
 
-        // --- 🔥 2) 카드를 '회수(뽑았을) 때' (신규) ---
-        if (event.data === 'cardRemoved') {
+        // --- 2) 카드를 '회수(뽑았을) 때' (문자열/객체 양쪽 호환) ---
+        if (event.data === 'cardRemoved' || (event.data && event.data.type === 'CARD_REMOVED')) {
             // 카드를 뽑았으니 팝업창을 깔끔하게 숨기고
             if (paymentCompleteModal) paymentCompleteModal.classList.add('hidden');
             

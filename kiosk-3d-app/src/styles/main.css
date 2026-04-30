@@ -16,8 +16,6 @@
   --border-color: #e2e8f0;
   --success: #1e8e3e;
   /* 결제 성공 등 긍정적 피드백 초록색 */
-  --success: #1e8e3e;
-  /* 결제 성공 등 긍정적 피드백 초록색 */
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.08);
   /* 부드러운 다중 섀도우를 위한 프리미엄 입체감 변수 설정 */
@@ -253,9 +251,8 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 3;
-  /* ★ CSS3D iframe을 WebGL 위에 직접 표시 — 마스킹 불필요 */
-  pointer-events: none;
+  z-index: 1;
+  /* CSS3D (iframe UI) - WebGL의 투명 픽셀(mask)을 통해 렌더링됨 */
 }
 
 #canvas-container {
@@ -264,8 +261,9 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1;
-  /* WebGL(3D 기기, 카드) — CSS3D 아래에서 프레임 역할 */
+  z-index: 3;
+  /* WebGL 화면 - 상위 렌더링. iframe 조작을 위해 클릭 투과(none) */
+  pointer-events: none;
 }
 
 /* Right Pane (1) */
@@ -302,8 +300,9 @@ body {
   cursor: pointer;
   transition: all 0.2s;
   color: var(--text-dark);
-  width: fit-content;
-  /* 100%에서 fit-content로 변경하여 빈 공간 클릭 방지 */
+  width: 100%;
+  /* 글자 길이 상관없이 100%로 맞춤 (index.html 인라인 스타일에서 통합) */
+  box-sizing: border-box;
   text-align: left;
 }
 
@@ -466,4 +465,52 @@ body {
 .toast.show {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+}
+
+/* [인벤토리 영역] interaction.js의 인라인 스타일을 CSS 클래스로 분리 */
+.inventory-title {
+  margin-top: 2rem;
+  font-size: 1.6rem;
+  color: var(--primary);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+.inventory-item {
+  background: var(--pane-bg);
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15);
+  animation: fade-in-up 0.4s ease;
+}
+
+.inventory-item-title {
+  font-size: 1.2rem;
+  color: #5f6368;
+  font-weight: bold;
+}
+
+.inventory-item-main {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin: 8px 0;
+}
+
+.inventory-item-detail {
+  font-size: 1.3rem;
+  color: #4e5968;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

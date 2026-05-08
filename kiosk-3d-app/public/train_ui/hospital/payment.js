@@ -1,86 +1,126 @@
-document.addEventListener('DOMContentLoaded', () => {
+// =========================================================================
+// 0단계: 경비실(main.js)과 연락할 무전기 3총사 (맨 위에 설치!)
+// =========================================================================
+function updateQuest(text) {
+    if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
+}
 
-    // 🌟 0. 넘어온 주민번호 꺼내서 화면에 뿌려주기
+function showGuide(direction, x, y) {
+    if (window.parent) window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: direction, x: x, y: y, fromIframe: true }, '*');
+}
+
+function hideGuide() {
+    if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+}
+
+
+// =========================================================================
+// 1단계: 2호 방에 들어왔을 때 (방문 열기)
+// =========================================================================
+// payment.js (2호 방문 열었을 때)
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. 메모장 확인
+    const isSecondVisit = sessionStorage.getItem('isSecondVisit');
+
+    if (isSecondVisit === 'yes') {
+        // 메모장에 'yes'가 있다면? (키패드 치고 2번째로 온 경우!)
+        updateQuest('7. 나온 금액을 확인하고 수납 여부를 물어보는 화면입니다. 수납은 비용을 계산(납부)하는 것을 말합니다. 일시불을 눌러 결제합니다.'); 
+        setTimeout(() => { showGuide('up', 200, 550); }, 300); // 카드 꽂는 곳 가리키기 (좌표는 예시)
+
+        // 다음번 테스트를 위해 메모장은 다시 깨끗하게 지워주기
+        sessionStorage.removeItem('isSecondVisit'); 
+        
+    } else {
+        // 메모장이 깨끗하다면? (바코드 찍고 1번째로 온 경우!)
+        updateQuest('3. 다른 방법도 해 볼게요. 처음을 눌러 처음 화면으로 돌아와 주세요.');
+        setTimeout(() => { showGuide('up', 550, 650); }, 300); // 처음 버튼 가리키기
+    }
+
+    // --- 넘어온 주민번호 화면에 뿌려주기 ---
     const displayJuminEl = document.getElementById('display-jumin');
-    const savedJumin = sessionStorage.getItem('savedJumin'); // 저장해둔 번호 꺼내기!
+    const savedJumin = sessionStorage.getItem('savedJumin');
 
     if (displayJuminEl) {
-        // 만약 직접 번호를 입력하고 넘어왔다면 (13자리 숫자가 있다면)
         if (savedJumin && savedJumin.length === 13) {
-            // 앞자리 6개 + ' - ' + 뒷자리 1번째 숫자 + '******' 로 예쁘게 조립
             const formattedJumin = savedJumin.substring(0, 6) + ' - ' + savedJumin.charAt(6) + '******';
             displayJuminEl.innerText = formattedJumin;
-        } 
-        // 만약 바코드를 찍고 넘어와서 저장된 번호가 없다면
-        else {
-            // 기본 화면(홍길동)에 있던 디폴트 번호로 띄움
+        } else {
             displayJuminEl.innerText = '800101 - ******';
         }
     }
     
-    // 🌟 1. 조종할 팝업창과 모든 버튼들을 찾아옵니다.
+    // --- 팝업과 버튼들 찾아오기 ---
     const lumpSumBtn = document.getElementById('lump-sum-btn'); 
     const cardModal = document.getElementById('card-modal'); 
     const paymentCompleteModal = document.getElementById('payment-complete-modal'); 
-    
-    const prevBtn = document.getElementById('prev-btn'); // 팝업 안의 '이전' 버튼
-    const homeBtnModal = document.getElementById('home-btn-modal'); // 팝업 안의 '처음' 버튼
-    
-    // 🔥 HTML에서 새로 이름을 지어준 화면 오른쪽 아래 '처음' 버튼!
+    const prevBtn = document.getElementById('prev-btn'); 
+    const homeBtnModal = document.getElementById('home-btn-modal'); 
     const mainHomeBtn = document.getElementById('main-home-btn'); 
 
-    // 🌟 2. 일시불 버튼 클릭 -> 팝업 띄우기
+    // --- 버튼 누를 때 할 일들 ---
     if (lumpSumBtn && cardModal) {
         lumpSumBtn.addEventListener('click', () => {
+            // 1. 일시불 팝업창 띄우기 (원래 있던 코드)
             cardModal.classList.remove('hidden'); 
+
+            //팝업이 뜨는 순간 퀘스트 글씨 바꾸기
+            updateQuest("카드를 꺼내주세요");
+            
+            // '내 물건' 쪽으로 손가락 가이드 띄우기
+            setTimeout(() => { showGuide('right', 800, 300); }, 300);
         });
     }
 
-    // 🌟 3. '이전' 버튼 클릭 -> 팝업 닫기
     if (prevBtn && cardModal) {
         prevBtn.addEventListener('click', () => {
             cardModal.classList.add('hidden'); 
         });
     }
 
-    // 🌟 4. '처음' 버튼 클릭 -> 첫 화면으로! (팝업창 안에 있는 버튼)
     if (homeBtnModal) {
         homeBtnModal.addEventListener('click', () => {
             window.location.href = 'index.html'; 
         });
     }
 
-    // 🔥 5. '처음' 버튼 클릭 -> 첫 화면으로! (화면 오른쪽 아래 메인 버튼)
+    // 메인 '처음' 버튼 클릭! (여기서 바로 손가락 끕니다)
     if (mainHomeBtn) {
         mainHomeBtn.addEventListener('click', () => {
-            window.location.href = 'index.html'; 
+            hideGuide();   // 무전기로 "손가락 꺼주세요!" 신호 쏘기
+
+            // 🌟🌟🌟 메모장에 흔적 남기기! 🌟🌟🌟
+            sessionStorage.setItem('isReturned', 'yes');
+
+            window.location.href = 'index.html'; // 첫 화면으로 이동
         });
     }
+});
 
-    // 🌟 6. 3D 화면에서 신호가 날아올 때의 처리
-    window.addEventListener('message', (event) => {
-        if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
-        
-        // --- 1) 카드가 '꽂혔을 때' (문자열/객체 양쪽 호환) ---
-        if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
-            // "카드를 넣어주세요" 팝업을 숨기고
-            if (cardModal) cardModal.classList.add('hidden');
-            
-            // "카드를 뽑아주세요" 주황색 팝업을 띄웁니다.
-            if (paymentCompleteModal) paymentCompleteModal.classList.remove('hidden');
-            
-            // (기존에 있던 3초 뒤 자동 이동 타이머는 완전히 삭제했습니다!)
-        }
 
-        // --- 2) 카드를 '회수(뽑았을) 때' (문자열/객체 양쪽 호환) ---
-        if (event.data === 'cardRemoved' || (event.data && event.data.type === 'CARD_REMOVED')) {
-            // 카드를 뽑았으니 팝업창을 깔끔하게 숨기고
-            if (paymentCompleteModal) paymentCompleteModal.classList.add('hidden');
-            
-            // 드디어 출력 대기 화면(output.html)으로 진짜 넘어갑니다!
-            window.location.href = 'output.html'; 
-        }
-        
-    });
+// =========================================================================
+// 2단계: 경비실(main.js) 방송 듣는 곳 (카드 꽂고 빼는 것만 들으면 됨)
+// =========================================================================
+window.addEventListener('message', (event) => {
+    // 보안: 신뢰할 수 있는 출처만 허용
+    if (event.origin !== window.location.origin) return; 
+    
+    // --- 1) 카드가 '꽂혔을 때' ---
+    if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
 
+        //안내문을 바꾸기
+        updateQuest('결제단말을 한 번 더 눌러 카드를 빼주세요.');
+
+        const cardModal = document.getElementById('card-modal');
+        const paymentCompleteModal = document.getElementById('payment-complete-modal');
+        if (cardModal) cardModal.classList.add('hidden');
+        if (paymentCompleteModal) paymentCompleteModal.classList.remove('hidden');
+    }
+
+    // --- 2) 카드를 '회수(뽑았을) 때' ---
+    if (event.data === 'cardRemoved' || (event.data && event.data.type === 'CARD_REMOVED')) {
+        const paymentCompleteModal = document.getElementById('payment-complete-modal');
+        if (paymentCompleteModal) paymentCompleteModal.classList.add('hidden');
+        window.location.href = 'output.html'; 
+    }
 });

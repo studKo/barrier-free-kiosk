@@ -203,7 +203,7 @@ async function init() {
         }
 
         const questText = document.getElementById('quest-text-1');
-        if (questText) questText.textContent = '버스 차표를 가저가주세요';
+        if (questText) questText.textContent = '버스 차표를 가져가주세요';
         showClickGuide('up', window.innerWidth * 0.5, window.innerHeight * 0.6);
 
         paper.position.y = 0.53;

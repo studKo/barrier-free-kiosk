@@ -18,13 +18,29 @@ let selection = { "일반": 0, "청소년": 0, "우대": 0, "경로": 0 };
 let posX = 0, posY = 0;
 let currentMovie = "";
 let currentTime = "";
+let cardInsertAbortController = null;
 
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(screenId).classList.add('active');
-    if(screenId === 'schedule-screen') renderSchedules();
-    if(screenId === 'people-screen') renderPeople();
-    if(screenId === 'seat-screen') renderSeats();
+    if(screenId === 'menu-screen'){
+        updateQuest('티켓을 구매하기 위해 ‘티켓구매’를 눌러주세요!');
+        showGuide('up', 400, 400);
+    }
+    if(screenId === 'schedule-screen'){
+        updateQuest('12개의 영화중 원하는 영화를 클릭하여 주세요!');
+        renderSchedules();
+        hideGuide();
+    }
+    if(screenId === 'people-screen'){
+        updateQuest('‘일반’,’청소년’,’우대’,’경로’로 4가지 타입의 금액이 있으면 총 8명까지 예매할 수 있습니다!');
+        renderPeople();
+    }
+    if(screenId === 'seat-screen')
+    {
+        showGuide('up', 500, 750);
+        renderSeats();
+    }
 }
 
 function handleRefund() {
@@ -80,6 +96,7 @@ function updateCount(cat, count) {
 }
 
 function completePeople() {
+    updateQuest('좌석 선택에서 좌석을 하나씩 선택하세요!');
     if(Object.values(selection).reduce((a,b)=>a+b,0) === 0) alert("인원을 선택하세요.");
     else showScreen('seat-screen');
 }
@@ -141,6 +158,7 @@ function updateSeatInfo() {
 }
 
 function renderPayment() {
+    updateQuest('좌석을 다 골랐으면 ‘결제하기’ 버튼을 눌러주세요!')
     const selSeats = document.getElementById('seat-info').innerText;
     
     // 1. 좌석 선택 여부 확인
@@ -179,12 +197,14 @@ function renderPayment() {
  * 결제 완료 프로세스 (HTML 안내 버전)
  */
 async function finishPayment() {
+    updateQuest('결제를 하려면 ‘최종 결제 완료’를 눌러주세요!');
     console.log("결제 프로세스 시작");
 
     const payContent = document.querySelector('.pay-content');
     if (!payContent) return;
 
     // 1단계: "신용카드를 넣어주세요" 화면 표시
+    updateQuest('신용카드를 넣어주세요!');
     payContent.innerHTML = `
         <div id="payment-step-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:300px; text-align:center;">
             <div class="card-icon" style="font-size: 60px; margin-bottom: 20px;">💳</div>
@@ -212,6 +232,7 @@ async function finishPayment() {
     await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 5단계: 완료 메시지 업데이트
+    updateQuest('예매가 완료되었습니다!');
     const statusText = document.getElementById('payment-status');
     if (statusText) {
         statusText.innerText = "결제가 완료되었습니다.";
@@ -222,21 +243,6 @@ async function finishPayment() {
         showScreen('home-screen');
     }, 2000);
 }
-
-// 스피너 애니메이션을 위해 CSS 추가 (JS에서 동적 삽입)
-const style = document.createElement('style');
-style.innerHTML = `
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-`;
-document.head.appendChild(style);
-
-/**
- * 이벤트를 기다리는 헬퍼 함수 (기존과 동일)
- */
-let cardInsertAbortController = null;
 
 function waitForCardInsert() {
     if (cardInsertAbortController) {
@@ -256,3 +262,30 @@ function waitForCardInsert() {
         window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
     });
 }
+
+function updateQuest(text) {
+  if (window.parent) {
+    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
+  }
+}
+
+function showGuide(direction, x, y) {
+  if (window.parent) {
+    window.parent.postMessage({
+      type: 'SHOW_CLICK_GUIDE',
+      direction: direction,
+      x: x,
+      y: y,
+      fromIframe: true // 메인 화면에서 좌표 보정을 위해 플래그 추가
+    }, '*');
+  }
+}
+
+function hideGuide() {
+  if (window.parent) {
+    window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+  }
+}
+
+updateQuest('‘시작하기’ 버튼을 눌러주세요!');
+showGuide('up', 400,750);

@@ -1,3 +1,4 @@
+// 파일명: src/core/main.js
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment } from '../scene/camera.js';
@@ -9,6 +10,7 @@ let container, clock, cssContainer;
 let statusMessageEl, resetBtn, cameraSelect;
 let sceneObjects;
 let isPrinting = false;
+let currentGuide = null;
 
 (async () => {
   await init();
@@ -52,9 +54,8 @@ async function init() {
       iframeWin.postMessage({ type: 'CARD_INSERTED' }, '*');
     }
 
-    if (sceneObjects.kioskGroup.userData.arrowMesh) {
-      sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
-    }
+    // [수정] arrowMesh 가시성 제어 삭제됨
+
     statusMessageEl.textContent = '현재 상태: 결제 중... 주문을 완료합니다.';
     statusMessageEl.classList.add('success');
 
@@ -85,6 +86,7 @@ async function init() {
       paper.visible = false;
       paper.position.set(-0.25, 0.47, 0.095);
       paper.rotation.set(-Math.PI / 16, 0, 0);
+      paper.userData.ticketInfo = null;
     }
 
     if (sceneObjects.slotGlowMesh) {
@@ -97,9 +99,7 @@ async function init() {
       sceneObjects.scannerGlowMesh.material.color.setHex(0xffff00);
     }
 
-    if (sceneObjects.kioskGroup.userData.arrowMesh) {
-      sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
-    }
+    // [수정] arrowMesh 가시성 제어 삭제됨
 
     const inventory = document.getElementById('my-inventory');
     if (inventory) inventory.remove();
@@ -109,8 +109,9 @@ async function init() {
     btn.addEventListener('click', (e) => {
       resetKioskState();
       const brand = e.currentTarget.dataset.brand;
-      let brandName = "";
+      sceneObjects.kioskGroup.userData.currentBrand = brand;
 
+      let brandName = "";
       if (brand === 'mcdonalds') brandName = "맥도날드";
       if (brand === 'compose') brandName = "컴포즈커피";
       if (brand === 'hospital') brandName = "병원";
@@ -140,11 +141,10 @@ async function init() {
   document.getElementById('spawn-card-btn').addEventListener('click', () => {
     spawnCard();
 
-    // 카드 생성 시 결제 단계라면 단말기 투입 가이드 활성화
     const questText = document.getElementById('quest-text-1');
     if (questText && questText.textContent === '카드를 꺼내주세요') {
       questText.textContent = '카드를 결제단말에 가져가세요';
-      showClickGuide('right', window.innerWidth * 0.5, window.innerHeight * 0.7);
+      //showClickGuide('right', 0, 0, false, 'slotGlowMesh');
     }
   });
 
@@ -154,6 +154,7 @@ async function init() {
 
   resetBtn.addEventListener('click', () => {
     resetKioskState();
+    sceneObjects.kioskGroup.userData.currentBrand = null;
     brandSelectionEl.style.display = 'block';
     questContentEl.style.display = 'none';
     if (spawnReceiptBtn) spawnReceiptBtn.style.display = 'none';
@@ -172,7 +173,7 @@ async function init() {
     }
     else if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
-      if (sceneObjects.kioskGroup.userData.arrowMesh) sceneObjects.kioskGroup.userData.arrowMesh.visible = true;
+      // [수정] arrowMesh 표시 로직 삭제됨
       autoZoomToPayment();
 
       const questText = document.getElementById('quest-text-1');
@@ -190,7 +191,7 @@ async function init() {
       hideClickGuide();
       statusMessageEl.textContent = '현재 상태: 결제 대기 중';
       statusMessageEl.classList.remove('success');
-      if (sceneObjects.kioskGroup.userData.arrowMesh) sceneObjects.kioskGroup.userData.arrowMesh.visible = false;
+      // [수정] arrowMesh 숨김 로직 삭제됨
     }
     else if (event.data.type === 'PRINT_RECEIPT') {
       if (sceneObjects.kioskGroup.userData.paperMesh && !isPrinting) {
@@ -203,8 +204,9 @@ async function init() {
         }
 
         const questText = document.getElementById('quest-text-1');
-        if (questText) questText.textContent = '버스 차표를 가져가주세요';
-        showClickGuide('up', window.innerWidth * 0.5, window.innerHeight * 0.6);
+        if (questText) questText.textContent = '차표/영수증을 가져가주세요';
+
+        showClickGuide('up', 0, 0, false, 'scannerGlowMesh');
 
         paper.position.y = 0.53;
         const targetY = 0.47;
@@ -218,15 +220,11 @@ async function init() {
           }
         }
         animateReceipt();
-        statusMessageEl.textContent = '영수증을 스캐너에 스캔해주세요.';
+        statusMessageEl.textContent = '영수증을 스캐너에 스캔하거나 확인해주세요.';
       }
     }
     else if (event.data.type === 'SHOW_CLICK_GUIDE') {
-      const offsetX = (window.innerWidth - 700) / 2;
-      const offsetY = (window.innerHeight - 900) / 2 + 40;
-      const finalX = event.data.fromIframe ? event.data.x + offsetX : event.data.x;
-      const finalY = event.data.fromIframe ? event.data.y + offsetY : event.data.y;
-      showClickGuide(event.data.direction, finalX, finalY);
+      showClickGuide(event.data.direction, event.data.x, event.data.y, event.data.fromIframe);
     }
     else if (event.data.type === 'HIDE_CLICK_GUIDE') {
       hideClickGuide();
@@ -250,9 +248,55 @@ function animate() {
 
   updateCamera(delta);
 
-  if (sceneObjects && sceneObjects.kioskGroup.userData.arrowMesh) {
-    const arrow = sceneObjects.kioskGroup.userData.arrowMesh;
-    arrow.position.y = 0.65 + Math.sin(time * 5) * 0.01;
+  // [수정] arrowMesh 위치 애니메이션 로직 삭제됨
+
+  if (currentGuide) {
+    let screenX = currentGuide.x;
+    let screenY = currentGuide.y;
+    let scaleFactor = 1.0;
+    const REFERENCE_DISTANCE = 2.0;
+
+    if (currentGuide.fromIframe && sceneObjects && sceneObjects.kioskGroup) {
+      const cssObject = sceneObjects.kioskGroup.children.find(c => c.isCSS3DObject || c.element);
+      if (cssObject) {
+        const localX = (currentGuide.x - 350) * 0.001;
+        const localY = (450 - currentGuide.y) * 0.001;
+
+        const targetPos = new THREE.Vector3(localX, localY, 0);
+        targetPos.applyMatrix4(cssObject.matrixWorld);
+
+        const dist = camera.position.distanceTo(targetPos);
+        scaleFactor = REFERENCE_DISTANCE / dist;
+        scaleFactor = Math.min(1.0, scaleFactor);
+
+        targetPos.project(camera);
+        screenX = (targetPos.x * 0.5 + 0.5) * window.innerWidth;
+        screenY = -(targetPos.y * 0.5 - 0.5) * window.innerHeight;
+      }
+    } else if (currentGuide.target3DObjName && sceneObjects && sceneObjects[currentGuide.target3DObjName]) {
+      const obj = sceneObjects[currentGuide.target3DObjName];
+      const targetPos = new THREE.Vector3();
+      obj.getWorldPosition(targetPos);
+
+      const dist = camera.position.distanceTo(targetPos);
+      scaleFactor = REFERENCE_DISTANCE / dist;
+      scaleFactor = Math.min(1.0, scaleFactor);
+
+      targetPos.project(camera);
+      screenX = (targetPos.x * 0.5 + 0.5) * window.innerWidth;
+      screenY = -(targetPos.y * 0.5 - 0.5) * window.innerHeight;
+
+      if (currentGuide.direction === 'right') screenX -= 60 * scaleFactor;
+      if (currentGuide.direction === 'up') screenY += 40 * scaleFactor;
+    }
+
+    const overlay = document.getElementById('click-guide-overlay');
+    if (overlay) {
+      overlay.style.left = `${screenX}px`;
+      overlay.style.top = `${screenY}px`;
+      overlay.style.transformOrigin = 'center';
+      overlay.style.transform = `scale(${scaleFactor})`;
+    }
   }
 
   renderer.render(scene, camera);
@@ -272,6 +316,7 @@ function createClickGuideDOM() {
 
   const overlay = document.createElement('div');
   overlay.id = 'click-guide-overlay';
+  overlay.style.transition = 'transform 0.1s ease-out';
 
   const imgUp = document.createElement('img');
   imgUp.id = 'guide-img-up';
@@ -288,15 +333,14 @@ function createClickGuideDOM() {
   document.body.appendChild(overlay);
 }
 
-export function showClickGuide(direction, x, y) {
+export function showClickGuide(direction, x, y, fromIframe = false, target3DObjName = null) {
   const overlay = document.getElementById('click-guide-overlay');
   const imgUp = document.getElementById('guide-img-up');
   const imgRight = document.getElementById('guide-img-right');
 
   if (!overlay) return;
 
-  overlay.style.left = `${x}px`;
-  overlay.style.top = `${y}px`;
+  currentGuide = { direction, x, y, fromIframe, target3DObjName };
 
   imgUp.classList.remove('guide-dir-up');
   imgRight.classList.remove('guide-dir-right');
@@ -311,6 +355,7 @@ export function showClickGuide(direction, x, y) {
 }
 
 export function hideClickGuide() {
+  currentGuide = null;
   const overlay = document.getElementById('click-guide-overlay');
   if (overlay) {
     overlay.classList.remove('visible');

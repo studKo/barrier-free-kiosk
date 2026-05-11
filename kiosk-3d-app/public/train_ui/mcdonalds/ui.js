@@ -1,3 +1,16 @@
+// ==========================================
+// 튜토리얼 헬퍼 함수
+// ==========================================
+function updateQuest(text) {
+    if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
+}
+function showGuide(direction, x, y) {
+    if (window.parent) window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: direction, x: x, y: y, fromIframe: true }, '*');
+}
+function hideGuide() {
+    if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+}
+
 const STATE = {
     currentCategory: 'burger',
     currentFilter: 'all',
@@ -127,15 +140,73 @@ function initApp() {
     renderStartScreen();
 }
 
-// 1. 첫 화면 그리기
 function renderStartScreen() {
     const app = document.getElementById('app');
     app.innerHTML = `
         <div id="start-screen">
-            <div class="start-title">식사 방법을<br>선택해 주세요</div>
-            <div class="start-options">
-                <div class="start-card" onclick="selectDiningMethod('eat-in')">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:160px; height:160px; margin-bottom:30px;">
+            <!-- 1. 상단 광고 이미지 -->
+            <div class="start-ad"></div>
+
+            <!-- 2. 중간 안내 바 (여백 있음) -->
+            <div class="start-notice">
+                <p>* 카카오 선물하기, 모바일 상품권 사용 가능 (무료 쿠폰 제외)</p>
+                <p>* 현금 결제는 카운터에서 가능 / Please pay at Counter for Cash</p>
+                <p>* 상기 이미지는 실제와 다를 수 있습니다.</p>
+            </div>
+
+            <!-- 3. 하단 버튼 영역 (섹션 간 여백 있음) -->
+            <div class="start-bottom">
+                <!-- 포인트 적립 박스 -->
+                <div class="start-point-box">
+                    <div class="start-point-title" style="font-size: 18px;">포인트를 적립하세요</div>
+                    <div class="start-point-sub" style="font-size: 12px;">결제 전 선택 필수</div>
+                    <div class="start-qr" style="background:#fff; padding:8px; border-radius:8px; margin: 10px 0;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="2.5">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                            <path d="M14 14h3m1 0h3M14 17h1m2 0h4M14 21h7"></path>
+                        </svg>
+                    </div>
+                    <div class="start-qr-arrow">∨</div>
+                </div>
+
+                <!-- 주문하기 섹션 -->
+                <div class="start-right">
+                    <!-- 위: 주문하기 버튼 -->
+                    <div class="start-order-btn" onclick="hideGuide(); showDiningModal();">
+                        <div class="start-order-title" style="font-size: 30px;">주문하기</div>
+                        <div class="start-order-sub" style="font-size: 15px; margin-top:5px;">(Start Order)</div>
+                    </div>
+                    <!-- 아래: 언어 및 도움 기능 -->
+                    <div class="start-side-btns">
+                        <div class="start-sub-btn">
+                            <span style="background:#444; color:#fff; padding:2px 5px; border-radius:4px; font-size:10px;">AZ</span>
+                            <span>언어 선택<br><small>Languages</small></span>
+                        </div>
+                        <div class="start-sub-btn">
+                            <span style="font-size:18px;">♿</span>
+                            <span>도움 기능<br><small>Accessibility</small></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    // [튜토리얼 1단계] 주문하기 버튼 안내
+    setTimeout(() => { updateQuest('첫화면에서 주문하기를 눌러주세요.'); }, 800);
+    setTimeout(() => { showGuide('up', 430, 620); }, 800);
+}
+
+// 1-1. 식사 방법 선택 풀화면
+function showDiningModal() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        <div id="dining-screen">
+            <div class="dining-title">식사 방법을 선택해 주세요</div>
+            <div class="dining-options">
+                <div class="dining-card" onclick="hideGuide(); selectDiningMethod('eat-in')">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
                         <circle cx="30" cy="35" r="7" fill="#D0D0D0"/>
                         <path d="M 22 65 L 22 50 C 22 42, 38 42, 38 50 L 38 65 Z" fill="#D0D0D0"/>
                         <path d="M 32 52 L 44 52 L 44 42" fill="none" stroke="#D0D0D0" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -158,21 +229,24 @@ function renderStartScreen() {
                     </svg>
                     <span>매장에서 식사</span>
                 </div>
-                <div class="start-card" onclick="selectDiningMethod('take-out')">
-                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:160px; height:160px; margin-bottom:30px;">
+                <div class="dining-card" onclick="hideGuide(); selectDiningMethod('take-out')">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="100" height="100">
                         <path d="M 20 30 L 25 22 L 30 30 L 35 22 L 40 30 L 45 22 L 50 30 L 55 22 L 60 30 L 65 22 L 70 30 L 75 22 L 80 30 Z" fill="#C28A54"/>
                         <path d="M 20 30 L 80 30 L 76 90 L 24 90 Z" fill="#C28A54"/>
                         <path d="M 24.5 70 L 75.5 70 L 76 90 L 24 90 Z" fill="#DA291C"/>
                         <path d="M 32 80 L 32 50 C 32 38, 50 38, 50 60 C 50 38, 68 38, 68 50 L 68 80" fill="none" stroke="#FFC72C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    <span>테이크 아웃</span>
+                    <span>포장</span>
                 </div>
             </div>
+            <button class="dining-back-btn" onclick="renderStartScreen()">← 뒤로</button>
         </div>
     `;
+    // [튜토리얼 2단계] 매장/포장 선택 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.'); }, 800);
 }
 
-// 2. 식사 방법 선택 시 메인 화면으로 넘어가는 함수
 function selectDiningMethod(method) {
     STATE.diningMethod = method; // 'eat-in' 이나 'take-out' 저장
     startMainKiosk();
@@ -209,6 +283,8 @@ function startMainKiosk() {
     kGrid.addEventListener('scroll', updateScrollbar);
     initDragScroll(kGrid);
     initThumbDrag();
+    hideGuide();
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
 }
 
 function renderSidebar() {
@@ -293,12 +369,12 @@ function renderModals() {
                 <div class="modal-title" id="modal-item-name"></div>
                 <div class="modal-subtitle">세트로 주문하시겠습니까?</div>
                 <div class="option-container">
-                    <div class="option-card" onclick="selectOption('단품')">
+                    <div class="option-card" onclick="hideGuide(); selectOption('단품')">
                         <img class="option-img" id="modal-single-img" src="" alt="단품">
                         <div class="option-name">단품 선택</div>
                         <div class="option-price" id="modal-single-price"></div>
                     </div>
-                    <div class="option-card" onclick="selectOption('세트')">
+                    <div class="option-card" onclick="hideGuide(); selectOption('세트')">
                         <img class="option-img" id="modal-set-img" src="" alt="세트">
                         <div class="option-name">세트 선택</div>
                         <div class="option-price" id="modal-set-price"></div>
@@ -315,7 +391,27 @@ function renderModals() {
     `;
 }
 
-function changeCategory(categoryKey) { STATE.currentCategory = categoryKey; STATE.currentFilter = 'all'; renderSidebar(); renderHeader(); renderGrid(); initDragScroll(document.getElementById('k-grid')); }
+function changeCategory(categoryKey) { 
+    STATE.currentCategory = categoryKey; 
+    STATE.currentFilter = 'all'; 
+    renderSidebar(); renderHeader(); renderGrid(); initDragScroll(document.getElementById('k-grid'));
+
+    // [튜토리얼 4단계] 메뉴 선택 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
+
+    // [튜토리얼 5단계] 버거 카테고리일 때 필터 안내 (3초 후 자동으로)
+    if (categoryKey === 'burger') {
+        setTimeout(() => {
+            updateQuest('버거의 경우 위에서 고기의 종류로 나눠서 볼 수 있습니다.');
+        }, 3000);
+        // 6초 후 다시 메뉴 선택으로 돌아오기
+        setTimeout(() => {
+            updateQuest('드시고 싶은 음식을 골라주세요.');
+            hideGuide();
+        }, 6000);
+    }
+}
 function filterSubCategory(type) { STATE.currentFilter = type; renderHeader(); renderGrid(); }
 
 function handleItemClick(name, price, img, category, setImg) {
@@ -327,6 +423,10 @@ function handleItemClick(name, price, img, category, setImg) {
         document.getElementById('modal-single-price').innerText = '₩' + price.toLocaleString();
         document.getElementById('modal-set-price').innerText = '₩' + (price + 2000).toLocaleString(); 
         document.getElementById('set-modal').style.display = 'flex';
+
+        // [튜토리얼 7단계] 단품/세트 선택 안내
+        hideGuide();
+        setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.'); }, 800);
     } else {
         addToCart({ name: name, price: price, img: img });
     }
@@ -358,20 +458,46 @@ function openProcessStep(step) {
     closeSetModal(); 
     
     let contentHtml = '';
-    let sidebarHtml = `<div class="step-item completed"><span class="check-icon">✔</span> 세트 메뉴 / ${STATE.tempSelectedItem.name} 세트</div>`;
     let footerHtml = '';
 
-    if (step === 1) {
+    // [1] 왼쪽 사이드바 생성 (사진 UI 반영)
+    const stepData = [
+        { id: 1, label: "세트메뉴 사이드를<br>선택하세요" },
+        { id: 2, label: "세트메뉴 음료를<br>선택하세요" },
+        { id: 3, label: "주문 확인하기" }
+    ];
+
+    let sidebarHtml = `
+        <div class="step-list">
+            <div class="step-item completed">
+                <span class="step-icon">✓</span>
+                <div style="font-size: 13px;">세트 메뉴<br>
+                    <span style="font-weight: 800; font-size: 15px;">${STATE.tempSelectedItem.name} - 세트</span>
+                </div>
+            </div>
+    `;
+    
+    stepData.forEach(s => {
+        const isActive = (s.id === step) ? 'active' : '';
+        const isCompleted = (s.id < step) ? 'completed' : '';
+        const icon = (s.id < step) ? '✓' : ''; 
+        
         sidebarHtml += `
-            <div class="step-item active">세트메뉴 사이드를 선택하세요</div>
-            <div class="step-item">세트 메뉴 음료를 선택하세요</div>
-            <div class="step-item" style="border-bottom:none;">주문에 추가하기</div>
+            <div class="step-item ${isActive} ${isCompleted}">
+                <span class="step-icon">${icon}</span>
+                <div>${s.label}</div>
+            </div>
         `;
+    });
+    sidebarHtml += `</div>`;
+
+    // [2] 각 단계별 중앙 컨텐츠 및 하단 버튼 생성
+    if (step === 1) {
         let gridHtml = '';
         setSideOptions.forEach(side => {
             const priceText = side.price > 0 ? `+₩${side.price.toLocaleString()}` : '+₩0';
             gridHtml += `
-                <div class="side-card" onclick="selectProcessOption(1, '${side.name}', ${side.price}, '${side.img}')">
+                <div class="side-card" onclick="hideGuide(); selectProcessOption(1, '${side.name}', ${side.price}, '${side.img}')">
                     <img class="side-img" src="${side.img}">
                     <div class="side-name">${side.name}</div>
                     <div class="side-price-diff">${priceText}</div>
@@ -384,19 +510,19 @@ function openProcessStep(step) {
             <div class="footer-left"><button class="footer-btn cancel-btn" onclick="closeProcessModal()">취소</button></div>
             <div class="footer-right"><button class="footer-btn prev-btn" onclick="goPrevStep(${step})">이전단계</button></div>
         `;
+
+        // [튜토리얼 8단계] 사이드 선택 안내
+        setTimeout(() => {
+            hideGuide();
+            updateQuest('원하시는 사이드메뉴를 선택해주세요.');
+        }, 800);
     }
     else if (step === 2) {
-        const sideName = STATE.tempSetSelections.side ? STATE.tempSetSelections.side.name : "사이드 선택 안됨";
-        sidebarHtml += `
-            <div class="step-item completed"><span class="check-icon">✔</span> 사이드 / ${sideName}</div>
-            <div class="step-item active">세트 메뉴 음료를 선택하세요</div>
-            <div class="step-item" style="border-bottom:none;">주문에 추가하기</div>
-        `;
         let gridHtml = '';
         setDrinkOptions.forEach(drink => {
             const priceText = drink.price > 0 ? `+₩${drink.price.toLocaleString()}` : '+₩0';
             gridHtml += `
-                <div class="side-card" onclick="selectProcessOption(2, '${drink.name}', ${drink.price}, '${drink.img}')">
+                <div class="side-card" onclick="hideGuide(); selectProcessOption(2, '${drink.name}', ${drink.price}, '${drink.img}')">
                     <img class="side-img" src="${drink.img}">
                     <div class="side-name">${drink.name}</div>
                     <div class="side-price-diff">${priceText}</div>
@@ -409,59 +535,108 @@ function openProcessStep(step) {
             <div class="footer-left"><button class="footer-btn cancel-btn" onclick="closeProcessModal()">취소</button></div>
             <div class="footer-right"><button class="footer-btn prev-btn" onclick="goPrevStep(${step})">이전단계</button></div>
         `;
+
+        // [튜토리얼 8단계] 음료 선택 안내
+        setTimeout(() => {
+            hideGuide();
+            updateQuest('원하시는 음료를 선택해주세요.');
+        }, 800);
     }
     else if (step === 3) {
-        sidebarHtml += `
-            <div class="step-item completed"><span class="check-icon">✔</span> 사이드 / ${STATE.tempSetSelections.side.name}</div>
-            <div class="step-item completed"><span class="check-icon">✔</span> 음료 / ${STATE.tempSetSelections.drink.name}</div>
-            <div class="step-item active" style="border-bottom:none;">주문에 추가하기</div>
-        `;
         const finalPrice = STATE.tempSelectedItem.price + 2000 + STATE.tempSetSelections.side.price + STATE.tempSetSelections.drink.price;
+        const totalKcal = (STATE.tempSelectedItem.kcal || 582) + (STATE.tempSetSelections.side.kcal || 324) + (STATE.tempSetSelections.drink.kcal || 0);
 
-        contentHtml = `
-            <div class="confirm-wrapper">
-                <div class="summary-header">
-                    <div class="summary-title">${STATE.tempSelectedItem.name} 세트</div>
-                    <div class="summary-price">₩ ${finalPrice.toLocaleString()}</div>
+        const fullScreenHtml = `
+            <div class="confirm-fullscreen">
+                <!-- 상단 헤더 -->
+                <div class="confirm-header">
+                    <div class="confirm-logo">M</div>
+                    <button class="confirm-nutrition-btn">영양정보</button>
                 </div>
-                <img class="summary-main-img" src="${STATE.tempSelectedItem.setImg}" alt="세트 이미지">
-                <div class="summary-details">
-                    <div class="detail-item">
+
+                <!-- 메뉴명/가격/칼로리 -->
+                <div class="confirm-title-row">
+                    <div class="confirm-menu-name">${STATE.tempSelectedItem.name} - 세트</div>
+                    <div class="confirm-price-kcal">₩${finalPrice.toLocaleString()} &nbsp; ${totalKcal} Kcal</div>
+                </div>
+
+                <!-- 세트 큰 이미지 -->
+                <div class="confirm-main-img-wrap">
+                    <img class="confirm-main-img" src="${STATE.tempSelectedItem.setImg || STATE.tempSelectedItem.img}" alt="세트 이미지">
+                </div>
+
+                <!-- 구성품 3개 썸네일 -->
+                <div class="confirm-components">
+                    <div class="confirm-comp-item">
                         <img src="${STATE.tempSelectedItem.img}">
-                        <span>${STATE.tempSelectedItem.name}</span>
+                        <div class="comp-kcal">${STATE.tempSelectedItem.kcal || 582} Kcal</div>
+                        <div class="comp-name">${STATE.tempSelectedItem.name}</div>
+                        <button class="comp-change-btn" disabled>재료 추가/변경</button>
+                        <button class="comp-edit-btn" disabled>수정</button>
                     </div>
-                    <div class="detail-item">
+                    <div class="confirm-comp-item">
                         <img src="${STATE.tempSetSelections.side.img}">
-                        <span>${STATE.tempSetSelections.side.name}</span>
-                        <button class="detail-change-btn" onclick="editProcessStep(1)">변경</button>
+                        <div class="comp-kcal">${STATE.tempSetSelections.side.kcal || 324} Kcal</div>
+                        <div class="comp-name">${STATE.tempSetSelections.side.name}</div>
+                        <button class="comp-change-btn" onclick="editProcessStep(1)">재료 추가/변경</button>
+                        <button class="comp-edit-btn" onclick="editProcessStep(1)">수정</button>
                     </div>
-                    <div class="detail-item">
+                    <div class="confirm-comp-item">
                         <img src="${STATE.tempSetSelections.drink.img}">
-                        <span>${STATE.tempSetSelections.drink.name}</span>
-                        <button class="detail-change-btn" onclick="editProcessStep(2)">변경</button>
+                        <div class="comp-kcal">${STATE.tempSetSelections.drink.kcal || 0} Kcal</div>
+                        <div class="comp-name">${STATE.tempSetSelections.drink.name}</div>
+                        <button class="comp-change-btn" onclick="editProcessStep(2)">재료 추가/변경</button>
+                        <button class="comp-edit-btn" onclick="editProcessStep(2)">수정</button>
                     </div>
                 </div>
+
+                <!-- 수량 조절 -->
+                <div class="confirm-qty-row">
+                    <button class="qty-btn" onclick="this.nextElementSibling.textContent = Math.max(1, parseInt(this.nextElementSibling.textContent)-1)">−</button>
+                    <span class="qty-num">1</span>
+                    <button class="qty-btn" onclick="this.previousElementSibling.textContent = parseInt(this.previousElementSibling.textContent)+1">+</button>
+                </div>
+
+                <!-- 하단 버튼 -->
+                <div class="confirm-footer">
+                    <button class="confirm-cancel-btn" onclick="closeProcessModal()">취소</button>
+                    <button class="confirm-add-btn" onclick="hideGuide(); addSetToCartFinal()">장바구니에 담기</button>
+                </div>
+
+                <!-- 최하단 -->
+		<div class="confirm-bottom-bar">
+               		<button class="confirm-home-btn" onclick="resetCartConfirm()">처음으로</button>
+                		<button class="confirm-help-btn">♿ 도움기능...</button>
+            	</div>
+
+            <div class="confirm-legal">
+                일반적인 영양 균형을 위해 하루 2000kcal을 기준으로 하며, 개인의 필요에 따라 다를 수 있습니다.[cite: 5]
             </div>
-        `;
-        footerHtml = `
-            <div class="footer-left"><button class="footer-btn cancel-btn" onclick="closeProcessModal()">취소</button></div>
-            <div class="footer-right">
-                <button class="footer-btn prev-btn" onclick="goPrevStep(${step})">이전단계</button>
-                <button class="footer-btn add-btn" onclick="addSetToCartFinal()">주문에 추가</button>
-            </div>
-        `;
+        </div>
+    `;
+        document.getElementById('process-modal').innerHTML = fullScreenHtml;
+        document.getElementById('process-modal').style.display = 'flex';
+
+        // [튜토리얼 9단계] 장바구니 담기 안내
+        setTimeout(() => {
+            hideGuide();
+            updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.');
+            showGuide('up', 450, 660);
+        }, 800);
+        return;
     }
 
+    // [3] 최종 화면 렌더링
     const fullScreenHtml = `
         <div class="set-step-container">
             <div class="step-header">
-                <img src="mc.jpeg" alt="로고" class="step-header-logo" onerror="this.style.display='none'">
-                <div class="step-header-title">${STATE.tempSelectedItem.name} 세트</div>
+                <div class="step-header-info">
+                    <div class="header-menu-name">${STATE.tempSelectedItem.name} 세트</div>
+                    <div class="header-menu-cal">₩${(STATE.tempSelectedItem.price + 2000).toLocaleString()} 582 Kcal</div>
+                </div>
             </div>
             <div class="step-body">
-                <div class="step-sidebar">
-                    <div class="step-list">${sidebarHtml}</div>
-                </div>
+                <div class="step-sidebar">${sidebarHtml}</div>
                 <div class="step-content-wrapper">
                     <div class="step-content-inner">${contentHtml}</div>
                     <div class="step-footer">${footerHtml}</div>
@@ -495,10 +670,24 @@ function addSetToCartFinal() {
 function addToCart(newItem) {
     const existingItem = STATE.cartItems.find(item => item.name === newItem.name);
     if (existingItem) existingItem.qty += 1; else STATE.cartItems.push({ ...newItem, qty: 1 });
-    renderBottom(); 
+    renderBottom();
+
+    // [튜토리얼 10단계] 결제하기 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('음식들을 선택하신 후 주문내역 확인/결제하기를 눌러주세요.'); }, 800);
+    setTimeout(() => { showGuide('up', 460, 700); }, 800);
 }
 
-function resetCartConfirm() { if(STATE.cartItems.length > 0 && confirm("장바구니를 비우고 처음부터 다시 주문하시겠습니까?")) { STATE.cartItems = []; renderBottom(); } }
+function resetCartConfirm() {
+    if (STATE.cartItems.length > 0) {
+        if (!confirm("장바구니를 비우고 처음 화면으로 돌아가시겠습니까?")) return;
+    }
+    STATE.cartItems = [];
+    STATE.currentCategory = 'burger';
+    STATE.currentFilter = 'all';
+    STATE.diningMethod = null;
+    renderStartScreen();
+}
 
 function openCartModal() {
     const cartModal = document.getElementById('cart-modal');
@@ -508,7 +697,7 @@ function openCartModal() {
     
     let totalQty = 0; let totalPrice = 0;
     let cartHtml = `<div class="cart-wrapper-new">
-        <div class="cart-header-new"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/1200px-McDonald%27s_Golden_Arches.svg.png"> 나의 주문</div>
+        <div class="cart-header-new"><img src="사진/mc.jpeg"> 나의 주문</div>
         <div class="cart-list-new">`;
 
     STATE.cartItems.forEach((item, index) => {
@@ -536,13 +725,23 @@ function openCartModal() {
         <div class="cart-footer-new">
             <div class="cart-summary-new">총 수량: ${totalQty}개 <span style="margin-left:30px;">합계 <strong style="font-size:32px; color:#000;">₩ ${totalPrice.toLocaleString()}</strong></span></div>
             <div class="cart-actions-new">
-                <button class="cart-btn-new cart-btn-add" onclick="closeCartModal()">추가 주문</button>
-                <button class="cart-btn-new cart-btn-checkout" onclick="openPaymentMethod()">주문 완료</button>
+                <button class="cart-btn-new cart-btn-add" onclick="hideGuide(); closeCartModal()">추가 주문</button>
+                <button class="cart-btn-new cart-btn-checkout" onclick="hideGuide(); openPaymentMethod()">주문 완료</button>
             </div>
         </div></div>`;
     cartModalInner.innerHTML = cartHtml;
+
+    // [튜토리얼 11단계] 추가주문 또는 주문완료 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.'); }, 800);
+    setTimeout(() => { showGuide('up', 460, 720); }, 800);
 }
-function closeCartModal() { document.getElementById('cart-modal').style.display = 'none'; }
+function closeCartModal() { 
+    document.getElementById('cart-modal').style.display = 'none';
+    // 추가주문으로 돌아왔을 때 메뉴 선택 안내 다시 표시
+    hideGuide();
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
+}
 
 // 장바구니 아이템 삭제 함수 (취소 버튼)
 function removeCartItem(itemName) {
@@ -586,16 +785,6 @@ function scrollKiosk(dir) {
 }
 
 window.onload = () => { initApp(); window.addEventListener('resize', updateScrollbar); };
-// ==========================================
-// [추가됨] 3D 환경과 통신하기 위한 메시지 리스너
-// ==========================================
-window.addEventListener('message', (event) => {
-    if (event.origin !== window.location.origin) return; // 보안: 신뢰할 수 있는 출처만 허용
-    // 3D 밖에서 카드가 투입구에 꽂혔다는 신호가 오면!
-    if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
-        completeCreditCardPayment();
-    }
-});
 
 // ==========================================
 // [V3 원본 이식] 결제창 모달 관련 함수 
@@ -609,13 +798,13 @@ function openPaymentMethod() {
             <div class="pay-title">결제 수단을 선택해 주세요</div>
             <div class="pay-grid" style="display: flex !important; justify-content: center !important; gap: 40px !important;">
                 
-                <div class="pay-item" onclick="processPayment('신용카드')" style="width: 250px !important;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/633/633611.png">
+                <div class="pay-item" onclick="hideGuide(); processPayment('신용카드')" style="width: 250px !important;">
+                    <img src="사진/카드.png">
                     <span>신용카드</span>
                 </div>
 
                 <div class="pay-item" onclick="openCartModal()" style="width: 250px !important;">
-                    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828778.png">
+                    <img src="사진/취소.png">
                     <span>취소</span>
                 </div>
 
@@ -623,17 +812,20 @@ function openPaymentMethod() {
         </div>
     `;
     cartModalInner.innerHTML = payHtml;
+
+    // [튜토리얼 12단계] 결제수단 선택 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('결제수단을 선택해주세요.'); }, 800);
+    setTimeout(() => { showGuide('up', 280, 480); }, 800);
 }
 
 function completeCreditCardPayment() {
     if (document.getElementById('payment-complete-screen')) return;
-
-    // 장바구니 모달 닫기
     if (STATE.cartItems.length === 0) return;
+
     const cartModal = document.getElementById('cart-modal');
     if (cartModal) cartModal.style.display = 'none';
 
-    // 총 금액 계산
     let totalPrice = 0;
     STATE.cartItems.forEach(item => { totalPrice += item.price * item.qty; });
 
@@ -645,56 +837,16 @@ function completeCreditCardPayment() {
                 <div class="payment-complete-icon">✓</div>
                 <div class="payment-complete-title">결제가 완료되었습니다</div>
                 <div class="payment-complete-amount">₩ ${totalPrice.toLocaleString()}</div>
-                <div class="payment-complete-msg">영수증이 출력됩니다.<br>잠시만 기다려 주세요.</div>
+                <div class="payment-complete-msg">카드를 단말기에서 빼주세요.</div>
             </div>
         </div>
     `;
 
-    // 3초 후 카운터 픽업 안내 화면으로 전환
-    setTimeout(() => {
-        app.innerHTML = `
-            <div id="pickup-screen">
-                <div class="pickup-inner">
-                    <div class="pickup-title">주문하신 제품을 카운터에서<br>받아주세요</div>
-                    <div class="pickup-illustration">
-                    <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" width="260" height="160">
-                        <!-- 카운터 테이블 -->
-                        <rect x="10" y="110" width="240" height="18" rx="4" fill="#F5C842"/>
-                        <rect x="10" y="128" width="240" height="28" rx="2" fill="#E8B800"/>
+    // [튜토리얼 14단계] 카드 빼기 안내
+    hideGuide();
+    setTimeout(() => { updateQuest('카드를 빼주세요.'); }, 800);
 
-                        <!-- 맥도날드 박스 (버거 박스) -->
-                        <rect x="55" y="72" width="62" height="40" rx="4" fill="#DA291C"/>
-                        <rect x="55" y="72" width="62" height="14" rx="4" fill="#C8001A"/>
-                        <!-- M 로고 -->
-                        <text x="86" y="100" text-anchor="middle" font-size="22" font-weight="900" fill="#FFC72C" font-family="Arial Black, sans-serif">M</text>
-
-                        <!-- 감자튀김 용기 -->
-                        <path d="M 135 110 L 142 72 L 172 72 L 179 110 Z" fill="#DA291C"/>
-                        <rect x="138" y="68" width="38" height="8" rx="2" fill="#C8001A"/>
-                        <!-- 감자튀김 막대들 -->
-                        <rect x="143" y="42" width="6" height="32" rx="3" fill="#F5C842"/>
-                        <rect x="152" y="36" width="6" height="38" rx="3" fill="#F5C842"/>
-                        <rect x="161" y="40" width="6" height="34" rx="3" fill="#F5C842"/>
-                        <rect x="147" y="38" width="6" height="36" rx="3" fill="#FFD966"/>
-                        <rect x="156" y="34" width="6" height="40" rx="3" fill="#FFD966"/>
-
-                        <!-- 음료컵 -->
-                        <path d="M 188 110 L 194 70 L 222 70 L 228 110 Z" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
-                        <rect x="190" y="66" width="36" height="8" rx="3" fill="#e0e0e0"/>
-                        <!-- 빨대 -->
-                        <rect x="216" y="30" width="5" height="44" rx="2.5" fill="#DA291C"/>
-                        <!-- 컵 로고 라인 -->
-                        <rect x="195" y="80" width="18" height="3" rx="1.5" fill="#ffbc0d"/>
-                        <rect x="195" y="87" width="14" height="2" rx="1" fill="#ffbc0d"/>
-                    </svg>
-                </div>
-            </div>
-        </div>
-    `;
-        // 픽업 화면에서 5초 뒤 처음 화면으로
-        STATE.cartItems = [];
-        setTimeout(() => { initApp(); }, 5000);
-    }, 3000);
+    // PAYMENT_COMPLETE는 카드가 빠질 때 보냄 (아래 CARD_REMOVED 핸들러에서 처리)
 }
 // ==========================================
 // 스크롤 썸(노란 막대) 직접 드래그
@@ -807,10 +959,9 @@ function initDragScroll(grid) {
 
 function processPayment(method) {
     if (method === '신용카드') {
-        window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
+        window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
         const cartModalInner = document.getElementById('cart-modal-inner');
         
-        // 카드 투입 안내 화면 렌더링 (아이콘 없이 텍스트 중심)
         cartModalInner.innerHTML = `
             <div class="pay-method-wrapper" style="text-align: center;">
                 <div class="pay-title" style="margin-bottom: 20px; font-size: 42px;">결제 단말기에 카드를 꽂아주세요</div>
@@ -825,7 +976,6 @@ function processPayment(method) {
                 </div>
                 
                 <style>
-                    /* 점 깜빡임 애니메이션 */
                     @keyframes blink {
                         0% { opacity: 0.2; }
                         50% { opacity: 1; }
@@ -834,5 +984,58 @@ function processPayment(method) {
                 </style>
             </div>
         `;
+
+        // [튜토리얼 13단계] 카드 투입 안내
+        hideGuide();
+        updateQuest('카드를 결제 단말기에 넣어주세요.');
     }
 }
+
+// ==========================================
+// 부모 창(3D 환경)에서 오는 메시지 수신
+// ==========================================
+window.addEventListener('message', (event) => {
+    if (!event.data) return;
+
+    // 카드가 꽂혔을 때 → 결제 완료 화면 표시 + 카드 빼라는 안내
+    if (event.data === 'cardInserted' || event.data.type === 'CARD_INSERTED') {
+        completeCreditCardPayment();
+    }
+
+    // 카드가 빠졌을 때 → 픽업 안내 화면 → PAYMENT_COMPLETE → initApp
+    if (event.data.type === 'CARD_REMOVED') {
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+
+        const app = document.getElementById('app');
+        app.innerHTML = `
+            <div id="pickup-screen">
+                <div class="pickup-inner">
+                    <div class="pickup-title">주문하신 제품을 카운터에서<br>받아주세요</div>
+                    <div class="pickup-illustration">
+                    <svg viewBox="0 0 260 160" xmlns="http://www.w3.org/2000/svg" width="260" height="160">
+                        <rect x="10" y="110" width="240" height="18" rx="4" fill="#F5C842"/>
+                        <rect x="10" y="128" width="240" height="28" rx="2" fill="#E8B800"/>
+                        <rect x="55" y="72" width="62" height="40" rx="4" fill="#DA291C"/>
+                        <rect x="55" y="72" width="62" height="14" rx="4" fill="#C8001A"/>
+                        <text x="86" y="100" text-anchor="middle" font-size="22" font-weight="900" fill="#FFC72C" font-family="Arial Black, sans-serif">M</text>
+                        <path d="M 135 110 L 142 72 L 172 72 L 179 110 Z" fill="#DA291C"/>
+                        <rect x="138" y="68" width="38" height="8" rx="2" fill="#C8001A"/>
+                        <rect x="143" y="42" width="6" height="32" rx="3" fill="#F5C842"/>
+                        <rect x="152" y="36" width="6" height="38" rx="3" fill="#F5C842"/>
+                        <rect x="161" y="40" width="6" height="34" rx="3" fill="#F5C842"/>
+                        <rect x="147" y="38" width="6" height="36" rx="3" fill="#FFD966"/>
+                        <rect x="156" y="34" width="6" height="40" rx="3" fill="#FFD966"/>
+                        <path d="M 188 110 L 194 70 L 222 70 L 228 110 Z" fill="#fff" stroke="#ddd" stroke-width="1.5"/>
+                        <rect x="190" y="66" width="36" height="8" rx="3" fill="#e0e0e0"/>
+                        <rect x="216" y="30" width="5" height="44" rx="2.5" fill="#DA291C"/>
+                        <rect x="195" y="80" width="18" height="3" rx="1.5" fill="#ffbc0d"/>
+                        <rect x="195" y="87" width="14" height="2" rx="1" fill="#ffbc0d"/>
+                    </svg>
+                    </div>
+                </div>
+            </div>
+        `;
+        STATE.cartItems = [];
+        setTimeout(() => { initApp(); }, 5000);
+    }
+});

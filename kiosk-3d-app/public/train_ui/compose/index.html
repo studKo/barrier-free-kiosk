@@ -26,6 +26,12 @@
           <span class="choice-title">포장해가기</span>
           <span class="choice-desc">포장해서 가져갈게요</span>
         </button>
+
+        <button id="tutorial-start-btn" class="choice-btn" type="button" style="margin-top: 30px; border-color: #d32f2f; background-color: #fff;">
+          <span class="choice-emoji">💡</span>
+          <span class="choice-title" style="color: #d32f2f;">도움말 (튜토리얼 시작)</span>
+          <span class="choice-desc">처음이시라면 여기를 눌러 따라해보세요!</span>
+        </button>
       </div>
 
       <p class="guide-text">원하시는 주문 방식을 눌러주세요</p>
@@ -42,8 +48,12 @@
       <section class="menu-section">
         <div class="category-tabs" id="category-tabs">
           <button class="tab active" data-category="커피" type="button">커피</button>
-          <button class="tab" data-category="음료" type="button">음료</button>
-          <button class="tab" data-category="디저트" type="button">디저트</button>
+          <button class="tab" data-category="디카페인" type="button">디카페인</button>
+          <button class="tab" data-category="논커피" type="button">논커피</button>
+          <button class="tab" data-category="스무디/프라페" type="button">스무디/프라페</button>
+          <button class="tab" data-category="에이드/주스" type="button">에이드/주스</button>
+          <button class="tab" data-category="티" type="button">티</button>
+          <button class="tab" data-category="푸드/디저트" type="button">푸드/디저트</button>
         </div>
 
         <div id="menu-list" class="menu-list"></div>
@@ -69,6 +79,49 @@
     </main>
   </section>
 
+  <div id="option-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-menu-name">메뉴 이름</h2>
+        <p id="modal-menu-price">1,500원</p>
+      </div>
+
+      <div class="option-group">
+        <h3>1. 온도 선택 (필수)</h3>
+        <div class="radio-group" id="temp-options">
+          <button class="opt-btn active" data-type="temp" data-value="HOT">HOT (따뜻하게)</button>
+          <button class="opt-btn" data-type="temp" data-value="ICED">ICED (차갑게)</button>
+        </div>
+      </div>
+
+      <div class="option-group" id="ice-option-group" style="display: none;">
+        <h3>2. 얼음양 선택</h3>
+        <div class="radio-group">
+          <button class="opt-btn" data-type="ice" data-value="얼음 빼기">빼기</button>
+          <button class="opt-btn" data-type="ice" data-value="얼음 적게">적게</button>
+          <button class="opt-btn active" data-type="ice" data-value="기본">기본</button>
+          <button class="opt-btn" data-type="ice" data-value="얼음 많이">많이</button>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <h3>3. 추가 옵션 (선택)</h3>
+        <div class="radio-group" id="extra-options">
+          <button class="opt-btn active" data-type="extra" data-value="선택 안함" data-price="0">선택 안함</button>
+          <button class="opt-btn" data-type="extra" data-value="샷 추가" data-price="500">샷 추가 (+500원)</button>
+          <button class="opt-btn" data-type="extra" data-value="시럽 추가" data-price="500">시럽 추가 (+500원)</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="modal-cancel-btn" class="cancel-btn" type="button">취소하기</button>
+        <button id="modal-add-btn" class="add-btn" type="button">
+          장바구니 담기 (<span id="modal-total-price">0</span>원)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <section id="payment-wait-screen" class="screen hidden">
     <div class="choice-wrap">
       <div class="brand-box">
@@ -89,6 +142,12 @@
       <p class="guide-text">잠시 후 처음 화면으로 돌아갑니다...</p>
     </div>
   </section>
+
+  <div id="tutorial-dim" class="hidden"></div>
+  <div id="tutorial-tooltip" class="hidden">
+    <p id="tutorial-text">가이드라인 텍스트</p>
+    <button id="tutorial-next-btn" type="button">다 음</button>
+  </div>
 
   <script src="ui.js"></script>
 </body>

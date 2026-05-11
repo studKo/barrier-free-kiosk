@@ -95,7 +95,9 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     paperObj.visible = false;
     showToast("물건을 '내 물건'으로 옮겼습니다.");
 
-    const info = paperObj.userData.ticketInfo || { destination: '목적지', time: '시간', seat: '좌석' };
+    // [수정 핵심] 메인 코드에서 넘겨준 현재 브랜드 정보 획득
+    const currentBrand = kioskGroup.userData.currentBrand || '';
+
     const toolsPane = document.querySelector('.tools-pane');
     if (!toolsPane) return;
 
@@ -112,27 +114,44 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       }
     }
 
-    const titleText = info.movie ? '영화 티켓' : '버스 승차권';
-    const mainText = info.movie
-      || (info.destination ? '세종 -> ' + info.destination : '영수증');
-    const timeText = info.time ? '시간: ' + escapeHTML(info.time) : '';
-    const seatText = info.seat ? '| 좌석: ' + escapeHTML(info.seat) : '';
+    // 브랜드별 렌더링 변수 선언
+    let titleText = '결제 영수증';
+    let mainText = '영수증';
+    let timeText = '';
+    let seatText = '';
 
-    // '내 신용카드 꺼내기' 버튼과 완벽히 동일한 규격의 디자인(CSS) 적용
-    // 이모티콘 대신 CSS 속성을 활용하여 초록색 티켓 아이콘을 구현했습니다.
+    // [수정 핵심] 브랜드 종류에 따라 텍스트 분기 처리
+    if (currentBrand === 'busterminal') {
+      const info = paperObj.userData.ticketInfo || { destination: '목적지', time: '시간', seat: '좌석' };
+      titleText = '버스 승차권';
+      mainText = info.destination ? '세종 -> ' + info.destination : '승차권';
+      timeText = info.time ? '시간: ' + escapeHTML(info.time) : '';
+      seatText = info.seat ? '| 좌석: ' + escapeHTML(info.seat) : '';
+    } else if (currentBrand === 'hospital') {
+      titleText = '진료비 계산서';
+      mainText = '병원 영수증 / 처방전';
+    } else {
+      // 기타 브랜드 (맥도날드, 컴포즈, CGV 등 일반 브랜드)
+      titleText = '결제 영수증';
+      mainText = '주문 영수증';
+    }
+
+    // 좌석이나 시간 정보가 있을 때만 렌더링되도록 템플릿 리터럴 조건부 처리
+    const detailHTML = (timeText || seatText)
+      ? `<div style="font-size: 1.2rem; color: #4e5968; font-weight: 600;">${timeText} ${seatText}</div>`
+      : '';
+
     inventory.innerHTML = `
       <div style="display: flex; align-items: center; gap: 15px; padding: 1.5rem; background-color: #e8f0fe; border-radius: 12px; border: 3px solid #1a73e8; margin-top: 15px; box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2); width: 100%; box-sizing: border-box; cursor: default;">
         
-        <!-- 좌측 가상 아이콘 (티켓 형태의 CSS 도형) -->
         <div style="width: 50px; height: 35px; background: linear-gradient(135deg, #34a853, #1e8e3e); border-radius: 6px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(52, 168, 83, 0.3); position: relative; overflow: hidden;">
           <div style="position: absolute; left: 12px; top: 0; bottom: 0; border-left: 2px dashed rgba(255, 255, 255, 0.6);"></div>
         </div>
 
-        <!-- 우측 텍스트 정보 영역 -->
         <div style="display: flex; flex-direction: column; text-align: left; gap: 4px;">
           <div style="font-size: 1.1rem; color: #1a73e8; font-weight: 800;">${escapeHTML(titleText)}</div>
           <div style="font-size: 1.5rem; font-weight: 800; color: #191f28;">${escapeHTML(mainText)}</div>
-          <div style="font-size: 1.2rem; color: #4e5968; font-weight: 600;">${timeText} ${seatText}</div>
+          ${detailHTML}
         </div>
 
       </div>

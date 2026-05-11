@@ -192,19 +192,83 @@ body { background-color: #333; display: block !important; height: 100vh; width: 
 .step-header-title { font-size: 24px; font-weight: 900; color: #222; letter-spacing: -1px; }
 
 .step-body { flex: 1; display: flex; overflow: hidden; }
-.step-sidebar { width: 250px; background-color: #1a1a1a; color: #fff; display: flex; flex-direction: column; }
-.step-list { flex: 1; padding: 15px; display:flex; flex-direction: column; overflow-y: auto;}
-.step-item { padding: 20px 10px; border-bottom: 1px solid #333; font-size: 16px; font-weight: 700; color: #666; line-height: 1.4; word-break: keep-all; }
-.step-item.completed { color: #fff; font-weight: 800; }
-.step-item.active { color: #ffbc0d; font-size: 20px; font-weight: 900; }
-.check-icon { color: #00a35c; font-weight: 900; margin-right: 8px; font-size: 18px; }
+/* --- 왼쪽 사이드바 리뉴얼 --- */
+.step-sidebar {
+    width: 260px; 
+    background: #f8f8f8; /* 약간 회색빛 배경 */
+    border-right: 1px solid #ddd;
+    padding: 40px 0; /* 좌우 패딩은 빼고 위아래만 */
+}
+
+.step-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.step-item {
+    position: relative;
+    padding: 20px 25px 20px 50px; /* 왼쪽 여백을 줘서 바와 아이콘 공간 확보 */
+    font-size: 15px;
+    font-weight: 700;
+    color: #999; /* 기본은 흐리게 */
+    line-height: 1.4;
+    transition: all 0.2s;
+}
+
+/* 현재 선택된 단계의 노란색 왼쪽 바 */
+.step-item.active {
+    color: #222;
+    background: #fff; /* 활성화된 단계만 흰색 배경 */
+}
+
+.step-item.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    background-color: #FFC72C; /* 맥도날드 노란색 바 */
+}
+
+/* 완료된 단계 스타일 */
+.step-item.completed {
+    color: #222;
+}
+
+/* 단계 앞의 원형 아이콘 */
+.step-icon {
+    position: absolute;
+    left: 20px;
+    top: 22px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    background: #fff;
+}
+
+/* 완료/활성 시 아이콘 변화 */
+.step-item.completed .step-icon {
+    border-color: #222;
+    background: #fff;
+    color: #222;
+}
+
+.step-item.active .step-icon {
+    border-color: #222;
+}
 
 .step-content-wrapper { flex: 1; display: flex; flex-direction: column; background-color: #fff; overflow: hidden; }
 .step-content-inner { flex: 1; padding: 30px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; }
 .step-title { font-size: 36px; font-weight: 900; color: #222; margin-bottom: 25px; letter-spacing: -1px; }
 
-.side-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; box-sizing: border-box; }
-.side-card { border: 2px solid #e5e5e5; border-radius: 12px; padding: 20px 10px; cursor: pointer; transition: 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 230px; text-align: center; background: white;}
+.side-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; box-sizing: border-box; padding: 0 4px; }
+.side-card { border: 2px solid #e5e5e5; border-radius: 12px; padding: 15px 6px; cursor: pointer; transition: 0.1s; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; text-align: center; background: white; min-width: 0; }
 .side-card:active { border-color: #ffbc0d; border-width: 3px; background-color: #fffdf5; transform: scale(0.97); }
 .side-img { width: 110px; height: 100px; object-fit: contain; margin-bottom: 15px; }
 .side-name { font-size: 16px; font-weight: 800; color: #222; word-break: keep-all; line-height: 1.3; margin-bottom: 8px; }
@@ -367,14 +431,102 @@ body { background-color: #333; display: block !important; height: 100vh; width: 
     font-weight: 800 !important;
     color: #333 !important;
 }
-/* --- 시작 화면(식사 방법 선택) --- */
-#start-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f8f8f8; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.start-title { font-size: 50px; font-weight: 900; margin-bottom: 50px; text-align: center; color: #222; line-height: 1.2; }
-.start-options { display: flex; gap: 40px; }
-.start-card { width: 320px; height: 420px; background: #fff; border: 2px solid #ddd; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-.start-card:hover { border-color: #ffbc0d; transform: translateY(-5px); }
-.start-card img, .start-card svg { width: 160px; height: 160px; margin-bottom: 40px; }
-.start-card span { font-size: 30px; font-weight: 800; color: #222; }
+/* --- 시작 화면 여백 강조 버전 --- */
+#start-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #f4f4f4; /* 배경에 회색을 깔아 흰색 버튼들이 구분되게 함 */
+    z-index: 9999;
+    display: flex; flex-direction: column;
+    padding: 15px; /* 전체적인 테두리 여백 */
+    gap: 15px;     /* 요소 간의 간격 생성 */
+}
+
+/* 상단 메인 광고 */
+.start-ad {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px; /* 모서리 둥글게 */
+    background-image: url('사진/메인광고.png');
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* 안내 문구 영역 */
+.start-notice {
+    background: #FFC72C;
+    padding: 15px 25px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+.start-notice p {
+    font-size: 14px; color: #222; font-weight: 700; line-height: 1.8;
+}
+
+/* 하단 영역 컨테이너 */
+.start-bottom {
+    display: flex;
+    height: 260px;
+    gap: 15px; /* 포인트 섹션과 주문 섹션 사이의 간격 */
+    background: transparent;
+}
+
+/* 포인트 적립 박스 */
+.start-point-box {
+    background: #FFC72C;
+    width: 38%;
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 오른쪽 주문 섹션 */
+.start-right {
+    flex: 1;
+    display: flex; flex-direction: column;
+    gap: 12px; /* 주문하기 버튼과 아래 보조 버튼들 사이의 간격 */
+}
+
+/* 주문하기 버튼 */
+.start-order-btn {
+    flex: 1.5;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 언어/도움 기능 버튼 행 */
+.start-side-btns {
+    flex: 1;
+    display: flex;
+    gap: 10px; /* 두 버튼 사이의 간격 */
+}
+.start-sub-btn {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; font-weight: 800; color: #333;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.start-sub-btn:last-child { border-right: none; }
+.sub-btn-icon {
+    font-size: 18px; color: #555;
+}
+/* 법적 고지 */
+.start-legal {
+    font-size: 11px; color: #aaa; text-align: center;
+    padding: 6px; background: #f0f0f0; flex-shrink: 0;
+}
+
+
 
 /* 이미지가 드래그를 방해하지 않게 설정 */
 #k-grid img {
@@ -392,7 +544,38 @@ body { background-color: #333; display: block !important; height: 100vh; width: 
 #k-grid.dragging {
     cursor: grabbing;
 }
-/* --- 결제 완료 화면 --- */
+/* --- 식사 방법 선택 풀화면 --- */
+#dining-screen {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: #f8f8f8; z-index: 9999;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 50px;
+}
+.dining-title {
+    font-size: 52px; font-weight: 900; color: #222;
+}
+.dining-options {
+    display: flex; gap: 50px;
+}
+.dining-card {
+    width: 220px; height: 280px;
+    background: #fff; border: 2px solid #ddd; border-radius: 20px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 20px;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+.dining-card:hover { border-color: #FFC72C; transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+.dining-card span { font-size: 22px; font-weight: 800; color: #222; }
+.dining-back-btn {
+    position: absolute; bottom: 40px; left: 40px;
+    background: none; border: 1.5px solid #ccc; border-radius: 10px;
+    padding: 12px 24px; font-size: 18px; font-weight: 700; color: #555;
+    cursor: pointer;
+}
+.dining-back-btn:hover { border-color: #888; color: #222; }
+
+
 #payment-complete-screen {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: #fff; z-index: 99999;
@@ -439,4 +622,125 @@ body { background-color: #333; display: block !important; height: 100vh; width: 
     padding: 30px 40px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.07);
     display: flex; align-items: flex-end; justify-content: center;
+}
+
+/* --- 세트 주문 확인 풀화면 (Step 3) --- */
+.confirm-fullscreen {
+    width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    background: #fff; overflow-y: auto;
+}
+.confirm-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px 0;
+}
+.confirm-logo {
+    font-size: 32px; font-weight: 900; color: #FFC72C;
+    font-family: Arial, sans-serif;
+}
+.confirm-nutrition-btn {
+    border: 1.5px solid #ccc; background: #fff;
+    border-radius: 8px; padding: 6px 16px;
+    font-size: 14px; font-weight: 600; color: #555; cursor: pointer;
+}
+.confirm-title-row {
+    padding: 10px 20px 0;
+}
+.confirm-menu-name {
+    font-size: 28px; font-weight: 900; color: #222;
+}
+.confirm-price-kcal {
+    font-size: 24px; font-weight: 900; color: #222; margin-top: 2px;
+}
+.confirm-main-img-wrap {
+    display: flex; justify-content: center;
+    padding: 10px 0 0;
+}
+.confirm-main-img {
+    height: 200px; object-fit: contain;
+}
+/* 구성품 3개 */
+.confirm-components {
+    display: flex; gap: 12px;
+    padding: 14px 16px 0;
+}
+.confirm-comp-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+}
+.confirm-comp-item img {
+    width: 64px; height: 64px; object-fit: contain;
+}
+.comp-kcal { font-size: 12px; color: #888; }
+.comp-name { font-size: 13px; font-weight: 700; color: #222; text-align: center; }
+.comp-change-btn {
+    width: 100%; border: 1px solid #ccc; background: #fff;
+    border-radius: 6px; padding: 5px 4px;
+    font-size: 12px; color: #444; cursor: pointer; margin-top: 4px;
+}
+.comp-change-btn:disabled { color: #bbb; cursor: default; }
+.comp-edit-btn {
+    width: 100%; border: 1px solid #ccc; background: #fff;
+    border-radius: 6px; padding: 5px 4px;
+    font-size: 12px; color: #444; cursor: pointer; margin-top: 2px;
+}
+.comp-edit-btn:disabled { color: #bbb; cursor: default; }
+/* 수량 */
+.confirm-qty-row {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 16px; padding: 16px 20px 0;
+}
+.qty-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid #ccc; background: #fff;
+    font-size: 20px; font-weight: 700; color: #333;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.qty-num { font-size: 22px; font-weight: 700; color: #222; min-width: 30px; text-align: center; }
+/* 하단 버튼 */
+.confirm-footer {
+    display: flex; gap: 12px;
+    padding: 14px 16px;
+    margin-top: auto;
+}
+.confirm-cancel-btn {
+    flex: 1; padding: 18px;
+    border: 2px solid #ccc; border-radius: 10px;
+    background: #fff; font-size: 20px; font-weight: 800; color: #555;
+    cursor: pointer;
+}
+.confirm-add-btn {
+    flex: 2.5; padding: 18px;
+    border: none; border-radius: 10px;
+    background: #FFC72C; font-size: 22px; font-weight: 900; color: #222;
+    cursor: pointer;
+}
+.confirm-add-btn:hover { background: #f5b800; }
+/* 최하단 바 */
+/* 최하단 바: 처음으로 & 도움기능 버튼 정렬 */
+.confirm-bottom-bar {
+    display: flex; 
+    justify-content: space-between; /* 양 끝으로 배치 */
+    align-items: center;
+    padding: 8px 16px;
+    border-top: 1px solid #eee;
+    margin-top: 10px;
+}
+
+.confirm-home-btn, .confirm-help-btn {
+    border: 1px solid #ddd; 
+    background: #fff; 
+    border-radius: 8px;
+    padding: 8px 18px; 
+    font-size: 14px; 
+    font-weight: 600; 
+    color: #555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.confirm-legal {
+    font-size: 11px; color: #aaa; text-align: center;
+    padding: 6px 10px 10px;
 }

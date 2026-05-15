@@ -389,19 +389,28 @@ body {
   transform: translate(-50%, -50%) scale(1);
 }
 
-#click-guide-overlay {
+/* ==========================================
+   Click Guide Overlay Styles 
+   ========================================== */
+
+#click-guide-wrapper {
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: 99999;
   pointer-events: none;
   transition: opacity 0.3s ease;
   opacity: 0;
   visibility: hidden;
-  transform: translate(-50%, -50%);
 }
 
-#click-guide-overlay.visible {
+#click-guide-wrapper.visible {
   opacity: 1;
   visibility: visible;
+}
+
+#click-guide-overlay {
+  position: relative;
 }
 
 #click-guide-overlay img {
@@ -412,36 +421,10 @@ body {
   display: none;
 }
 
-@keyframes bounceUp {
-
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-}
-
 .guide-dir-up {
   display: block !important;
-  animation: bounceUp 1s infinite ease-in-out;
-}
-
-@keyframes bounceRight {
-
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-
-  50% {
-    transform: translateX(15px);
-  }
 }
 
 .guide-dir-right {
   display: block !important;
-  animation: bounceRight 1s infinite ease-in-out;
 }

@@ -1,4 +1,3 @@
-// 파일명: src/core/main.js
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment } from '../scene/camera.js';
@@ -54,7 +53,9 @@ async function init() {
       iframeWin.postMessage({ type: 'CARD_INSERTED' }, '*');
     }
 
-    // [수정] arrowMesh 가시성 제어 삭제됨
+    if (sceneObjects.arrowMesh) {
+      sceneObjects.arrowMesh.visible = false;
+    }
 
     statusMessageEl.textContent = '현재 상태: 결제 중... 주문을 완료합니다.';
     statusMessageEl.classList.add('success');
@@ -99,7 +100,9 @@ async function init() {
       sceneObjects.scannerGlowMesh.material.color.setHex(0xffff00);
     }
 
-    // [수정] arrowMesh 가시성 제어 삭제됨
+    if (sceneObjects.arrowMesh) {
+      sceneObjects.arrowMesh.visible = false;
+    }
 
     const inventory = document.getElementById('my-inventory');
     if (inventory) inventory.remove();
@@ -144,7 +147,6 @@ async function init() {
     const questText = document.getElementById('quest-text-1');
     if (questText && questText.textContent === '카드를 꺼내주세요') {
       questText.textContent = '카드를 결제단말에 가져가세요';
-      //showClickGuide('right', 0, 0, false, 'slotGlowMesh');
     }
   });
 
@@ -173,7 +175,11 @@ async function init() {
     }
     else if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
-      // [수정] arrowMesh 표시 로직 삭제됨
+
+      if (sceneObjects.arrowMesh) {
+        sceneObjects.arrowMesh.visible = true;
+      }
+
       autoZoomToPayment();
 
       const questText = document.getElementById('quest-text-1');
@@ -191,7 +197,10 @@ async function init() {
       hideClickGuide();
       statusMessageEl.textContent = '현재 상태: 결제 대기 중';
       statusMessageEl.classList.remove('success');
-      // [수정] arrowMesh 숨김 로직 삭제됨
+
+      if (sceneObjects.arrowMesh) {
+        sceneObjects.arrowMesh.visible = false;
+      }
     }
     else if (event.data.type === 'PRINT_RECEIPT') {
       if (sceneObjects.kioskGroup.userData.paperMesh && !isPrinting) {
@@ -248,19 +257,30 @@ function animate() {
 
   updateCamera(delta);
 
-  // [수정] arrowMesh 위치 애니메이션 로직 삭제됨
+  // 3D 화살표 진동 애니메이션
+  if (sceneObjects && sceneObjects.arrowMesh && sceneObjects.arrowMesh.visible) {
+    const ARROW_BASE_Y = 0.6;
+    const ARROW_SPEED = 5.0;
+    const ARROW_AMP = 0.05;
+    sceneObjects.arrowMesh.position.y = ARROW_BASE_Y + Math.sin(time * ARROW_SPEED) * ARROW_AMP;
+  }
 
+  // 2D 클릭 가이드 위치 및 바운스 처리
   if (currentGuide) {
     let screenX = currentGuide.x;
     let screenY = currentGuide.y;
     let scaleFactor = 1.0;
     const REFERENCE_DISTANCE = 2.0;
+    const containerRect = container.getBoundingClientRect();
 
     if (currentGuide.fromIframe && sceneObjects && sceneObjects.kioskGroup) {
       const cssObject = sceneObjects.kioskGroup.children.find(c => c.isCSS3DObject || c.element);
       if (cssObject) {
-        const localX = (currentGuide.x - 350) * 0.001;
-        const localY = (450 - currentGuide.y) * 0.001;
+        const iframeW = 700;
+        const iframeH = 900;
+
+        const localX = currentGuide.x - (iframeW / 2);
+        const localY = (iframeH / 2) - currentGuide.y;
 
         const targetPos = new THREE.Vector3(localX, localY, 0);
         targetPos.applyMatrix4(cssObject.matrixWorld);
@@ -270,8 +290,8 @@ function animate() {
         scaleFactor = Math.min(1.0, scaleFactor);
 
         targetPos.project(camera);
-        screenX = (targetPos.x * 0.5 + 0.5) * window.innerWidth;
-        screenY = -(targetPos.y * 0.5 - 0.5) * window.innerHeight;
+        screenX = (targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
+        screenY = -(targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
       }
     } else if (currentGuide.target3DObjName && sceneObjects && sceneObjects[currentGuide.target3DObjName]) {
       const obj = sceneObjects[currentGuide.target3DObjName];
@@ -283,19 +303,25 @@ function animate() {
       scaleFactor = Math.min(1.0, scaleFactor);
 
       targetPos.project(camera);
-      screenX = (targetPos.x * 0.5 + 0.5) * window.innerWidth;
-      screenY = -(targetPos.y * 0.5 - 0.5) * window.innerHeight;
+      screenX = (targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
+      screenY = -(targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
 
       if (currentGuide.direction === 'right') screenX -= 60 * scaleFactor;
       if (currentGuide.direction === 'up') screenY += 40 * scaleFactor;
     }
 
-    const overlay = document.getElementById('click-guide-overlay');
-    if (overlay) {
-      overlay.style.left = `${screenX}px`;
-      overlay.style.top = `${screenY}px`;
-      overlay.style.transformOrigin = 'center';
-      overlay.style.transform = `scale(${scaleFactor})`;
+    const bounceOffset = Math.sin(time * Math.PI * 2) * 15;
+    const absBounce = Math.abs(bounceOffset);
+
+    const wrapper = document.getElementById('click-guide-wrapper');
+    if (wrapper) {
+      if (currentGuide.direction === 'up') {
+        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateY(${-absBounce}px)`;
+      } else if (currentGuide.direction === 'right') {
+        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateX(${absBounce}px)`;
+      } else {
+        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor})`;
+      }
     }
   }
 
@@ -312,11 +338,13 @@ export function showToast(message) {
 }
 
 function createClickGuideDOM() {
-  if (document.getElementById('click-guide-overlay')) return;
+  if (document.getElementById('click-guide-wrapper')) return;
+
+  const wrapper = document.createElement('div');
+  wrapper.id = 'click-guide-wrapper';
 
   const overlay = document.createElement('div');
   overlay.id = 'click-guide-overlay';
-  overlay.style.transition = 'transform 0.1s ease-out';
 
   const imgUp = document.createElement('img');
   imgUp.id = 'guide-img-up';
@@ -330,15 +358,16 @@ function createClickGuideDOM() {
 
   overlay.appendChild(imgUp);
   overlay.appendChild(imgRight);
-  document.body.appendChild(overlay);
+  wrapper.appendChild(overlay);
+  document.body.appendChild(wrapper);
 }
 
 export function showClickGuide(direction, x, y, fromIframe = false, target3DObjName = null) {
-  const overlay = document.getElementById('click-guide-overlay');
+  const wrapper = document.getElementById('click-guide-wrapper');
   const imgUp = document.getElementById('guide-img-up');
   const imgRight = document.getElementById('guide-img-right');
 
-  if (!overlay) return;
+  if (!wrapper) return;
 
   currentGuide = { direction, x, y, fromIframe, target3DObjName };
 
@@ -351,13 +380,13 @@ export function showClickGuide(direction, x, y, fromIframe = false, target3DObjN
     imgRight.classList.add('guide-dir-right');
   }
 
-  overlay.classList.add('visible');
+  wrapper.classList.add('visible');
 }
 
 export function hideClickGuide() {
   currentGuide = null;
-  const overlay = document.getElementById('click-guide-overlay');
-  if (overlay) {
-    overlay.classList.remove('visible');
+  const wrapper = document.getElementById('click-guide-wrapper');
+  if (wrapper) {
+    wrapper.classList.remove('visible');
   }
 }

@@ -95,7 +95,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     paperObj.visible = false;
     showToast("물건을 '내 물건'으로 옮겼습니다.");
 
-    // [수정 핵심] 메인 코드에서 넘겨준 현재 브랜드 정보 획득
     const currentBrand = kioskGroup.userData.currentBrand || '';
 
     const toolsPane = document.querySelector('.tools-pane');
@@ -114,29 +113,28 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       }
     }
 
-    // 브랜드별 렌더링 변수 선언
     let titleText = '결제 영수증';
     let mainText = '영수증';
     let timeText = '';
     let seatText = '';
 
-    // [수정 핵심] 브랜드 종류에 따라 텍스트 분기 처리
     if (currentBrand === 'busterminal') {
-      const info = paperObj.userData.ticketInfo || { destination: '목적지', time: '시간', seat: '좌석' };
+      const info = paperObj.userData.ticketInfo || { destination: '목적지' };
       titleText = '버스 승차권';
       mainText = info.destination ? '세종 -> ' + info.destination : '승차권';
-      timeText = info.time ? '시간: ' + escapeHTML(info.time) : '';
-      seatText = info.seat ? '| 좌석: ' + escapeHTML(info.seat) : '';
+
+      // ✅ 사용자님의 아이디어 반영: 시간과 좌석 정보를 비워서 UI 높이를 확 줄입니다!
+      timeText = '';
+      seatText = '';
+
     } else if (currentBrand === 'hospital') {
       titleText = '진료비 계산서';
       mainText = '병원 영수증 / 처방전';
     } else {
-      // 기타 브랜드 (맥도날드, 컴포즈, CGV 등 일반 브랜드)
       titleText = '결제 영수증';
       mainText = '주문 영수증';
     }
 
-    // 좌석이나 시간 정보가 있을 때만 렌더링되도록 템플릿 리터럴 조건부 처리
     const detailHTML = (timeText || seatText)
       ? `<div style="font-size: 1.2rem; color: #4e5968; font-weight: 600;">${timeText} ${seatText}</div>`
       : '';
@@ -156,6 +154,11 @@ export function setupInteraction(canvas, camera, sceneObjects) {
 
       </div>
     `;
+
+    // 영수증 획득 시 자동으로 살짝 스크롤해주는 기능도 그대로 유지해 두었습니다!
+    setTimeout(() => {
+      toolsPane.scrollTo({ top: toolsPane.scrollHeight, behavior: 'smooth' });
+    }, 50);
   }
 
   function onPointerMove(event) {

@@ -1,6 +1,5 @@
 const app = document.getElementById('app');
 
-// 사용자의 결제 상태 관리
 let orderState = {
   dateObj: new Date(),
   dateStr: '',
@@ -25,28 +24,63 @@ const terminalsByRegion = {
   '대구/경북': ['경산', '경주', '구미', '동대구', '상주', '안동', '영주', '포항']
 };
 
-// ==========================================
-// 메인 화면과의 통신 헬퍼 함수
-// ==========================================
 function updateQuest(text) {
   if (window.parent) {
     window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
   }
 }
 
-function showGuide(direction, x, y) {
-  if (window.parent) {
-    window.parent.postMessage({
-      type: 'SHOW_CLICK_GUIDE',
-      direction: direction,
-      x: x,
-      y: y,
-      fromIframe: true // 메인 화면에서 좌표 보정을 위해 플래그 추가
-    }, '*');
+let guideTimeoutId = null;
+
+function showGuideOnTarget(direction, selector, delay = 0) {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
+
+  const sendGuide = () => {
+    const el = document.querySelector(selector);
+    if (el && window.parent) {
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      window.parent.postMessage({
+        type: 'SHOW_CLICK_GUIDE',
+        direction: direction,
+        x: x,
+        y: y,
+        fromIframe: true
+      }, '*');
+    }
+  };
+
+  if (delay > 0) {
+    guideTimeoutId = setTimeout(sendGuide, delay);
+  } else {
+    sendGuide();
   }
 }
 
+function showGuide(direction, x, y, delay = 0) {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
+  const sendGuide = () => {
+    if (window.parent) {
+      window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction, x, y, fromIframe: true }, '*');
+    }
+  };
+  if (delay > 0) guideTimeoutId = setTimeout(sendGuide, delay);
+  else sendGuide();
+}
+
 function hideGuide() {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
   if (window.parent) {
     window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
   }
@@ -67,7 +101,8 @@ function getFormattedDate(d) {
   return `${yyyy}-${mm}-${dd} (${days[d.getDay()]})`;
 }
 
-setInterval(() => {
+// ★ 리뷰 반영: setInterval 메모리 누수 방지를 위한 핸들링 추가
+const clockInterval = setInterval(() => {
   const dateEl = document.getElementById('current-date');
   const timeEl = document.getElementById('current-time');
   if (dateEl && timeEl) {
@@ -77,9 +112,10 @@ setInterval(() => {
   }
 }, 1000);
 
-// ==========================================
-// [STEP 1] 첫 화면
-// ==========================================
+// iframe 언로드 시 타이머 해제
+window.addEventListener('beforeunload', () => clearInterval(clockInterval));
+
+
 function renderStep1() {
   app.innerHTML = `
     <div id="step1" class="step-container">
@@ -114,7 +150,7 @@ function renderStep1() {
   `;
 
   updateQuest('현장 발권을 눌러주세요');
-  setTimeout(() => { showGuide('up', 350, 420); }, 300);
+  showGuideOnTarget('up', '#btn-현장발권', 300);
 
   document.getElementById('btn-현장발권').addEventListener('click', () => {
     hideGuide();
@@ -123,9 +159,6 @@ function renderStep1() {
   });
 }
 
-// ==========================================
-// [STEP 2-A] 노선 및 날짜 선택
-// ==========================================
 function renderStep2_Route() {
   const isDestSelected = orderState.destination !== null;
   const destText = isDestSelected ? orderState.destination : '도착지 선택';
@@ -179,10 +212,10 @@ function renderStep2_Route() {
 
   if (!isDestSelected) {
     updateQuest('도착지 선택을 눌러주세요');
-    setTimeout(() => { showGuide('up', 500, 400); }, 300);
+    showGuideOnTarget('up', '#box-destination', 300);
   } else {
     updateQuest('조회하기를 눌러주세요');
-    setTimeout(() => { showGuide('up', 500, 680); }, 300);
+    showGuideOnTarget('up', '#btn-search', 300);
   }
 
   document.getElementById('btn-prev-day').addEventListener('click', () => {
@@ -214,9 +247,6 @@ function renderStep2_Route() {
   });
 }
 
-// ==========================================
-// [STEP 2-B] 터미널 목록 선택
-// ==========================================
 function renderStep2_Terminal() {
   app.innerHTML = `
     <div id="step2_terminal" class="step-container">
@@ -246,8 +276,7 @@ function renderStep2_Terminal() {
   const regions = Object.keys(terminalsByRegion);
   const CHOSUNG = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
 
-  updateQuest('다른 지역을 눌러주세요');
-  setTimeout(() => { showGuide('up', 450, 300); }, 300);
+  updateQuest('터미널을 선택해주세요');
 
   function updateTerminalUI() {
     document.getElementById('region-list').innerHTML = regions.map(r =>
@@ -279,6 +308,8 @@ function renderStep2_Terminal() {
     document.getElementById('terminal-list').innerHTML = filteredTerminals.map(t =>
       `<button class="terminal-btn" data-name="${t}">${t}</button>`
     ).join('') || '<div style="grid-column: span 2; text-align: center; padding: 20px; color: #999;">터미널이 없습니다.</div>';
+
+    showGuideOnTarget('up', '.terminal-btn', 300);
 
     document.querySelectorAll('.region-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -313,9 +344,6 @@ function renderStep2_Terminal() {
   document.getElementById('btn-back-term').addEventListener('click', renderStep2_Route);
 }
 
-// ==========================================
-// [STEP 3] 시간 선택 화면
-// ==========================================
 function renderStep3() {
   const now = new Date();
   const hourOffsets = [-1, 0, 1, 2];
@@ -378,7 +406,7 @@ function renderStep3() {
   `;
 
   updateQuest('버스 시간을 눌러주세요');
-  setTimeout(() => { showGuide('up', 350, 450); }, 300);
+  showGuideOnTarget('up', '.bookable-time', 300);
 
   document.getElementById('btn-home3').addEventListener('click', () => {
     hideGuide();
@@ -396,9 +424,6 @@ function renderStep3() {
   });
 }
 
-// ==========================================
-// [STEP 4] 좌석 선택 화면
-// ==========================================
 function renderStep4() {
   app.innerHTML = `
     <div id="step4" class="step-container">
@@ -451,7 +476,7 @@ function renderStep4() {
   `;
 
   updateQuest('좌석을 선택해주세요');
-  setTimeout(() => { showGuide('up', 150, 450); }, 300);
+  showGuideOnTarget('up', '.seat:not(.sold)', 300);
 
   document.getElementById('btn-home4').addEventListener('click', () => {
     hideGuide();
@@ -467,14 +492,14 @@ function renderStep4() {
       tempSeat = e.target;
       modal.style.display = 'flex';
       updateQuest('어른을 눌러주세요');
-      setTimeout(() => { showGuide('up', 350, 400); }, 100);
+      showGuideOnTarget('up', '.age-btn', 100);
     });
   });
 
   document.getElementById('btn-modal-cancel').addEventListener('click', () => {
     modal.style.display = 'none';
     updateQuest('좌석을 선택해주세요');
-    setTimeout(() => { showGuide('up', 150, 450); }, 100);
+    showGuideOnTarget('up', '.seat:not(.sold)', 100);
   });
 
   document.querySelectorAll('.age-btn').forEach(btn => {
@@ -492,7 +517,7 @@ function renderStep4() {
       modal.style.display = 'none';
 
       updateQuest('선택완료를 눌러주세요');
-      setTimeout(() => { showGuide('up', 600, 800); }, 100);
+      showGuideOnTarget('up', '#btn-submit', 100);
     });
   });
 
@@ -504,10 +529,13 @@ function renderStep4() {
   });
 }
 
-// ==========================================
-// [STEP 5] 결제 진행 화면
-// ==========================================
+let isCardInserted = false;
+let isPaymentProcessed = false;
+
 function renderStep5() {
+  isCardInserted = false;
+  isPaymentProcessed = false;
+
   app.innerHTML = `
     <div id="step5" class="step-container">
       <header>
@@ -568,15 +596,33 @@ function renderStep5() {
     renderStep1();
   });
 
+  document.getElementById('btn-complete-confirm').addEventListener('click', () => {
+    document.getElementById('complete-modal').style.display = 'none';
+    hideGuide();
+
+    window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+
+    const ticketInfo = {
+      destination: orderState.destination,
+      time: orderState.time,
+      seat: orderState.seat
+    };
+    window.parent.postMessage({ type: 'PRINT_RECEIPT', ticketInfo }, '*');
+
+    setTimeout(() => { renderStep1(); }, 3500);
+  });
+
   if (window.parent) {
     window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
   }
 }
 
-// 결제 완료 및 모달 제어 이벤트
 window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+
   if (event.data && event.data.type === 'CARD_INSERTED') {
     if (document.getElementById('step5')) {
+      isCardInserted = true;
       hideGuide();
 
       const processingModal = document.getElementById('processing-modal');
@@ -585,37 +631,30 @@ window.addEventListener('message', (event) => {
       processingModal.style.display = 'flex';
 
       setTimeout(() => {
+        isPaymentProcessed = true;
         processingModal.style.display = 'none';
         completeModal.style.display = 'flex';
 
-        updateQuest('카드를 제거해주세요');
-        showGuide('right', 350, 750);
+        if (isCardInserted) {
+          updateQuest('카드를 회수하고 확인을 눌러주세요');
+          showGuideOnTarget('up', '#btn-complete-confirm', 300);
+        } else {
+          updateQuest('확인을 눌러주세요');
+          showGuideOnTarget('up', '#btn-complete-confirm', 300);
+        }
       }, 1500);
     }
   }
 
   if (event.data && event.data.type === 'CARD_REMOVED') {
-    const completeModal = document.getElementById('complete-modal');
-    if (completeModal && completeModal.style.display === 'flex') {
-      hideGuide();
-      updateQuest('확인을 눌러주세요');
-      setTimeout(() => { showGuide('up', 350, 600); }, 100);
+    if (document.getElementById('step5')) {
+      isCardInserted = false;
 
-      document.getElementById('btn-complete-confirm').addEventListener('click', () => {
-        completeModal.style.display = 'none';
+      if (isPaymentProcessed) {
         hideGuide();
-
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
-
-        const ticketInfo = {
-          destination: orderState.destination,
-          time: orderState.time,
-          seat: orderState.seat
-        };
-        window.parent.postMessage({ type: 'PRINT_RECEIPT', ticketInfo }, '*');
-
-        setTimeout(() => { renderStep1(); }, 500);
-      }, { once: true });
+        updateQuest('확인을 눌러주세요');
+        showGuideOnTarget('up', '#btn-complete-confirm', 300);
+      }
     }
   }
 });

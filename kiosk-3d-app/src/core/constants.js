@@ -10,7 +10,7 @@ export const BRAND_NAMES = {
 };
 
 export const KIOSK = {
-  CARD_SPAWN_POSITION: { x: 0.35, y: 0.9, z: 0.5 },
+  CARD_SPAWN_POSITION: { x: 0.2, y: 0.45, z: 0.4 },
   CARD_HIDE_POSITION: { x: 0, y: -10, z: 0 },
   CARD_ROTATION_Z: -Math.PI / 2,
 
@@ -24,29 +24,29 @@ export const KIOSK = {
 
   RECEIPT_COLLECT_THRESHOLD_Y: 0.6,
 
-  COLLISION_EXPAND_SCALAR: 0.08,
-
-  SLOT_SNAP_OFFSET_Y: 0.1,
-  SLOT_SNAP_OFFSET_Z: 0.11,
+  COLLISION_EXPAND_SCALAR: 0.05,
+  SLOT_SNAP_OFFSET_Y: -0.05,
+  SLOT_SNAP_OFFSET_Z: 0.04,
+  SCANNER_SNAP_OFFSET_Y: -0.05,
+  SCANNER_SNAP_OFFSET_Z: 0.04,
 };
-
-export const SNAP_DURATION = 0.4;
 
 export const CAMERA = {
   FOV: 45,
   NEAR: 0.1,
-  FAR: 100,
-  ZOOM_STEP: 0.3,
+  FAR: 1000,
   ZOOM_MIN: 1.0,
   ZOOM_MAX: 3.5,
-  LERP_FACTOR: 3,
+  ZOOM_STEP: 0.3,
+  LERP_FACTOR: 3.5,
 };
 
+export const SNAP_DURATION = 0.3;
+
 export const MSG = {
-  PAYMENT_READY: 'PAYMENT_READY',
-  PAYMENT_COMPLETE: 'PAYMENT_COMPLETE',
-  PRINT_RECEIPT: 'PRINT_RECEIPT',
-  CARD_INSERTED: 'CARD_INSERTED',
-  CARD_REMOVED: 'CARD_REMOVED',
-  BARCODE_SCANNED: 'BARCODE_SCANNED',
+  CARD_INSERTED: 'cardInserted',
+  CARD_REMOVED: 'cardRemoved',
+  BARCODE_SCANNED: 'barcodeScanned',
+  PRINT_RECEIPT: 'printReceipt',
+  PAYMENT_READY: 'paymentReady',
 };

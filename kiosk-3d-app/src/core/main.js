@@ -1,8 +1,12 @@
+// 파일명: src/core/main.js
 import * as THREE from 'three';
 import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
-import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment } from '../scene/camera.js';
+import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment, autoZoomToScreenAndLower } from '../scene/camera.js';
 import { createSceneObjects, resetCardPosition, spawnCard } from '../scene/objects.js';
 import { setupInteraction, onCardInserted, unlockCard } from '../scene/interaction.js';
+import { isTrustedOrigin } from '../utils/security.js';
+// ★ 리뷰 반영: 하드코딩 방지를 위한 브랜드 상수 임포트
+import { BRAND_NAMES } from './constants.js';
 
 let scene, renderer, cssRenderer, camera;
 let container, clock, cssContainer;
@@ -10,6 +14,9 @@ let statusMessageEl, resetBtn, cameraSelect;
 let sceneObjects;
 let isPrinting = false;
 let currentGuide = null;
+const _targetPos = new THREE.Vector3();
+// ★ 리뷰 반영: DOM 반복 탐색 비용(비효율) 제거를 위한 캐싱 변수
+let _guideWrapper = null;
 
 (async () => {
   await init();
@@ -53,14 +60,11 @@ async function init() {
       iframeWin.postMessage({ type: 'CARD_INSERTED' }, '*');
     }
 
-    if (sceneObjects.arrowMesh) {
-      sceneObjects.arrowMesh.visible = false;
-    }
-
     statusMessageEl.textContent = '현재 상태: 결제 중... 주문을 완료합니다.';
     statusMessageEl.classList.add('success');
 
     hideClickGuide();
+    autoZoomToScreenAndLower();
   });
 
   cameraSelect.addEventListener('change', (e) => {
@@ -100,10 +104,6 @@ async function init() {
       sceneObjects.scannerGlowMesh.material.color.setHex(0xffff00);
     }
 
-    if (sceneObjects.arrowMesh) {
-      sceneObjects.arrowMesh.visible = false;
-    }
-
     const inventory = document.getElementById('my-inventory');
     if (inventory) inventory.remove();
   }
@@ -114,12 +114,8 @@ async function init() {
       const brand = e.currentTarget.dataset.brand;
       sceneObjects.kioskGroup.userData.currentBrand = brand;
 
-      let brandName = "";
-      if (brand === 'mcdonalds') brandName = "맥도날드";
-      if (brand === 'compose') brandName = "컴포즈커피";
-      if (brand === 'hospital') brandName = "병원";
-      if (brand === 'cgv') brandName = "CGV";
-      if (brand === 'busterminal') brandName = "버스터미널";
+      // ★ 리뷰 반영: 여러 줄의 if 문 대신 깔끔하게 상수를 통해 맵핑
+      const brandName = BRAND_NAMES[brand] || "";
 
       if (brandName !== "") {
         document.getElementById('quest-text-1').textContent = `1. ${brandName} 화면에서 메뉴를 직접 클릭해 주문하세요.`;
@@ -145,8 +141,10 @@ async function init() {
     spawnCard();
 
     const questText = document.getElementById('quest-text-1');
-    if (questText && questText.textContent === '카드를 꺼내주세요') {
+    if (questText && questText.textContent.includes('카드를 꺼내주세요')) {
       questText.textContent = '카드를 결제단말에 가져가세요';
+      hideClickGuide();
+      showClickGuide('up', 0, 0, false, 'slotGlowMesh');
     }
   });
 
@@ -167,7 +165,7 @@ async function init() {
   });
 
   window.addEventListener('message', (event) => {
-    if (!event.data) return;
+    if (!event.data || !isTrustedOrigin(event)) return;
 
     if (event.data.type === 'UPDATE_QUEST') {
       const questText = document.getElementById('quest-text-1');
@@ -175,11 +173,6 @@ async function init() {
     }
     else if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
-
-      if (sceneObjects.arrowMesh) {
-        sceneObjects.arrowMesh.visible = true;
-      }
-
       autoZoomToPayment();
 
       const questText = document.getElementById('quest-text-1');
@@ -197,10 +190,6 @@ async function init() {
       hideClickGuide();
       statusMessageEl.textContent = '현재 상태: 결제 대기 중';
       statusMessageEl.classList.remove('success');
-
-      if (sceneObjects.arrowMesh) {
-        sceneObjects.arrowMesh.visible = false;
-      }
     }
     else if (event.data.type === 'PRINT_RECEIPT') {
       if (sceneObjects.kioskGroup.userData.paperMesh && !isPrinting) {
@@ -215,21 +204,33 @@ async function init() {
         const questText = document.getElementById('quest-text-1');
         if (questText) questText.textContent = '차표/영수증을 가져가주세요';
 
-        showClickGuide('up', 0, 0, false, 'scannerGlowMesh');
+        showClickGuide('up', 0, 0, false, 'paperMesh');
 
         paper.position.y = 0.53;
         const targetY = 0.47;
-        function animateReceipt() {
+        const speedPerSecond = 0.12;
+        let lastTime = performance.now();
+
+        function animateReceipt(currentTime) {
+          const deltaTime = (currentTime - lastTime) / 1000;
+          lastTime = currentTime;
+
           if (paper.position.y > targetY) {
-            paper.position.y -= 0.002;
-            requestAnimationFrame(animateReceipt);
+            paper.position.y -= speedPerSecond * deltaTime;
+            if (paper.position.y <= targetY) {
+              paper.position.y = targetY;
+              isPrinting = false;
+              statusMessageEl.textContent = '영수증을 스캐너에 스캔하거나 확인해주세요.';
+            } else {
+              requestAnimationFrame(animateReceipt);
+            }
           } else {
             paper.position.y = targetY;
             isPrinting = false;
+            statusMessageEl.textContent = '영수증을 스캐너에 스캔하거나 확인해주세요.';
           }
         }
-        animateReceipt();
-        statusMessageEl.textContent = '영수증을 스캐너에 스캔하거나 확인해주세요.';
+        requestAnimationFrame(animateReceipt);
       }
     }
     else if (event.data.type === 'SHOW_CLICK_GUIDE') {
@@ -257,15 +258,6 @@ function animate() {
 
   updateCamera(delta);
 
-  // 3D 화살표 진동 애니메이션
-  if (sceneObjects && sceneObjects.arrowMesh && sceneObjects.arrowMesh.visible) {
-    const ARROW_BASE_Y = 0.6;
-    const ARROW_SPEED = 5.0;
-    const ARROW_AMP = 0.05;
-    sceneObjects.arrowMesh.position.y = ARROW_BASE_Y + Math.sin(time * ARROW_SPEED) * ARROW_AMP;
-  }
-
-  // 2D 클릭 가이드 위치 및 바운스 처리
   if (currentGuide) {
     let screenX = currentGuide.x;
     let screenY = currentGuide.y;
@@ -276,51 +268,57 @@ function animate() {
     if (currentGuide.fromIframe && sceneObjects && sceneObjects.kioskGroup) {
       const cssObject = sceneObjects.kioskGroup.children.find(c => c.isCSS3DObject || c.element);
       if (cssObject) {
-        const iframeW = 700;
-        const iframeH = 900;
+        const iframeW = cssObject.element.offsetWidth || 700;
+        const iframeH = cssObject.element.offsetHeight || 900;
 
         const localX = currentGuide.x - (iframeW / 2);
         const localY = (iframeH / 2) - currentGuide.y;
 
-        const targetPos = new THREE.Vector3(localX, localY, 0);
-        targetPos.applyMatrix4(cssObject.matrixWorld);
+        _targetPos.set(localX, localY, 0);
+        _targetPos.applyMatrix4(cssObject.matrixWorld);
 
-        const dist = camera.position.distanceTo(targetPos);
+        const dist = camera.position.distanceTo(_targetPos);
         scaleFactor = REFERENCE_DISTANCE / dist;
         scaleFactor = Math.min(1.0, scaleFactor);
 
-        targetPos.project(camera);
-        screenX = (targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
-        screenY = -(targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
+        _targetPos.project(camera);
+        screenX = (_targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
+        screenY = -(_targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
       }
-    } else if (currentGuide.target3DObjName && sceneObjects && sceneObjects[currentGuide.target3DObjName]) {
-      const obj = sceneObjects[currentGuide.target3DObjName];
-      const targetPos = new THREE.Vector3();
-      obj.getWorldPosition(targetPos);
+    } else if (currentGuide.target3DObjName && sceneObjects) {
+      let obj = sceneObjects[currentGuide.target3DObjName];
 
-      const dist = camera.position.distanceTo(targetPos);
-      scaleFactor = REFERENCE_DISTANCE / dist;
-      scaleFactor = Math.min(1.0, scaleFactor);
+      if (currentGuide.target3DObjName === 'paperMesh' && sceneObjects.kioskGroup) {
+        obj = sceneObjects.kioskGroup.userData.paperMesh;
+      }
 
-      targetPos.project(camera);
-      screenX = (targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
-      screenY = -(targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
+      if (obj) {
+        obj.getWorldPosition(_targetPos);
 
-      if (currentGuide.direction === 'right') screenX -= 60 * scaleFactor;
-      if (currentGuide.direction === 'up') screenY += 40 * scaleFactor;
+        const dist = camera.position.distanceTo(_targetPos);
+        scaleFactor = REFERENCE_DISTANCE / dist;
+        scaleFactor = Math.min(1.0, scaleFactor);
+
+        _targetPos.project(camera);
+        screenX = (_targetPos.x * 0.5 + 0.5) * containerRect.width + containerRect.left;
+        screenY = -(_targetPos.y * 0.5 - 0.5) * containerRect.height + containerRect.top;
+
+        if (currentGuide.direction === 'right') screenX -= 60 * scaleFactor;
+        if (currentGuide.direction === 'up') screenY += 40 * scaleFactor;
+      }
     }
 
     const bounceOffset = Math.sin(time * Math.PI * 2) * 15;
     const absBounce = Math.abs(bounceOffset);
 
-    const wrapper = document.getElementById('click-guide-wrapper');
-    if (wrapper) {
+    // ★ 리뷰 반영: DOM 객체를 매번 찾지 않고 캐싱된 wrapper 사용
+    if (_guideWrapper) {
       if (currentGuide.direction === 'up') {
-        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateY(${-absBounce}px)`;
+        _guideWrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateY(${-absBounce}px)`;
       } else if (currentGuide.direction === 'right') {
-        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateX(${absBounce}px)`;
+        _guideWrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateX(${absBounce}px)`;
       } else {
-        wrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor})`;
+        _guideWrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor})`;
       }
     }
   }
@@ -329,16 +327,11 @@ function animate() {
   cssRenderer.render(scene, camera);
 }
 
-export function showToast(message) {
-  const toastEl = document.getElementById('custom-toast');
-  if (!toastEl) return;
-  toastEl.textContent = message;
-  toastEl.classList.add('show');
-  setTimeout(() => { toastEl.classList.remove('show'); }, 3000);
-}
-
 function createClickGuideDOM() {
-  if (document.getElementById('click-guide-wrapper')) return;
+  if (document.getElementById('click-guide-wrapper')) {
+    _guideWrapper = document.getElementById('click-guide-wrapper');
+    return;
+  }
 
   const wrapper = document.createElement('div');
   wrapper.id = 'click-guide-wrapper';
@@ -360,14 +353,16 @@ function createClickGuideDOM() {
   overlay.appendChild(imgRight);
   wrapper.appendChild(overlay);
   document.body.appendChild(wrapper);
+
+  // 생성된 래퍼를 캐싱 변수에 저장
+  _guideWrapper = wrapper;
 }
 
 export function showClickGuide(direction, x, y, fromIframe = false, target3DObjName = null) {
-  const wrapper = document.getElementById('click-guide-wrapper');
   const imgUp = document.getElementById('guide-img-up');
   const imgRight = document.getElementById('guide-img-right');
 
-  if (!wrapper) return;
+  if (!_guideWrapper) return;
 
   currentGuide = { direction, x, y, fromIframe, target3DObjName };
 
@@ -380,13 +375,12 @@ export function showClickGuide(direction, x, y, fromIframe = false, target3DObjN
     imgRight.classList.add('guide-dir-right');
   }
 
-  wrapper.classList.add('visible');
+  _guideWrapper.classList.add('visible');
 }
 
 export function hideClickGuide() {
   currentGuide = null;
-  const wrapper = document.getElementById('click-guide-wrapper');
-  if (wrapper) {
-    wrapper.classList.remove('visible');
+  if (_guideWrapper) {
+    _guideWrapper.classList.remove('visible');
   }
 }

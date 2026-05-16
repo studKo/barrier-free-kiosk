@@ -4,9 +4,9 @@ import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment, autoZoomToScreenAndLower } from '../scene/camera.js';
 import { createSceneObjects, resetCardPosition, spawnCard } from '../scene/objects.js';
 import { setupInteraction, onCardInserted, unlockCard } from '../scene/interaction.js';
+// ★ 리뷰 반영: constants.js import 병합
+import { KIOSK, BRAND_NAMES } from './constants.js';
 import { isTrustedOrigin } from '../utils/security.js';
-// ★ 리뷰 반영: 하드코딩 방지를 위한 브랜드 상수 임포트
-import { BRAND_NAMES } from './constants.js';
 
 let scene, renderer, cssRenderer, camera;
 let container, clock, cssContainer;
@@ -15,8 +15,10 @@ let sceneObjects;
 let isPrinting = false;
 let currentGuide = null;
 const _targetPos = new THREE.Vector3();
-// ★ 리뷰 반영: DOM 반복 탐색 비용(비효율) 제거를 위한 캐싱 변수
 let _guideWrapper = null;
+// ★ 리뷰 반영: DOM 매번 탐색 방지를 위한 캐싱 변수
+let _guideImgUp = null;
+let _guideImgRight = null;
 
 (async () => {
   await init();
@@ -57,7 +59,8 @@ async function init() {
   onCardInserted(() => {
     const iframeWin = sceneObjects.kioskGroup.userData.iframeDOM?.contentWindow || document.querySelector('iframe')?.contentWindow;
     if (iframeWin) {
-      iframeWin.postMessage({ type: 'CARD_INSERTED' }, '*');
+      // ★ 리뷰 반영: origin 제한으로 보안 강화
+      iframeWin.postMessage({ type: 'CARD_INSERTED' }, window.location.origin);
     }
 
     statusMessageEl.textContent = '현재 상태: 결제 중... 주문을 완료합니다.';
@@ -89,8 +92,8 @@ async function init() {
     if (sceneObjects.kioskGroup.userData.paperMesh) {
       const paper = sceneObjects.kioskGroup.userData.paperMesh;
       paper.visible = false;
-      paper.position.set(-0.25, 0.47, 0.095);
-      paper.rotation.set(-Math.PI / 16, 0, 0);
+      paper.position.set(KIOSK.RECEIPT_OUTPUT_POSITION.x, KIOSK.RECEIPT_OUTPUT_POSITION.y, KIOSK.RECEIPT_OUTPUT_POSITION.z);
+      paper.rotation.set(KIOSK.RECEIPT_OUTPUT_ROTATION_X, 0, 0);
       paper.userData.ticketInfo = null;
     }
 
@@ -114,7 +117,6 @@ async function init() {
       const brand = e.currentTarget.dataset.brand;
       sceneObjects.kioskGroup.userData.currentBrand = brand;
 
-      // ★ 리뷰 반영: 여러 줄의 if 문 대신 깔끔하게 상수를 통해 맵핑
       const brandName = BRAND_NAMES[brand] || "";
 
       if (brandName !== "") {
@@ -166,10 +168,13 @@ async function init() {
 
   window.addEventListener('message', (event) => {
     if (!event.data || !isTrustedOrigin(event)) return;
-
     if (event.data.type === 'UPDATE_QUEST') {
       const questText = document.getElementById('quest-text-1');
-      if (questText) questText.textContent = event.data.text;
+      if (questText) questText.innerHTML = event.data.text; // <--- 이렇게 변경해주세요!
+    }
+
+    else if (event.data.type === 'SCANNER_READY') {
+      resetZoom();
     }
     else if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
@@ -206,8 +211,9 @@ async function init() {
 
         showClickGuide('up', 0, 0, false, 'paperMesh');
 
-        paper.position.y = 0.53;
-        const targetY = 0.47;
+        // ★ 리뷰 반영: 매직넘버 제거 및 상수 적용
+        paper.position.y = KIOSK.RECEIPT_START_Y;
+        const targetY = KIOSK.RECEIPT_TARGET_Y;
         const speedPerSecond = 0.12;
         let lastTime = performance.now();
 
@@ -234,7 +240,8 @@ async function init() {
       }
     }
     else if (event.data.type === 'SHOW_CLICK_GUIDE') {
-      showClickGuide(event.data.direction, event.data.x, event.data.y, event.data.fromIframe);
+      // ✅ 5번째 파라미터 누락 복구 (튕김 현상의 원인 해결)
+      showClickGuide(event.data.direction, event.data.x, event.data.y, event.data.fromIframe, event.data.target3DObjName);
     }
     else if (event.data.type === 'HIDE_CLICK_GUIDE') {
       hideClickGuide();
@@ -311,7 +318,6 @@ function animate() {
     const bounceOffset = Math.sin(time * Math.PI * 2) * 15;
     const absBounce = Math.abs(bounceOffset);
 
-    // ★ 리뷰 반영: DOM 객체를 매번 찾지 않고 캐싱된 wrapper 사용
     if (_guideWrapper) {
       if (currentGuide.direction === 'up') {
         _guideWrapper.style.transform = `translate(${screenX}px, ${screenY}px) translate(-50%, -50%) scale(${scaleFactor}) translateY(${-absBounce}px)`;
@@ -330,6 +336,8 @@ function animate() {
 function createClickGuideDOM() {
   if (document.getElementById('click-guide-wrapper')) {
     _guideWrapper = document.getElementById('click-guide-wrapper');
+    _guideImgUp = document.getElementById('guide-img-up');
+    _guideImgRight = document.getElementById('guide-img-right');
     return;
   }
 
@@ -354,25 +362,25 @@ function createClickGuideDOM() {
   wrapper.appendChild(overlay);
   document.body.appendChild(wrapper);
 
-  // 생성된 래퍼를 캐싱 변수에 저장
+  // ★ 리뷰 반영: 생성된 요소를 변수에 캐싱
   _guideWrapper = wrapper;
+  _guideImgUp = imgUp;
+  _guideImgRight = imgRight;
 }
 
 export function showClickGuide(direction, x, y, fromIframe = false, target3DObjName = null) {
-  const imgUp = document.getElementById('guide-img-up');
-  const imgRight = document.getElementById('guide-img-right');
-
-  if (!_guideWrapper) return;
+  // ★ 리뷰 반영: getElementById 반복 호출 대신 캐싱된 변수 사용
+  if (!_guideWrapper || !_guideImgUp || !_guideImgRight) return;
 
   currentGuide = { direction, x, y, fromIframe, target3DObjName };
 
-  imgUp.classList.remove('guide-dir-up');
-  imgRight.classList.remove('guide-dir-right');
+  _guideImgUp.classList.remove('guide-dir-up');
+  _guideImgRight.classList.remove('guide-dir-right');
 
   if (direction === 'up') {
-    imgUp.classList.add('guide-dir-up');
+    _guideImgUp.classList.add('guide-dir-up');
   } else if (direction === 'right') {
-    imgRight.classList.add('guide-dir-right');
+    _guideImgRight.classList.add('guide-dir-right');
   }
 
   _guideWrapper.classList.add('visible');

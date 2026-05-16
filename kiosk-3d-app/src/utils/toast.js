@@ -3,6 +3,8 @@
 
 /** 토스트 메시지가 표시되는 시간(밀리초) */
 const TOAST_DURATION_MS = 3000;
+// ★ 리뷰 반영: 연속 호출 시 이전 타이머를 취소하여 깜빡임 방지
+let _toastTimer = null;
 
 /**
  * 화면 중앙에 일시적인 알림(토스트 메시지)을 표시합니다.
@@ -12,9 +14,11 @@ const TOAST_DURATION_MS = 3000;
 export function showToast(message) {
   const toastEl = document.getElementById('custom-toast');
   if (!toastEl) return;
+  if (_toastTimer) clearTimeout(_toastTimer);
   toastEl.textContent = message;
   toastEl.classList.add('show');
-  setTimeout(() => {
+  _toastTimer = setTimeout(() => {
     toastEl.classList.remove('show');
+    _toastTimer = null;
   }, TOAST_DURATION_MS);
 }

@@ -43,10 +43,11 @@ export const CAMERA = {
 
 export const SNAP_DURATION = 0.3;
 
+// ★ 리뷰 반영: 실제 UI에서 사용하는 SCREAMING_CASE와 일치하도록 수정
 export const MSG = {
-  CARD_INSERTED: 'cardInserted',
-  CARD_REMOVED: 'cardRemoved',
-  BARCODE_SCANNED: 'barcodeScanned',
-  PRINT_RECEIPT: 'printReceipt',
-  PAYMENT_READY: 'paymentReady',
+  CARD_INSERTED: 'CARD_INSERTED',
+  CARD_REMOVED: 'CARD_REMOVED',
+  BARCODE_SCANNED: 'BARCODE_SCANNED',
+  PRINT_RECEIPT: 'PRINT_RECEIPT',
+  PAYMENT_READY: 'PAYMENT_READY',
 };

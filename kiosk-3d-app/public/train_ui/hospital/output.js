@@ -1,21 +1,18 @@
+// 파일명: hospital/output.js
 document.addEventListener('DOMContentLoaded', () => {
-    
     const printStatus = document.getElementById('print-status');
-    
-    // 3초 뒤에 (로딩바가 다 찼을 때) 실행
+
+    // ★ 리뷰 반영: 페이지가 열리자마자 부모 시스템의 퀘스트 텍스트 갱신
+    if (window.parent) {
+        window.parent.postMessage({ type: 'UPDATE_QUEST', text: '영수증이 출력되고 있습니다...' }, window.location.origin);
+    }
+
     setTimeout(() => {
-        // "0/1장" -> "1/1장" 으로 숫자 변경
         if (printStatus) {
             printStatus.innerHTML = '1/1장';
         }
-        
-        // 글씨 바뀌고 1초 뒤에 첫 화면으로 이동!
-        // output.js 안의 setTimeout 부분 수정
         setTimeout(() => {
-            // 🌟 index.html 대신 complete.html 로 넘어가게 수정!
-            window.location.href = 'complete.html'; 
+            window.location.href = 'complete.html';
         }, 1000);
-
-    }, 3000); // 로딩 시간 3초
-
+    }, 3000);
 });

@@ -94,9 +94,14 @@
               <p class="red-text">투입 후 빼지 마세요</p>
           </div>
           
-          <div class="card-img-box">
-              <p>💳 카드 넣는 이미지 삽입</p>
-          </div>
+      <div class="card-img-box">
+        <p class="guide-label">카드 넣는 곳</p>
+        <div class="machine-slot"></div>
+        <div class="credit-card">
+        <div class="card-chip"></div>
+      </div>
+      <div class="up-arrow"></div>
+    </div>
           
           <div class="modal-summary-row">
               <div class="summary-total">
@@ -122,12 +127,6 @@
       </div>
   </div>
 
-  <script src="payment.js"></script> 
-
-  <div id="card-modal" class="modal-overlay hidden">
-     ...
-  </div>
-
 <!--결제 완료 팝업-->
   <div id="payment-complete-modal" class="modal-overlay hidden">
       <div class="complete-modal-content">
@@ -138,8 +137,13 @@
           </div>
           
           <div class="card-img-box">
-              <p>💳 카드 빼는 이미지 삽입 (⬇)</p>
-          </div>
+            <p class="guide-label">카드 넣는 곳</p>
+            <div class="machine-slot"></div>
+            <div class="credit-card">
+            <div class="card-chip"></div>
+            </div>
+          <div class="down-arrow"></div> 
+</div>
 
           <div class="modal-summary-row">
               <div class="summary-total">
@@ -156,5 +160,7 @@
 
       </div>
   </div>
+
+  <script src="payment.js"></script>
 </body>
 </html>

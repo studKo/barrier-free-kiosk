@@ -440,3 +440,121 @@ body {
     font-weight: bold;
     letter-spacing: -1.5px;
 }
+
+/* --- 카드 투입 애니메이션 --- */
+.insert-animation-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    margin: 20px 0;
+}
+
+
+
+/* --- 1. 전체 테두리 박스 (가장 안정적이었던 기본 상태) --- */
+.card-img-box {
+    background-color: #ffffff;
+    border: 2px solid #007bff;
+    width: 500px; /* 팝업창 안 깨지게 크기 고정 */
+    margin: 10px auto; 
+    padding: 15px 0;
+    /* 내부 요소 세로로 정렬 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 안내 글씨 */
+.guide-label {
+    font-size: 20px;
+    color: #666;
+    margin: 0 0 30px 0;
+    margin-top: -30px;
+}
+
+/* --- 2. 기계 슬롯 --- */
+.machine-slot {
+    width: 100px;
+    height: 12px;
+    background-color: #333333;
+    border-radius: 6px;
+    z-index: 2; /* 카드보다 뒤에 */
+    position: relative;
+}
+
+/* --- 3. 신용카드 (세로형 + IC칩) --- */
+.credit-card {
+    width: 55px;
+    height: 80px;
+    background-color: #4da6ff;
+    border-radius: 5px;
+    border: 2px solid #e0f0ff;
+    z-index: 3; /* 검은 선 위로 올라오게 */
+    position: relative;
+    /* 🌟 핵심: 카드를 위로 끌어올려 검은 선에 겹치게 만듦 */
+    margin-top: -8px; 
+    
+    /* IC칩 가운데 정렬 */
+    display: flex;
+    justify-content: center;
+}
+
+.card-chip {
+    width: 14px;
+    height: 18px;
+    background-color: #ffd700;
+    border-radius: 3px;
+    margin-top: 10px; /* 카드 위쪽에 배치 */
+}
+
+/* --- 4. 위로 향하는 화살표 (작성자님이 주신 코드 그대로 비율만 살짝 축소) --- */
+.up-arrow {
+    position: relative;
+    width: 0;
+    height: 0;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-bottom: 25px solid #72c8f8;
+    margin-top: 10px; /* 카드와의 간격 */
+}
+
+.up-arrow::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 16px; 
+    height: 20px; 
+    background-color: #72c8f8;
+    top: 20px; 
+    left: -8px; 
+}
+
+/* --- 5. 아래로 향하는 화살표 (카드 빼기 픽토그램 용) --- */
+.down-arrow {
+    position: relative;
+    width: 0;
+    height: 0;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    /* 🌟 핵심: border-top을 써서 아래가 뾰족한 역삼각형을 만듭니다 */
+    border-top: 25px solid #72c8f8; 
+    
+    /* 그림이 위로 뻗어 만들어지기 때문에 카드와 안 겹치게 넉넉한 간격을 줍니다 */
+    margin-top: 30px; 
+}
+
+/* 화살표 기둥 (역삼각형 윗부분에 붙임) */
+.down-arrow::after {
+    content: '';
+    display: block;
+    position: absolute;
+    width: 16px; 
+    height: 20px; 
+    background-color: #72c8f8;
+    
+    /* 역삼각형의 평평한 윗부분 높이(25px)에 맞춰서 기둥을 올려 붙입니다 */
+    bottom: 25px; 
+    left: -8px; 
+}

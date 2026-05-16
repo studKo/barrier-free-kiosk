@@ -1,30 +1,81 @@
-// ==========================================
-// 1. 부모 창 연동 공통 헬퍼 함수 (그대로 복붙)
-// ==========================================
-function updateQuest(text) {
-  if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
-}
-function showGuide(direction, x, y) {
-  if (window.parent) window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: direction, x: x, y: y, fromIframe: true }, '*');
-}
-function hideGuide() {
-  if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+// 파일명: public/train_ui/compose/ui.js
+// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
+try {
+  if (window.parent && window.parent.document) {
+    const questText = window.parent.document.getElementById('quest-text-1');
+    if (questText) {
+      questText.style.whiteSpace = 'pre-wrap';
+      questText.style.lineHeight = '1.5';
+    }
+  }
+} catch (e) {
+  console.log("줄바꿈이 적용되지 않을 수 있습니다.");
 }
 
-// 특정 요소의 정중앙 X, Y 좌표를 구해서 가이드를 띄우는 편의 함수
-function pointToElement(elementIdOrSelector, direction = 'up') {
-  const el = document.querySelector(elementIdOrSelector);
-  if (el) {
-    const rect = el.getBoundingClientRect();
-    const centerX = rect.left + (rect.width / 2);
-    const centerY = rect.top + (rect.height / 2);
-    showGuide(direction, centerX, centerY);
+// 헬퍼 함수 (사용자님 버스터미널 코드 100% 동일)
+let guideTimeoutId = null;
+
+function updateQuest(text) {
+  if (window.parent) {
+    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
   }
 }
 
-// ==========================================
-// 2. 메뉴 데이터
-// ==========================================
+function showGuideOnTarget(direction, selector, delay = 0) {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
+
+  const sendGuide = () => {
+    const el = document.querySelector(selector);
+    if (el && window.parent) {
+      const rect = el.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      window.parent.postMessage({
+        type: 'SHOW_CLICK_GUIDE',
+        direction: direction,
+        x: x,
+        y: y,
+        fromIframe: true
+      }, window.location.origin);
+    }
+  };
+
+  if (delay > 0) {
+    guideTimeoutId = setTimeout(sendGuide, delay);
+  } else {
+    sendGuide();
+  }
+}
+
+function showGuide(direction, x, y, fromIframe = true, delay = 0) {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
+  const sendGuide = () => {
+    if (window.parent) {
+      window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction, x, y, fromIframe }, window.location.origin);
+    }
+  };
+  if (delay > 0) guideTimeoutId = setTimeout(sendGuide, delay);
+  else sendGuide();
+}
+
+function hideGuide() {
+  if (guideTimeoutId) {
+    clearTimeout(guideTimeoutId);
+    guideTimeoutId = null;
+  }
+  if (window.parent) {
+    window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
+  }
+}
+
+// 메뉴 데이터
 const menus = [
   { name: "아메리카노", price: 1500, desc: "컴포즈커피의 깔끔하고 진한 대표 커피", category: "커피" },
   { name: "카페라떼", price: 2900, desc: "부드러운 우유와 에스프레소의 조화", category: "커피" },
@@ -76,9 +127,7 @@ const menus = [
   { name: "티라미수케이크", price: 4500, desc: "부드러운 마스카포네 치즈와 커피의 조화", category: "푸드/디저트" }
 ];
 
-// ==========================================
-// 3. DOM 요소 및 상태 관리
-// ==========================================
+// DOM 요소 및 상태 관리
 const orderTypeScreen = document.getElementById("order-type-screen");
 const menuScreen = document.getElementById("menu-screen");
 const paymentWaitScreen = document.getElementById("payment-wait-screen");
@@ -108,62 +157,57 @@ const modalAddBtn = document.getElementById("modal-add-btn");
 const iceOptionGroup = document.getElementById("ice-option-group");
 
 let cart = [];
-let currentCategory = "커피"; 
-let orderCounter = 101; 
+let currentCategory = "커피";
+let orderCounter = 101;
 let selectedMenu = null;
 let selectedTemp = "HOT";
-let selectedIce = "기본"; 
+let selectedIce = "기본";
 let selectedExtra = "선택 안함";
 let extraPrice = 0;
 
-// ★ 튜토리얼 진행 상태 변수 ★
 let isTutorialMode = false;
 let tutorialStep = 0;
 
+// 로직 및 이벤트 리스너 (튜토리얼 연동 포함)
 
-// ==========================================
-// 4. 로직 및 이벤트 리스너 (튜토리얼 연동 포함)
-// ==========================================
-
-// [튜토리얼 스텝 1 시작] - 첫 화면 
-if(tutorialStartBtn) {
+if (tutorialStartBtn) {
   tutorialStartBtn.addEventListener("click", () => {
     isTutorialMode = true;
     tutorialStep = 1;
-    
-    // 부모 창에 텍스트 갱신 및 포장해가기 버튼 좌표 전송
+
+    // 부모 창에 텍스트 갱신 및 포장해가기 버튼 안전 타겟팅
     updateQuest("매장에서 먹을지, 포장해갈지 선택할 수 있습니다. 우선, '포장해가기'를 선택해보세요.");
-    setTimeout(() => { pointToElement("#take-out-btn", "up"); }, 300);
+    showGuideOnTarget('up', '#take-out-btn', 300);
   });
 }
 
 // 매장/포장 선택
 function startOrder(type) {
-  // [튜토리얼 스텝 1 완료 판정]
   if (isTutorialMode && tutorialStep === 1 && type === "포장해가기") {
     hideGuide();
-    tutorialStep = 2; // 다음 단계로
+    tutorialStep = 2;
   }
 
   orderTypeLabel.textContent = `주문 방식: ${type}`;
   orderTypeScreen.classList.add("hidden");
   menuScreen.classList.remove("hidden");
-  renderMenus(); 
+  renderMenus();
 
-  // [튜토리얼 스텝 2 시작] - 메뉴 렌더링 직후 아메리카노 담기 유도
   if (isTutorialMode && tutorialStep === 2) {
     updateQuest("가장 위에 위치한 버튼으로 커피의 종류를 선택할 수 있습니다. 우선, 가장 기본적인 음료인 ‘아메리카노’를 선택해볼까요?");
-    
+
     setTimeout(() => {
-      // 아메리카노 담기 버튼을 찾아서 마우스 커서 띄우기
       const cards = Array.from(document.querySelectorAll('.menu-card'));
       const americanoCard = cards.find(c => c.querySelector('h3').textContent.includes('아메리카노'));
       if (americanoCard) {
         const btn = americanoCard.querySelector('.add-btn');
-        const rect = btn.getBoundingClientRect();
-        showGuide('up', rect.left + rect.width / 2, rect.top + rect.height / 2);
+        if (btn) {
+          const rect = btn.getBoundingClientRect();
+          // iframe 내부 좌표이므로 fromIframe: true
+          showGuide('up', rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+        }
       }
-    }, 500); // 메뉴 렌더링 시간을 고려해 약간 대기
+    }, 500);
   }
 }
 
@@ -199,12 +243,10 @@ function renderMenus() {
 
     const addBtn = card.querySelector(".add-btn");
     addBtn.addEventListener("click", () => {
-      // [튜토리얼 스텝 2 완료 판정] - 아메리카노 클릭 시
       if (isTutorialMode && tutorialStep === 2 && menu.name === "아메리카노") {
         hideGuide();
         tutorialStep = 3;
       }
-
       if (menu.category === "푸드/디저트") addDirectlyToCart(menu);
       else openOptionModal(menu);
     });
@@ -217,7 +259,7 @@ function renderMenus() {
 function openOptionModal(menu) {
   selectedMenu = menu;
   selectedTemp = "HOT";
-  selectedIce = "기본"; 
+  selectedIce = "기본";
   selectedExtra = "선택 안함";
   extraPrice = 0;
 
@@ -235,10 +277,9 @@ function openOptionModal(menu) {
 
   optionModal.classList.remove("hidden");
 
-  // [튜토리얼 스텝 3 시작] - 모달창의 장바구니 담기 버튼 유도
   if (isTutorialMode && tutorialStep === 3) {
     updateQuest("옵션을 고른 후 아래의 '장바구니 담기' 버튼을 눌러주세요.");
-    setTimeout(() => { pointToElement("#modal-add-btn", "up"); }, 300);
+    showGuideOnTarget('up', '#modal-add-btn', 300);
   }
 }
 
@@ -260,10 +301,10 @@ optBtns.forEach(btn => {
       if (value === "ICED") iceOptionGroup.style.display = "block";
       else {
         iceOptionGroup.style.display = "none";
-        selectedIce = "기본"; 
+        selectedIce = "기본";
         document.querySelectorAll(`.opt-btn[data-type="ice"]`).forEach(b => {
           b.classList.remove("active");
-          if(b.dataset.value === "기본") b.classList.add("active");
+          if (b.dataset.value === "기본") b.classList.add("active");
         });
       }
     } else if (type === "ice") {
@@ -282,7 +323,6 @@ modalCancelBtn.addEventListener("click", () => {
 
 // 모달 '장바구니 담기' 클릭
 modalAddBtn.addEventListener("click", () => {
-  // [튜토리얼 스텝 3 완료 판정]
   if (isTutorialMode && tutorialStep === 3) {
     hideGuide();
     tutorialStep = 4;
@@ -291,18 +331,16 @@ modalAddBtn.addEventListener("click", () => {
   let optionText = selectedTemp;
   if (selectedTemp === "ICED" && selectedIce !== "기본") optionText += `, ${selectedIce}`;
   if (selectedExtra !== "선택 안함") optionText += `, ${selectedExtra}`;
-  
+
   const cartItemName = `${selectedMenu.name} (${optionText})`;
   const finalPrice = selectedMenu.price + extraPrice;
 
   processAddToCart(cartItemName, finalPrice);
   optionModal.classList.add("hidden");
 
-  // [튜토리얼 스텝 4 시작] - 결제하기 버튼 누르기 유도
   if (isTutorialMode && tutorialStep === 4) {
     updateQuest("장바구니에 아메리카노가 담긴 모습입니다. 장바구니의 버튼을 눌러 수량을 늘리거나 줄일 수 있습니다. 전체 취소 버튼으로 장바구니의 물품을 없앨 수 있습니다. 구매(결제하기) 버튼을 눌러볼까요?");
-    // 결제 버튼은 우측 하단이므로 오른쪽에서 가리키는 것이 자연스러움 ('right')
-    setTimeout(() => { pointToElement("#pay-btn", "up"); }, 300);
+    showGuideOnTarget('up', '#pay-btn', 300);
   }
 });
 
@@ -332,7 +370,7 @@ function removeCartItem(cartName) {
 }
 
 clearAllBtn.addEventListener("click", () => {
-  cart = []; 
+  cart = [];
   renderCart();
 });
 
@@ -345,7 +383,7 @@ function renderCart() {
 
     const div = document.createElement("div");
     div.className = "cart-item";
-    
+
     div.innerHTML = `
       <div class="cart-item-info">
         <span style="font-size: 15px; font-weight:bold; display:block; margin-bottom:3px; word-break:keep-all;">${item.cartName}</span>
@@ -372,60 +410,58 @@ function renderCart() {
 
 // 결제하기 버튼 클릭
 payBtn.addEventListener("click", () => {
-  // [튜토리얼 스텝 4 완료 판정]
   if (isTutorialMode && tutorialStep === 4) {
-    hideGuide(); // UI용 클릭 가이드는 숨김
+    hideGuide();
     tutorialStep = 5;
-    // 3D 환경의 카드를 드래그하라는 퀘스트로 변경
     updateQuest("여기서 임시 카드를 꺼낼 수 있습니다. 카드가 추가되었습니다. 카드를 옮겨 결제를 완료해보세요!");
+    showGuide('right', 1300, 300, false, 300);
   }
 
   menuScreen.classList.add("hidden");
   paymentWaitScreen.classList.remove("hidden");
-  window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+  window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
 });
 
 cancelPaymentBtn.addEventListener("click", () => {
   paymentWaitScreen.classList.add("hidden");
   menuScreen.classList.remove("hidden");
-  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 });
 
 // 부모 창(3D 환경)으로부터 카드 삽입 완료 메시지 수신
 window.addEventListener('message', (event) => {
-  if (event.data === 'cardInserted' || (event.data && event.data.type === 'CARD_INSERTED')) {
-    
+  if (event.origin !== window.location.origin) return;
+  if (event.data && event.data.type === 'CARD_INSERTED') {
+
     if (!paymentWaitScreen.classList.contains("hidden")) {
       paymentWaitScreen.classList.add("hidden");
       completeScreen.classList.remove("hidden");
-      
+
       document.getElementById("order-number").textContent = `주문번호: ${orderCounter}`;
-      orderCounter++; 
+      orderCounter++;
 
-      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, '*');
+      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, window.location.origin);
 
-      // [튜토리얼 스텝 5 완료 판정 - 최종]
       if (isTutorialMode && tutorialStep === 5) {
         updateQuest("잘하셨습니다! 결제가 완료되었습니다.");
-        
-        // 4초 후 상태 완전 초기화
+
         setTimeout(() => {
-          updateQuest(""); 
+          updateQuest("");
           isTutorialMode = false;
         }, 4000);
       }
 
       setTimeout(() => {
         completeScreen.classList.add("hidden");
-        orderTypeScreen.classList.remove("hidden"); 
-        cart = []; 
-        renderCart(); 
-        
+        orderTypeScreen.classList.remove("hidden");
+        cart = [];
+        renderCart();
+
         currentCategory = "커피";
         categoryTabs.forEach(t => t.classList.remove("active"));
         categoryTabs[0].classList.add("active");
 
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
       }, 4000);
     }
   }

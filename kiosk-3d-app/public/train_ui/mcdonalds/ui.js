@@ -1,14 +1,27 @@
-// ==========================================
+//맥도날드 (mcdonalds/ui.js)
+
+// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
+try {
+    if (window.parent && window.parent.document) {
+        const questText = window.parent.document.getElementById('quest-text-1');
+        if (questText) {
+            questText.style.whiteSpace = 'pre-wrap';
+            questText.style.lineHeight = '1.5';
+        }
+    }
+} catch (e) {
+    console.log("줄바꿈이 적용되지 않을 수 있습니다.");
+}
+
 // 튜토리얼 헬퍼 함수
-// ==========================================
 function updateQuest(text) {
-    if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
+    if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
 }
 function showGuide(direction, x, y) {
-    if (window.parent) window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: direction, x: x, y: y, fromIframe: true }, '*');
+    if (window.parent) window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: direction, x: x, y: y, fromIframe: true }, window.location.origin);
 }
 function hideGuide() {
-    if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+    if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
 }
 
 const STATE = {
@@ -193,7 +206,6 @@ function renderStartScreen() {
             </div>
         </div>
     `;
-    // [튜토리얼 1단계] 주문하기 버튼 안내
     setTimeout(() => { updateQuest('첫화면에서 주문하기를 눌러주세요.'); }, 800);
     setTimeout(() => { showGuide('up', 430, 620); }, 800);
 }
@@ -242,7 +254,6 @@ function showDiningModal() {
             <button class="dining-back-btn" onclick="renderStartScreen()">← 뒤로</button>
         </div>
     `;
-    // [튜토리얼 2단계] 매장/포장 선택 안내
     hideGuide();
     setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.'); }, 800);
 }
@@ -252,7 +263,7 @@ function selectDiningMethod(method) {
     startMainKiosk();
 }
 
-// 3. 기존 initApp() 역할을 하는 메인 키오스크 실행 함수
+// 기존 initApp() 역할을 하는 메인 키오스크 실행 함수
 function startMainKiosk() {
     const app = document.getElementById('app');
     app.innerHTML = `
@@ -277,8 +288,8 @@ function startMainKiosk() {
             <div id="cart-modal-container"></div>
         </div>
     `;
-    
-    renderSidebar(); renderHeader(); renderGrid(); renderBottom(); renderModals(); 
+
+    renderSidebar(); renderHeader(); renderGrid(); renderBottom(); renderModals();
     const kGrid = document.getElementById('k-grid');
     kGrid.addEventListener('scroll', updateScrollbar);
     initDragScroll(kGrid);
@@ -391,16 +402,14 @@ function renderModals() {
     `;
 }
 
-function changeCategory(categoryKey) { 
-    STATE.currentCategory = categoryKey; 
-    STATE.currentFilter = 'all'; 
+function changeCategory(categoryKey) {
+    STATE.currentCategory = categoryKey;
+    STATE.currentFilter = 'all';
     renderSidebar(); renderHeader(); renderGrid(); initDragScroll(document.getElementById('k-grid'));
 
-    // [튜토리얼 4단계] 메뉴 선택 안내
     hideGuide();
     setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
 
-    // [튜토리얼 5단계] 버거 카테고리일 때 필터 안내 (3초 후 자동으로)
     if (categoryKey === 'burger') {
         setTimeout(() => {
             updateQuest('버거의 경우 위에서 고기의 종류로 나눠서 볼 수 있습니다.');
@@ -421,10 +430,9 @@ function handleItemClick(name, price, img, category, setImg) {
         document.getElementById('modal-single-img').src = img;
         document.getElementById('modal-set-img').src = STATE.tempSelectedItem.setImg;
         document.getElementById('modal-single-price').innerText = '₩' + price.toLocaleString();
-        document.getElementById('modal-set-price').innerText = '₩' + (price + 2000).toLocaleString(); 
+        document.getElementById('modal-set-price').innerText = '₩' + (price + 2000).toLocaleString();
         document.getElementById('set-modal').style.display = 'flex';
 
-        // [튜토리얼 7단계] 단품/세트 선택 안내
         hideGuide();
         setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.'); }, 800);
     } else {
@@ -433,30 +441,30 @@ function handleItemClick(name, price, img, category, setImg) {
 }
 
 function selectOption(optionType) {
-    if (optionType === '세트') { openProcessStep(1); } 
+    if (optionType === '세트') { openProcessStep(1); }
     else { addToCart({ name: STATE.tempSelectedItem.name, price: STATE.tempSelectedItem.price, img: STATE.tempSelectedItem.img }); closeSetModal(); }
 }
 
 function closeSetModal() { document.getElementById('set-modal').style.display = 'none'; }
 
-function closeProcessModal() { 
-    document.getElementById('process-modal').style.display = 'none'; 
-    STATE.tempSetSelections = { side: null, drink: null }; 
+function closeProcessModal() {
+    document.getElementById('process-modal').style.display = 'none';
+    STATE.tempSetSelections = { side: null, drink: null };
     STATE.isEditing = false;
 }
 
 function goPrevStep(currentStep) {
     if (STATE.isEditing) { STATE.isEditing = false; openProcessStep(3); return; }
-    if (currentStep === 1) { closeProcessModal(); document.getElementById('set-modal').style.display = 'flex'; } 
-    else if (currentStep === 2) { openProcessStep(1); } 
+    if (currentStep === 1) { closeProcessModal(); document.getElementById('set-modal').style.display = 'flex'; }
+    else if (currentStep === 2) { openProcessStep(1); }
     else if (currentStep === 3) { openProcessStep(2); }
 }
 
 function editProcessStep(step) { STATE.isEditing = true; openProcessStep(step); }
 
 function openProcessStep(step) {
-    closeSetModal(); 
-    
+    closeSetModal();
+
     let contentHtml = '';
     let footerHtml = '';
 
@@ -476,12 +484,12 @@ function openProcessStep(step) {
                 </div>
             </div>
     `;
-    
+
     stepData.forEach(s => {
         const isActive = (s.id === step) ? 'active' : '';
         const isCompleted = (s.id < step) ? 'completed' : '';
-        const icon = (s.id < step) ? '✓' : ''; 
-        
+        const icon = (s.id < step) ? '✓' : '';
+
         sidebarHtml += `
             <div class="step-item ${isActive} ${isCompleted}">
                 <span class="step-icon">${icon}</span>
@@ -505,13 +513,12 @@ function openProcessStep(step) {
                 </div>`;
         });
         contentHtml = `<div class="step-title">세트메뉴 사이드를 선택하세요</div><div class="side-grid">${gridHtml}</div>`;
-        
+
         footerHtml = `
             <div class="footer-left"><button class="footer-btn cancel-btn" onclick="closeProcessModal()">취소</button></div>
             <div class="footer-right"><button class="footer-btn prev-btn" onclick="goPrevStep(${step})">이전단계</button></div>
         `;
 
-        // [튜토리얼 8단계] 사이드 선택 안내
         setTimeout(() => {
             hideGuide();
             updateQuest('원하시는 사이드메뉴를 선택해주세요.');
@@ -530,13 +537,12 @@ function openProcessStep(step) {
                 </div>`;
         });
         contentHtml = `<div class="step-title">세트 메뉴 음료를 선택하세요</div><div class="side-grid">${gridHtml}</div>`;
-        
+
         footerHtml = `
             <div class="footer-left"><button class="footer-btn cancel-btn" onclick="closeProcessModal()">취소</button></div>
             <div class="footer-right"><button class="footer-btn prev-btn" onclick="goPrevStep(${step})">이전단계</button></div>
         `;
 
-        // [튜토리얼 8단계] 음료 선택 안내
         setTimeout(() => {
             hideGuide();
             updateQuest('원하시는 음료를 선택해주세요.');
@@ -617,7 +623,6 @@ function openProcessStep(step) {
         document.getElementById('process-modal').innerHTML = fullScreenHtml;
         document.getElementById('process-modal').style.display = 'flex';
 
-        // [튜토리얼 9단계] 장바구니 담기 안내
         setTimeout(() => {
             hideGuide();
             updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.');
@@ -649,14 +654,14 @@ function openProcessStep(step) {
 }
 
 function selectProcessOption(step, name, price, img) {
-    if (step === 1) { 
-        STATE.tempSetSelections.side = { name, price, img }; 
-        if (STATE.isEditing) { STATE.isEditing = false; openProcessStep(3); } 
+    if (step === 1) {
+        STATE.tempSetSelections.side = { name, price, img };
+        if (STATE.isEditing) { STATE.isEditing = false; openProcessStep(3); }
         else { openProcessStep(2); }
-    } 
-    else if (step === 2) { 
-        STATE.tempSetSelections.drink = { name, price, img }; 
-        STATE.isEditing = false; openProcessStep(3); 
+    }
+    else if (step === 2) {
+        STATE.tempSetSelections.drink = { name, price, img };
+        STATE.isEditing = false; openProcessStep(3);
     }
 }
 
@@ -672,7 +677,6 @@ function addToCart(newItem) {
     if (existingItem) existingItem.qty += 1; else STATE.cartItems.push({ ...newItem, qty: 1 });
     renderBottom();
 
-    // [튜토리얼 10단계] 결제하기 안내
     hideGuide();
     setTimeout(() => { updateQuest('음식들을 선택하신 후 주문내역 확인/결제하기를 눌러주세요.'); }, 800);
     setTimeout(() => { showGuide('up', 460, 700); }, 800);
@@ -694,7 +698,7 @@ function openCartModal() {
     const cartModalInner = document.getElementById('cart-modal-inner');
     if (STATE.cartItems.length === 0) { alert("결제할 상품을 먼저 선택해 주세요."); return; }
     cartModal.style.display = 'flex';
-    
+
     let totalQty = 0; let totalPrice = 0;
     let cartHtml = `<div class="cart-wrapper-new">
         <div class="cart-header-new"><img src="사진/mc.jpeg"> 나의 주문</div>
@@ -704,7 +708,7 @@ function openCartModal() {
         totalQty += item.qty;
         const itemTotal = item.price * item.qty;
         totalPrice += itemTotal;
-        
+
         cartHtml += `<div class="c-item-row">
             <button class="c-btn-cancel" onclick="removeItem(${index})">취소</button>
             <img src="${item.img}" class="c-item-img">
@@ -719,7 +723,8 @@ function openCartModal() {
             </div>
             
             <div class="c-item-price">₩ ${(item.price * item.qty).toLocaleString()}</div>
-        </div>`;            });
+        </div>`;
+    });
 
     cartHtml += `</div>
         <div class="cart-footer-new">
@@ -731,12 +736,11 @@ function openCartModal() {
         </div></div>`;
     cartModalInner.innerHTML = cartHtml;
 
-    // [튜토리얼 11단계] 추가주문 또는 주문완료 안내
     hideGuide();
     setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.'); }, 800);
     setTimeout(() => { showGuide('up', 460, 720); }, 800);
 }
-function closeCartModal() { 
+function closeCartModal() {
     document.getElementById('cart-modal').style.display = 'none';
     // 추가주문으로 돌아왔을 때 메뉴 선택 안내 다시 표시
     hideGuide();
@@ -749,7 +753,7 @@ function removeCartItem(itemName) {
     if (index !== -1) {
         STATE.cartItems.splice(index, 1); // 해당 아이템 제거
         renderBottom(); // 하단 바 업데이트
-        
+
         if (STATE.cartItems.length === 0) {
             closeCartModal(); // 장바구니 비면 닫기
         } else {
@@ -760,13 +764,13 @@ function removeCartItem(itemName) {
 
 function changeQty(index, amount) {
     STATE.cartItems[index].qty += amount;
-    if(STATE.cartItems[index].qty <= 0) STATE.cartItems.splice(index, 1); 
-    renderBottom(); if(STATE.cartItems.length === 0) closeCartModal(); else openCartModal(); 
+    if (STATE.cartItems[index].qty <= 0) STATE.cartItems.splice(index, 1);
+    renderBottom(); if (STATE.cartItems.length === 0) closeCartModal(); else openCartModal();
 }
 
 function removeItem(index) {
     STATE.cartItems.splice(index, 1); renderBottom();
-    if(STATE.cartItems.length === 0) closeCartModal(); else openCartModal();
+    if (STATE.cartItems.length === 0) closeCartModal(); else openCartModal();
 }
 
 function updateScrollbar() {
@@ -774,25 +778,21 @@ function updateScrollbar() {
     if (!grid || !track || !thumb) return;
     if (grid.scrollHeight <= grid.clientHeight) { thumb.style.display = 'none'; return; } else { thumb.style.display = 'block'; }
     let thumbHeight = (grid.clientHeight / grid.scrollHeight) * track.clientHeight;
-    thumbHeight = Math.max(thumbHeight, 30);  thumb.style.height = thumbHeight + 'px';
+    thumbHeight = Math.max(thumbHeight, 30); thumb.style.height = thumbHeight + 'px';
     const scrollRatio = grid.scrollTop / (grid.scrollHeight - grid.clientHeight);
     const maxThumbTop = track.clientHeight - thumbHeight; thumb.style.top = (scrollRatio * maxThumbTop) + 'px';
 }
 
 function scrollKiosk(dir) {
-    const grid = document.getElementById('k-grid'); const scrollAmount = 260; 
+    const grid = document.getElementById('k-grid'); const scrollAmount = 260;
     if (dir === 'up') grid.scrollBy({ top: -scrollAmount, behavior: 'smooth' }); else grid.scrollBy({ top: scrollAmount, behavior: 'smooth' });
 }
 
 window.onload = () => { initApp(); window.addEventListener('resize', updateScrollbar); };
 
-// ==========================================
-// [V3 원본 이식] 결제창 모달 관련 함수 
-// ==========================================
-
 function openPaymentMethod() {
     const cartModalInner = document.getElementById('cart-modal-inner');
-    
+
     let payHtml = `
         <div class="pay-method-wrapper">
             <div class="pay-title">결제 수단을 선택해 주세요</div>
@@ -813,7 +813,6 @@ function openPaymentMethod() {
     `;
     cartModalInner.innerHTML = payHtml;
 
-    // [튜토리얼 12단계] 결제수단 선택 안내
     hideGuide();
     setTimeout(() => { updateQuest('결제수단을 선택해주세요.'); }, 800);
     setTimeout(() => { showGuide('up', 280, 480); }, 800);
@@ -842,19 +841,16 @@ function completeCreditCardPayment() {
         </div>
     `;
 
-    // [튜토리얼 14단계] 카드 빼기 안내
     hideGuide();
     setTimeout(() => { updateQuest('카드를 빼주세요.'); }, 800);
 
     // PAYMENT_COMPLETE는 카드가 빠질 때 보냄 (아래 CARD_REMOVED 핸들러에서 처리)
 }
-// ==========================================
 // 스크롤 썸(노란 막대) 직접 드래그
-// ==========================================
 function initThumbDrag() {
     const thumb = document.getElementById('k-thumb');
     const track = document.getElementById('k-track');
-    const grid  = document.getElementById('k-grid');
+    const grid = document.getElementById('k-grid');
     if (!thumb || !track || !grid) return;
 
     let isDragging = false;
@@ -875,7 +871,7 @@ function initThumbDrag() {
         const trackHeight = track.clientHeight;
         const thumbHeight = thumb.clientHeight;
         const maxThumbTop = trackHeight - thumbHeight;
-        const maxScroll   = grid.scrollHeight - grid.clientHeight;
+        const maxScroll = grid.scrollHeight - grid.clientHeight;
         const dy = e.clientY - startY;
         const scrollDelta = (dy / maxThumbTop) * maxScroll;
         grid.scrollTop = Math.max(0, Math.min(maxScroll, startScrollTop + scrollDelta));
@@ -891,7 +887,6 @@ function initThumbDrag() {
     // 썸 커서
     thumb.style.cursor = 'grab';
 }
-
 
 function initDragScroll(grid) {
     if (!grid) return;
@@ -959,9 +954,9 @@ function initDragScroll(grid) {
 
 function processPayment(method) {
     if (method === '신용카드') {
-        window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
         const cartModalInner = document.getElementById('cart-modal-inner');
-        
+
         cartModalInner.innerHTML = `
             <div class="pay-method-wrapper" style="text-align: center;">
                 <div class="pay-title" style="margin-bottom: 20px; font-size: 42px;">결제 단말기에 카드를 꽂아주세요</div>
@@ -985,26 +980,24 @@ function processPayment(method) {
             </div>
         `;
 
-        // [튜토리얼 13단계] 카드 투입 안내
         hideGuide();
         updateQuest('카드를 결제 단말기에 넣어주세요.');
     }
 }
 
-// ==========================================
 // 부모 창(3D 환경)에서 오는 메시지 수신
-// ==========================================
 window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin) return;
     if (!event.data) return;
 
-    // 카드가 꽂혔을 때 → 결제 완료 화면 표시 + 카드 빼라는 안내
-    if (event.data === 'cardInserted' || event.data.type === 'CARD_INSERTED') {
+    // 카드가 꼽혀을 때 → 결제 완료 화면 표시 + 카드 빼라는 안내
+    if (event.data.type === 'CARD_INSERTED') {
         completeCreditCardPayment();
     }
 
     // 카드가 빠졌을 때 → 픽업 안내 화면 → PAYMENT_COMPLETE → initApp
     if (event.data.type === 'CARD_REMOVED') {
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 
         const app = document.getElementById('app');
         app.innerHTML = `

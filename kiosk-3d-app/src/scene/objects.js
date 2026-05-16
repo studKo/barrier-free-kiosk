@@ -32,11 +32,14 @@ export async function createSceneObjects(scene) {
     const kioskGltf = await loader.loadAsync('models/kiosk.glb');
     const kioskModel = kioskGltf.scene;
 
+    // ★ 리뷰 반영: 명확한 이름 배열로 스크린 매칭 제한
+    const SCREEN_MESH_NAMES = ['screenDisplay', 'kioskScreen'];
+
     kioskModel.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
-        if (child.name === 'screenDisplay' || child.name.toLowerCase().includes('screen')) {
+        if (SCREEN_MESH_NAMES.includes(child.name)) {
           child.material = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: true });
           child.renderOrder = -1;
         }
@@ -118,8 +121,6 @@ export async function createSceneObjects(scene) {
     new THREE.MeshBasicMaterial({ color: 0xffff00, transparent: true, opacity: 0.3 })
   );
   if (slotMesh) slotMesh.add(slotGlowMesh);
-
-  // [수정] 빨간 화살표(arrowMesh) 생성 및 추가 로직 삭제됨
 
   scene.add(kioskGroup);
 

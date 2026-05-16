@@ -1,3 +1,16 @@
+// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
+try {
+  if (window.parent && window.parent.document) {
+    const questText = window.parent.document.getElementById('quest-text-1');
+    if (questText) {
+      questText.style.whiteSpace = 'pre-wrap';
+      questText.style.lineHeight = '1.5';
+    }
+  }
+} catch (e) {
+  console.log("줄바꿈이 적용되지 않을 수 있습니다.");
+}
+
 const app = document.getElementById('app');
 
 let orderState = {
@@ -26,7 +39,7 @@ const terminalsByRegion = {
 
 function updateQuest(text) {
   if (window.parent) {
-    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
+    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
   }
 }
 
@@ -51,7 +64,7 @@ function showGuideOnTarget(direction, selector, delay = 0) {
         x: x,
         y: y,
         fromIframe: true
-      }, '*');
+      }, window.location.origin);
     }
   };
 
@@ -69,7 +82,7 @@ function showGuide(direction, x, y, delay = 0) {
   }
   const sendGuide = () => {
     if (window.parent) {
-      window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction, x, y, fromIframe: true }, '*');
+      window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction, x, y, fromIframe: true }, window.location.origin);
     }
   };
   if (delay > 0) guideTimeoutId = setTimeout(sendGuide, delay);
@@ -82,7 +95,7 @@ function hideGuide() {
     guideTimeoutId = null;
   }
   if (window.parent) {
-    window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
+    window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
   }
 }
 
@@ -101,7 +114,6 @@ function getFormattedDate(d) {
   return `${yyyy}-${mm}-${dd} (${days[d.getDay()]})`;
 }
 
-// ★ 리뷰 반영: setInterval 메모리 누수 방지를 위한 핸들링 추가
 const clockInterval = setInterval(() => {
   const dateEl = document.getElementById('current-date');
   const timeEl = document.getElementById('current-time');
@@ -114,7 +126,6 @@ const clockInterval = setInterval(() => {
 
 // iframe 언로드 시 타이머 해제
 window.addEventListener('beforeunload', () => clearInterval(clockInterval));
-
 
 function renderStep1() {
   app.innerHTML = `
@@ -491,7 +502,7 @@ function renderStep4() {
     seat.addEventListener('click', (e) => {
       tempSeat = e.target;
       modal.style.display = 'flex';
-      updateQuest('어른을 눌러주세요');
+      updateQuest('어른을 눌러주세요\n<span style="font-size: 0.7em; color: #666;">(아동도 선택 가능합니다)</span>');
       showGuideOnTarget('up', '.age-btn', 100);
     });
   });
@@ -600,20 +611,20 @@ function renderStep5() {
     document.getElementById('complete-modal').style.display = 'none';
     hideGuide();
 
-    window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+    window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 
     const ticketInfo = {
       destination: orderState.destination,
       time: orderState.time,
       seat: orderState.seat
     };
-    window.parent.postMessage({ type: 'PRINT_RECEIPT', ticketInfo }, '*');
+    window.parent.postMessage({ type: 'PRINT_RECEIPT', ticketInfo }, window.location.origin);
 
     setTimeout(() => { renderStep1(); }, 3500);
   });
 
   if (window.parent) {
-    window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
+    window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
   }
 }
 

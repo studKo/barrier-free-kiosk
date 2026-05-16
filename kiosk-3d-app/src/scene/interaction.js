@@ -9,12 +9,16 @@ const mouse = new THREE.Vector2();
 const offset = new THREE.Vector3();
 const dragPlane = new THREE.Plane();
 const intersection = new THREE.Vector3();
+// ★ 리뷰 반영: 매 클릭마다 new Vector3() 생성 방지를 위한 재사용 벡터
+const _cameraDir = new THREE.Vector3();
 
 let isDragging = false;
 let selectedObject = null;
 let isSnapping = false;
 let snappingCard = null;
 let onCardInsertedCallback = null;
+// ★ 리뷰 반영: 비드래그 시 레이캐스팅 스로틀용 타임스탬프
+let lastCursorCheck = 0;
 
 export function setupInteraction(canvas, camera, sceneObjects) {
   const { cardMesh, slotMesh, slotGlowMesh, scannerGlowMesh, kioskGroup, spawnReceipt } = sceneObjects;
@@ -81,7 +85,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       isDragging = true;
       selectedObject = clickedObject;
       dragPlane.setFromNormalAndCoplanarPoint(
-        camera.getWorldDirection(new THREE.Vector3()),
+        camera.getWorldDirection(_cameraDir),
         selectedObject.position
       );
       if (raycaster.ray.intersectPlane(dragPlane, intersection)) {
@@ -166,6 +170,10 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     getMouseCoors(event);
 
     if (!isDragging) {
+      // ★ 리뷰 반영: 커서 변경용 레이캐스팅을 20fps로 제한
+      const now = performance.now();
+      if (now - lastCursorCheck < 50) return;
+      lastCursorCheck = now;
       raycaster.setFromCamera(mouse, camera);
 
       if (cardMesh.userData.isInserted) {

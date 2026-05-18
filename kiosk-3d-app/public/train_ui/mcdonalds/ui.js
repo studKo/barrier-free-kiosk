@@ -1,6 +1,5 @@
 //맥도날드 (mcdonalds/ui.js)
 
-// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
 try {
     if (window.parent && window.parent.document) {
         const questText = window.parent.document.getElementById('quest-text-1');
@@ -206,8 +205,8 @@ function renderStartScreen() {
             </div>
         </div>
     `;
-    setTimeout(() => { updateQuest('첫화면에서 주문하기를 눌러주세요.'); }, 800);
-    setTimeout(() => { showGuide('up', 430, 620); }, 800);
+    setTimeout(() => { updateQuest('첫화면에서 주문하기를 눌러주세요.\n'); }, 800);
+    setTimeout(() => { showGuide('up', 550, 700); }, 800);
 }
 
 // 1-1. 식사 방법 선택 풀화면
@@ -255,7 +254,7 @@ function showDiningModal() {
         </div>
     `;
     hideGuide();
-    setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.'); }, 800);
+    setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.\n"매장에서 식사" = 이 맥도날드 안에서 드실 때 / "포장" = 음식을 봉투에 담아 집에 가져가실 때. 해당하는 그림을 눌러주세요.'); }, 800);
 }
 
 function selectDiningMethod(method) {
@@ -295,7 +294,7 @@ function startMainKiosk() {
     initDragScroll(kGrid);
     initThumbDrag();
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.'); }, 800);
 }
 
 function renderSidebar() {
@@ -408,18 +407,7 @@ function changeCategory(categoryKey) {
     renderSidebar(); renderHeader(); renderGrid(); initDragScroll(document.getElementById('k-grid'));
 
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
-
-    if (categoryKey === 'burger') {
-        setTimeout(() => {
-            updateQuest('버거의 경우 위에서 고기의 종류로 나눠서 볼 수 있습니다.');
-        }, 3000);
-        // 6초 후 다시 메뉴 선택으로 돌아오기
-        setTimeout(() => {
-            updateQuest('드시고 싶은 음식을 골라주세요.');
-            hideGuide();
-        }, 6000);
-    }
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.'); }, 800);
 }
 function filterSubCategory(type) { STATE.currentFilter = type; renderHeader(); renderGrid(); }
 
@@ -434,7 +422,7 @@ function handleItemClick(name, price, img, category, setImg) {
         document.getElementById('set-modal').style.display = 'flex';
 
         hideGuide();
-        setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.'); }, 800);
+        setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.\n단품 = 버거만 / 세트 = 버거 + 감자튀김 + 음료 (세트가 더 저렴해요)'); }, 800);
     } else {
         addToCart({ name: name, price: price, img: img });
     }
@@ -521,7 +509,7 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('원하시는 사이드메뉴를 선택해주세요.');
+            updateQuest('원하시는 사이드메뉴를 선택해주세요.\n사이드 = 버거와 함께 나오는 곁들임 음식이에요. (예: 감자튀김, 치즈스틱 등) 원하시는 것 하나를 눌러주세요.');
         }, 800);
     }
     else if (step === 2) {
@@ -545,7 +533,7 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('원하시는 음료를 선택해주세요.');
+            updateQuest('원하시는 음료를 선택해주세요.\n콜라, 사이다, 커피 등 마시고 싶은 음료를 하나 골라 눌러주세요.');
         }, 800);
     }
     else if (step === 3) {
@@ -625,8 +613,8 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.');
-            showGuide('up', 450, 660);
+            updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.\n선택하신 음식들이 화면에 나와 있어요. 잘못 고르셨으면 "수정"을 누르시고, 맞으시면 아래 노란 "장바구니에 담기" 버튼을 눌러주세요.');
+            showGuide('up', 530, 780);
         }, 800);
         return;
     }
@@ -678,8 +666,9 @@ function addToCart(newItem) {
     renderBottom();
 
     hideGuide();
-    setTimeout(() => { updateQuest('음식들을 선택하신 후 주문내역 확인/결제하기를 눌러주세요.'); }, 800);
-    setTimeout(() => { showGuide('up', 460, 700); }, 800);
+    setTimeout(() => { updateQuest('어른을 눌러주세요\n<span style="font-size: 0.7em; color: #666;">(아동도 선택 가능합니다)</span>'); }, 800);
+
+    setTimeout(() => { showGuide('up', 610, 860); }, 800);
 }
 
 function resetCartConfirm() {
@@ -737,14 +726,14 @@ function openCartModal() {
     cartModalInner.innerHTML = cartHtml;
 
     hideGuide();
-    setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.'); }, 800);
-    setTimeout(() => { showGuide('up', 460, 720); }, 800);
+    setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.\n더 드실 음식이 있으시면 "추가 주문", 다 고르셨으면 "주문 완료"를 눌러주세요. 주문 완료를 눌러야 결제로 넘어갑니다.'); }, 800);
+    setTimeout(() => { showGuide('up', 560, 830); }, 800);
 }
 function closeCartModal() {
     document.getElementById('cart-modal').style.display = 'none';
     // 추가주문으로 돌아왔을 때 메뉴 선택 안내 다시 표시
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.'); }, 800);
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n화면에 보이는 음식 사진 중 원하시는 것을 손가락으로 눌러주시면 됩니다. 왼쪽 메뉴에서 종류를 바꿀 수 있어요.\n음식이 많아 화면에 다 안 보일 수 있어요. 화면을 손가락으로 위아래로 쓸어내리면 더 많은 메뉴를 보실 수 있습니다.'); }, 800);
 }
 
 // 장바구니 아이템 삭제 함수 (취소 버튼)
@@ -814,8 +803,8 @@ function openPaymentMethod() {
     cartModalInner.innerHTML = payHtml;
 
     hideGuide();
-    setTimeout(() => { updateQuest('결제수단을 선택해주세요.'); }, 800);
-    setTimeout(() => { showGuide('up', 280, 480); }, 800);
+    setTimeout(() => { updateQuest('결제수단을 선택해주세요.\n지금은 신용카드(체크카드 포함)로만 결제 가능합니다. "신용카드"를 눌러주세요.'); }, 800);
+    setTimeout(() => { showGuide('up', 170, 610); }, 800);
 }
 
 function completeCreditCardPayment() {
@@ -842,7 +831,7 @@ function completeCreditCardPayment() {
     `;
 
     hideGuide();
-    setTimeout(() => { updateQuest('카드를 빼주세요.'); }, 800);
+    setTimeout(() => { updateQuest('카드를 빼주세요.\n'); }, 800);
 
     // PAYMENT_COMPLETE는 카드가 빠질 때 보냄 (아래 CARD_REMOVED 핸들러에서 처리)
 }
@@ -981,7 +970,7 @@ function processPayment(method) {
         `;
 
         hideGuide();
-        updateQuest('카드를 결제 단말기에 넣어주세요.');
+        updateQuest('카드를 결제 단말기에 넣어주세요.\n');
     }
 }
 

@@ -9,7 +9,6 @@ const mouse = new THREE.Vector2();
 const offset = new THREE.Vector3();
 const dragPlane = new THREE.Plane();
 const intersection = new THREE.Vector3();
-// ★ 리뷰 반영: 매 클릭마다 new Vector3() 생성 방지를 위한 재사용 벡터
 const _cameraDir = new THREE.Vector3();
 
 let isDragging = false;
@@ -17,7 +16,6 @@ let selectedObject = null;
 let isSnapping = false;
 let snappingCard = null;
 let onCardInsertedCallback = null;
-// ★ 리뷰 반영: 비드래그 시 레이캐스팅 스로틀용 타임스탬프
 let lastCursorCheck = 0;
 
 export function setupInteraction(canvas, camera, sceneObjects) {
@@ -127,7 +125,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       titleText = '버스 승차권';
       mainText = info.destination ? '세종 -> ' + info.destination : '승차권';
 
-      // ✅ 사용자님의 아이디어 반영: 시간과 좌석 정보를 비워서 UI 높이를 확 줄입니다!
       timeText = '';
       seatText = '';
 
@@ -159,7 +156,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
       </div>
     `;
 
-    // 영수증 획득 시 자동으로 살짝 스크롤해주는 기능도 그대로 유지해 두었습니다!
     setTimeout(() => {
       toolsPane.scrollTo({ top: toolsPane.scrollHeight, behavior: 'smooth' });
     }, 50);
@@ -170,7 +166,6 @@ export function setupInteraction(canvas, camera, sceneObjects) {
     getMouseCoors(event);
 
     if (!isDragging) {
-      // ★ 리뷰 반영: 커서 변경용 레이캐스팅을 20fps로 제한
       const now = performance.now();
       if (now - lastCursorCheck < 50) return;
       lastCursorCheck = now;
@@ -246,6 +241,7 @@ export function setupInteraction(canvas, camera, sceneObjects) {
         if (checkScannerCollision(selectedObject)) {
           showToast('바코드가 성공적으로 인식되었습니다.');
           safePostMessage(getIframeWindow(), { type: MSG.BARCODE_SCANNED });
+          window.postMessage({ type: 'AUTO_ZOOM_TO_KIOSK' }, window.location.origin);
           selectedObject.visible = false;
         } else {
           showToast('바코드 스캐너(중앙)에 정확히 가져다 대세요.');

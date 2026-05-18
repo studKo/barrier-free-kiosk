@@ -5,7 +5,7 @@ function updateQuest(text) {
     if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
 }
 
-function showGuideOnTarget(direction, selector, delay = 0) {
+function showGuideOnTarget(direction, selector, offsetX = 0, offsetY = 0, delay = 0) {
     if (guideTimeoutId) {
         clearTimeout(guideTimeoutId);
         guideTimeoutId = null;
@@ -15,8 +15,8 @@ function showGuideOnTarget(direction, selector, delay = 0) {
         const el = document.querySelector(selector);
         if (el && window.parent) {
             const rect = el.getBoundingClientRect();
-            const x = rect.left + rect.width / 2;
-            const y = rect.top + rect.height / 2;
+            const x = rect.left + rect.width / 2 + Number(offsetX);
+            const y = rect.top + rect.height / 2 + Number(offsetY);
 
             window.parent.postMessage({
                 type: 'SHOW_CLICK_GUIDE',
@@ -55,6 +55,7 @@ function hideGuide() {
 let lumpSumBtn, cardModal, paymentCompleteModal, prevBtn, homeBtnModal, mainHomeBtn;
 
 document.addEventListener('DOMContentLoaded', () => {
+
     lumpSumBtn = document.getElementById('lump-sum-btn');
     cardModal = document.getElementById('card-modal');
     paymentCompleteModal = document.getElementById('payment-complete-modal');
@@ -75,23 +76,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const isSecondVisit = sessionStorage.getItem('isSecondVisit');
-
-    if (isSecondVisit === 'yes') {
-        updateQuest('나온 금액을 확인하고 수납 여부를 물어보는 화면입니다. 수납은 비용을 계산(납부)하는 것을 말합니다. 일시불을 눌러 결제합니다.');
-        // ★ 안전한 2D 타겟팅
-        showGuideOnTarget('right', '#lump-sum-btn', 300);
-        sessionStorage.removeItem('isSecondVisit');
-    } else {
-        updateQuest('3. 다른 방법도 해 볼게요. 처음을 눌러 처음 화면으로 돌아와 주세요.');
-        showGuideOnTarget('right', '#main-home-btn', 300);
-    }
+    // 바코드 스캔이나 주민번호 입력 후 동일하게 일시불 결제 유도
+    updateQuest('일시불을 눌러 결제해주세요. \n<span style="font-size: 0.8em; color: #575757;">나온 금액을 확인하고 수납 여부를 물어보는 화면입니다.\n수납은 비용을 계산(납부)하는 것을 말합니다.\n현장에선 환자 성명과 진료과 등 정보가 맞는지 꼭 확인해주신 다음 결제해 주세요.</span>');
+    // ★ 안전한 2D 타겟팅
+    showGuideOnTarget('up', '#lump-sum-btn', 0, 0, 300);
+    sessionStorage.removeItem('isSecondVisit');
 
     if (lumpSumBtn && cardModal) {
         lumpSumBtn.addEventListener('click', () => {
             cardModal.classList.remove('hidden');
             updateQuest("카드를 꺼내주세요");
-            showGuide('right', 1300, 300, false, 300);
+            
+            if (window.parent) {
+                window.parent.postMessage({
+                    type: 'SHOW_GUIDE_BY_SELECTOR',
+                    direction: 'up',
+                    selector: '#spawn-card-btn'
+                }, window.location.origin);
+            }
+            
             window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
         });
     }
@@ -120,8 +123,18 @@ window.addEventListener('message', (event) => {
         if (cardModal) cardModal.classList.add('hidden');
         if (paymentCompleteModal) paymentCompleteModal.classList.remove('hidden');
 
-        // ✅ 화면 중앙 모달창의 화살표 그림을 정확하게 타겟팅 (튕김 0%)
-        showGuideOnTarget('up', '#payment-complete-modal .down-arrow', 300);
+        // 3D 환경의 카드를 가리키도록 설정
+        hideGuide();
+        if (window.parent) {
+            window.parent.postMessage({
+                type: 'SHOW_CLICK_GUIDE',
+                direction: 'up',
+                x: 0,
+                y: 0,
+                fromIframe: false,
+                target3DObjName: 'cardMesh'
+            }, window.location.origin);
+        }
     }
 
     // ★ 리뷰 반영: 구버전 프로토콜 제거

@@ -1,5 +1,4 @@
 // 파일명: public/train_ui/compose/ui.js
-// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
 try {
   if (window.parent && window.parent.document) {
     const questText = window.parent.document.getElementById('quest-text-1');

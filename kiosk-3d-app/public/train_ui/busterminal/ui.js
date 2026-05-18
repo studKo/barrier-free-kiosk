@@ -1,4 +1,6 @@
-// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
+// 파일명: public/train_ui/busterminal/ui.js
+
+// 왼쪽 창의 퀘스트 텍스트 줄바꿈 및 자간 설정을 위한 초기 스타일 적용
 try {
   if (window.parent && window.parent.document) {
     const questText = window.parent.document.getElementById('quest-text-1');
@@ -11,18 +13,21 @@ try {
   console.log("줄바꿈이 적용되지 않을 수 있습니다.");
 }
 
+// 메인 콘텐츠가 렌더링될 컨테이너
 const app = document.getElementById('app');
 
+// 예매 프로세스 전반에서 관리되는 주문 상태 객체
 let orderState = {
-  dateObj: new Date(),
-  dateStr: '',
-  destination: null,
-  time: '',
-  seat: '',
-  age: '',
-  price: 0
+  dateObj: new Date(), // 선택된 날짜 객체
+  dateStr: '',        // 포맷팅된 날짜 문자열
+  destination: null,   // 도착지 터미널명
+  time: '',           // 출발 시간
+  seat: '',           // 선택 좌석 번호
+  age: '',            // 연령 구분 (어른/아동)
+  price: 0            // 결제 금액
 };
 
+// 지역별 터미널 목록 데이터
 const terminalsByRegion = {
   '전체': ['강릉', '거제(고현)', '고양백석', '광주', '김해공항', '대전복합', '동대구', '동서울', '목포', '부산', '부산사상', '상봉', '서울경부', '서울남부', '세종', '수원', '인천', '전주', '진주', '창원', '청주', '태안', '통영', '포항'],
   '서울': ['동서울', '상봉', '서울경부', '서울남부'],
@@ -37,14 +42,17 @@ const terminalsByRegion = {
   '대구/경북': ['경산', '경주', '구미', '동대구', '상주', '안동', '영주', '포항']
 };
 
+// 부모 창(메인 프레임)의 퀘스트 텍스트를 업데이트하는 함수
 function updateQuest(text) {
   if (window.parent) {
     window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
   }
 }
 
+// 가이드 표시 지연 처리를 위한 타이머 ID
 let guideTimeoutId = null;
 
+// 특정 HTML 요소를 찾아 해당 위치에 클릭 가이드를 표시하는 함수
 function showGuideOnTarget(direction, selector, delay = 0) {
   if (guideTimeoutId) {
     clearTimeout(guideTimeoutId);
@@ -75,6 +83,7 @@ function showGuideOnTarget(direction, selector, delay = 0) {
   }
 }
 
+// 좌표를 직접 지정하여 클릭 가이드를 표시하는 함수
 function showGuide(direction, x, y, delay = 0) {
   if (guideTimeoutId) {
     clearTimeout(guideTimeoutId);
@@ -89,6 +98,7 @@ function showGuide(direction, x, y, delay = 0) {
   else sendGuide();
 }
 
+// 현재 표시 중인 모든 가이드를 숨기는 함수
 function hideGuide() {
   if (guideTimeoutId) {
     clearTimeout(guideTimeoutId);
@@ -99,6 +109,7 @@ function hideGuide() {
   }
 }
 
+// 한글 문자열에서 초성을 추출하는 유틸리티 함수 (터미널 검색용)
 function getInitialConsonant(str) {
   const cho = ["ㄱ", "ㄲ", "ㄴ", "ㄷ", "ㄸ", "ㄹ", "ㅁ", "ㅂ", "ㅃ", "ㅅ", "ㅆ", "ㅇ", "ㅈ", "ㅉ", "ㅊ", "ㅋ", "ㅌ", "ㅍ", "ㅎ"];
   const code = str.charCodeAt(0) - 44032;
@@ -106,6 +117,7 @@ function getInitialConsonant(str) {
   return str.charAt(0);
 }
 
+// 날짜 객체를 'YYYY-MM-DD (요일)' 형식의 문자열로 변환하는 함수
 function getFormattedDate(d) {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
   const yyyy = d.getFullYear();
@@ -114,6 +126,7 @@ function getFormattedDate(d) {
   return `${yyyy}-${mm}-${dd} (${days[d.getDay()]})`;
 }
 
+// 상단 헤더의 실시간 시계를 업데이트하는 타이머 설정
 const clockInterval = setInterval(() => {
   const dateEl = document.getElementById('current-date');
   const timeEl = document.getElementById('current-time');
@@ -124,9 +137,10 @@ const clockInterval = setInterval(() => {
   }
 }, 1000);
 
-// iframe 언로드 시 타이머 해제
+// 페이지 이탈 시 시계 타이머 해제
 window.addEventListener('beforeunload', () => clearInterval(clockInterval));
 
+// [Step 1] 메인 홈 화면 렌더링 (현장발권/온라인예매/환불 선택)
 function renderStep1() {
   app.innerHTML = `
     <div id="step1" class="step-container">
@@ -170,6 +184,7 @@ function renderStep1() {
   });
 }
 
+// [Step 2-1] 노선 및 출발일 선택 화면 렌더링
 function renderStep2_Route() {
   const isDestSelected = orderState.destination !== null;
   const destText = isDestSelected ? orderState.destination : '도착지 선택';
@@ -229,6 +244,7 @@ function renderStep2_Route() {
     showGuideOnTarget('up', '#btn-search', 300);
   }
 
+  // 출발일 변경 버튼 이벤트 (이전날/다음날)
   document.getElementById('btn-prev-day').addEventListener('click', () => {
     orderState.dateObj.setDate(orderState.dateObj.getDate() - 1);
     displayDate.innerHTML = getFormattedDate(orderState.dateObj);
@@ -238,6 +254,7 @@ function renderStep2_Route() {
     displayDate.innerHTML = getFormattedDate(orderState.dateObj);
   });
 
+  // 도착지 선택 박스 클릭 시 터미널 선택 화면으로 이동
   document.getElementById('box-destination').addEventListener('click', () => {
     hideGuide();
     renderStep2_Terminal();
@@ -248,6 +265,7 @@ function renderStep2_Route() {
     renderStep1();
   });
 
+  // 조회하기 버튼 클릭 시 배차 조회(Step 3)로 이동
   const btnSearch = document.getElementById('btn-search');
   btnSearch.addEventListener('click', () => {
     if (btnSearch.classList.contains('enabled')) {
@@ -258,6 +276,7 @@ function renderStep2_Route() {
   });
 }
 
+// [Step 2-2] 도착지 터미널 검색 및 선택 화면 렌더링 (지역/초성 필터링 포함)
 function renderStep2_Terminal() {
   app.innerHTML = `
     <div id="step2_terminal" class="step-container">
@@ -281,15 +300,17 @@ function renderStep2_Terminal() {
     </div>
   `;
 
-  let activeRegion = '부산/경남';
-  let activeConsonant = '전체';
+  let activeRegion = '부산/경남'; // 초기 선택 지역
+  let activeConsonant = '전체';  // 초기 선택 초성
 
   const regions = Object.keys(terminalsByRegion);
   const CHOSUNG = ['ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
 
   updateQuest('터미널을 선택해주세요');
 
+  // 선택된 필터에 따라 터미널 목록 UI를 갱신하는 내부 함수
   function updateTerminalUI() {
+    // 1. 지역 목록 렌더링
     document.getElementById('region-list').innerHTML = regions.map(r =>
       `<button class="region-btn ${r === activeRegion ? 'active' : ''}" data-region="${r}">${r}</button>`
     ).join('');
@@ -301,6 +322,7 @@ function renderStep2_Terminal() {
       activeConsonant = '전체';
     }
 
+    // 2. 초성 목록 렌더링 (데이터 유무에 따라 비활성화 처리)
     let consonantHTML = `<button class="consonant-btn ${activeConsonant === '전체' ? 'active' : ''}" data-consonant="전체" style="font-size: 16px;">전체</button>`;
 
     consonantHTML += CHOSUNG.map(c => {
@@ -312,6 +334,7 @@ function renderStep2_Terminal() {
 
     document.getElementById('consonant-list').innerHTML = consonantHTML;
 
+    // 3. 필터링된 터미널 버튼 렌더링
     const filteredTerminals = activeConsonant === '전체'
       ? terminalsInRegion
       : terminalsInRegion.filter(t => getInitialConsonant(t) === activeConsonant);
@@ -322,6 +345,7 @@ function renderStep2_Terminal() {
 
     showGuideOnTarget('up', '.terminal-btn', 300);
 
+    // 이벤트 바인딩: 지역 변경
     document.querySelectorAll('.region-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         activeRegion = e.target.getAttribute('data-region');
@@ -330,6 +354,7 @@ function renderStep2_Terminal() {
       });
     });
 
+    // 이벤트 바인딩: 초성 변경
     document.querySelectorAll('.consonant-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         activeConsonant = e.target.getAttribute('data-consonant');
@@ -337,6 +362,7 @@ function renderStep2_Terminal() {
       });
     });
 
+    // 이벤트 바인딩: 터미널 최종 선택
     document.querySelectorAll('.terminal-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         hideGuide();
@@ -355,9 +381,10 @@ function renderStep2_Terminal() {
   document.getElementById('btn-back-term').addEventListener('click', renderStep2_Route);
 }
 
+// [Step 3] 배차 시간표 선택 화면 렌더링 (매진 및 직행 정보 표시)
 function renderStep3() {
   const now = new Date();
-  const hourOffsets = [-1, 0, 1, 2];
+  const hourOffsets = [-1, 0, 1, 2]; // 현재 시간 기준 앞뒤 시간대 생성
   let timeListHtml = '';
 
   hourOffsets.forEach(offset => {
@@ -370,6 +397,7 @@ function renderStep3() {
 
     const isPast = targetTime.getTime() < now.getTime();
 
+    // 지난 시간은 매진(비활성화) 처리
     if (isPast) {
       timeListHtml += `
             <div class="time-item" style="background: #f9f9f9; cursor: not-allowed;">
@@ -426,6 +454,7 @@ function renderStep3() {
 
   document.getElementById('btn-back3').addEventListener('click', renderStep2_Route);
 
+  // 시간 항목 클릭 시 좌석 선택(Step 4)으로 이동
   document.querySelectorAll('.bookable-time').forEach(el => {
     el.addEventListener('click', (e) => {
       hideGuide();
@@ -435,6 +464,7 @@ function renderStep3() {
   });
 }
 
+// [Step 4] 좌석 및 연령(어른/아동) 선택 화면 렌더링
 function renderStep4() {
   app.innerHTML = `
     <div id="step4" class="step-container">
@@ -496,8 +526,9 @@ function renderStep4() {
   document.getElementById('btn-back4').addEventListener('click', renderStep3);
 
   const modal = document.getElementById('age-modal');
-  let tempSeat = null;
+  let tempSeat = null; // 선택 중인 임시 좌석 저장용
 
+  // 좌석 클릭 시 연령 선택 모달 표시
   document.querySelectorAll('.seat:not(.sold)').forEach(seat => {
     seat.addEventListener('click', (e) => {
       tempSeat = e.target;
@@ -513,6 +544,7 @@ function renderStep4() {
     showGuideOnTarget('up', '.seat:not(.sold)', 100);
   });
 
+  // 연령(어른/아동) 버튼 클릭 시 최종 가격 및 상태 업데이트
   document.querySelectorAll('.age-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
       orderState.age = e.target.getAttribute('data-age');
@@ -540,9 +572,11 @@ function renderStep4() {
   });
 }
 
+// 결제 프로세스 추적 변수
 let isCardInserted = false;
 let isPaymentProcessed = false;
 
+// [Step 5] 최종 결제 안내 및 완료 화면 렌더링
 function renderStep5() {
   isCardInserted = false;
   isPaymentProcessed = false;
@@ -607,10 +641,12 @@ function renderStep5() {
     renderStep1();
   });
 
+  // 발권 완료 후 최종 확인 버튼 클릭 시 초기화 및 영수증 출력 요청
   document.getElementById('btn-complete-confirm').addEventListener('click', () => {
     document.getElementById('complete-modal').style.display = 'none';
     hideGuide();
 
+    // 부모 창에 결제 프로세스 종료 및 영수증(차표) 출력 메시지 전송
     window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
 
     const ticketInfo = {
@@ -620,17 +656,20 @@ function renderStep5() {
     };
     window.parent.postMessage({ type: 'PRINT_RECEIPT', ticketInfo }, window.location.origin);
 
-    setTimeout(() => { renderStep1(); }, 3500);
+    setTimeout(() => { renderStep1(); }, 3500); // 일정 시간 후 초기 화면으로 복귀
   });
 
+  // 부모 창에 결제 단말기 준비 상태 알림
   if (window.parent) {
     window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
   }
 }
 
+// 부모 창(3D 씬)에서 오는 메시지 리스너 (카드 삽입/제거 감지)
 window.addEventListener('message', (event) => {
   if (event.origin !== window.location.origin) return;
 
+  // 카드 삽입 이벤트 처리
   if (event.data && event.data.type === 'CARD_INSERTED') {
     if (document.getElementById('step5')) {
       isCardInserted = true;
@@ -641,6 +680,7 @@ window.addEventListener('message', (event) => {
 
       processingModal.style.display = 'flex';
 
+      // 결제 처리 중인 것처럼 보이도록 지연 후 완료 모달 표시
       setTimeout(() => {
         isPaymentProcessed = true;
         processingModal.style.display = 'none';
@@ -657,10 +697,12 @@ window.addEventListener('message', (event) => {
     }
   }
 
+  // 카드 제거 이벤트 처리
   if (event.data && event.data.type === 'CARD_REMOVED') {
     if (document.getElementById('step5')) {
       isCardInserted = false;
 
+      // 이미 결제가 끝났는데 카드를 뺀 경우 가이드 갱신
       if (isPaymentProcessed) {
         hideGuide();
         updateQuest('확인을 눌러주세요');
@@ -670,4 +712,5 @@ window.addEventListener('message', (event) => {
   }
 });
 
+// 초기 실행: 첫 번째 단계 화면 호출
 renderStep1();

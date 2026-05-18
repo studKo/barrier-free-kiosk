@@ -83,4 +83,29 @@ body { margin: 0; display: flex; justify-content: center; align-items: center; m
 .btn-footer { flex: 1; border: none; font-size: 42px; font-weight: bold; cursor: pointer; color: white; }
 .btn-red { background: #e71a0f; }
 
+/* 화면 중앙에 뜨는 커스텀 토스트 스타일 */
+#custom-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+    padding: 16px 28px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* show 클래스가 추가되었을 때 화면에 노출 */
+#custom-toast.show {
+    opacity: 1;
+    visibility: visible;
+}
 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }

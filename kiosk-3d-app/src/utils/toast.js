@@ -3,7 +3,6 @@
 
 /** 토스트 메시지가 표시되는 시간(밀리초) */
 const TOAST_DURATION_MS = 3000;
-// ★ 리뷰 반영: 연속 호출 시 이전 타이머를 취소하여 깜빡임 방지
 let _toastTimer = null;
 
 /**

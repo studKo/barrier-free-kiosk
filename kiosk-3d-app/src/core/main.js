@@ -4,7 +4,6 @@ import { CSS3DRenderer } from 'three/examples/jsm/renderers/CSS3DRenderer.js';
 import { setupCamera, setCameraMode, updateCamera, onWindowResize, zoomIn, zoomOut, autoZoomToKiosk, resetZoom, autoZoomToPayment, autoZoomToScreenAndLower } from '../scene/camera.js';
 import { createSceneObjects, resetCardPosition, spawnCard } from '../scene/objects.js';
 import { setupInteraction, onCardInserted, unlockCard } from '../scene/interaction.js';
-// ★ 리뷰 반영: constants.js import 병합
 import { KIOSK, BRAND_NAMES } from './constants.js';
 import { isTrustedOrigin } from '../utils/security.js';
 
@@ -16,7 +15,6 @@ let isPrinting = false;
 let currentGuide = null;
 const _targetPos = new THREE.Vector3();
 let _guideWrapper = null;
-// ★ 리뷰 반영: DOM 매번 탐색 방지를 위한 캐싱 변수
 let _guideImgUp = null;
 let _guideImgRight = null;
 
@@ -59,7 +57,6 @@ async function init() {
   onCardInserted(() => {
     const iframeWin = sceneObjects.kioskGroup.userData.iframeDOM?.contentWindow || document.querySelector('iframe')?.contentWindow;
     if (iframeWin) {
-      // ★ 리뷰 반영: origin 제한으로 보안 강화
       iframeWin.postMessage({ type: 'CARD_INSERTED' }, window.location.origin);
     }
 
@@ -151,7 +148,17 @@ async function init() {
   });
 
   if (spawnReceiptBtn) {
-    spawnReceiptBtn.addEventListener('click', () => { if (sceneObjects && sceneObjects.spawnReceipt) sceneObjects.spawnReceipt(); });
+    spawnReceiptBtn.addEventListener('click', () => {
+      if (sceneObjects && sceneObjects.spawnReceipt) {
+        sceneObjects.spawnReceipt();
+
+        if (sceneObjects.kioskGroup.userData.iframeDOM) {
+          sceneObjects.kioskGroup.userData.iframeDOM.contentWindow.postMessage(
+            { type: 'BARCODE_BTN_CLICKED' }, '*'
+          );
+        }
+      }
+    });
   }
 
   resetBtn.addEventListener('click', () => {
@@ -166,15 +173,25 @@ async function init() {
     }
   });
 
+  // 메시지 이벤트 리스너: SHOW_TOAST 추가 버전
   window.addEventListener('message', (event) => {
     if (!event.data || !isTrustedOrigin(event)) return;
+
     if (event.data.type === 'UPDATE_QUEST') {
       const questText = document.getElementById('quest-text-1');
-      if (questText) questText.innerHTML = event.data.text; // <--- 이렇게 변경해주세요!
+      if (questText) questText.innerHTML = event.data.text;
     }
-
+    // 토스트 메시지 처리 로직 추가
+    else if (event.data.type === 'SHOW_TOAST') {
+      if (typeof showToast === 'function') {
+        showToast(event.data.message);
+      }
+    }
     else if (event.data.type === 'SCANNER_READY') {
-      resetZoom();
+      autoZoomToScreenAndLower();
+    }
+    else if (event.data.type === 'AUTO_ZOOM_TO_KIOSK') {
+      autoZoomToKiosk();
     }
     else if (event.data.type === 'PAYMENT_READY') {
       statusMessageEl.textContent = '지시에 따라 카드를 꽂아주세요.';
@@ -211,7 +228,6 @@ async function init() {
 
         showClickGuide('up', 0, 0, false, 'paperMesh');
 
-        // ★ 리뷰 반영: 매직넘버 제거 및 상수 적용
         paper.position.y = KIOSK.RECEIPT_START_Y;
         const targetY = KIOSK.RECEIPT_TARGET_Y;
         const speedPerSecond = 0.12;
@@ -240,11 +256,26 @@ async function init() {
       }
     }
     else if (event.data.type === 'SHOW_CLICK_GUIDE') {
-      // ✅ 5번째 파라미터 누락 복구 (튕김 현상의 원인 해결)
+      // 5번째 파라미터 포함 (튕김 방지)
       showClickGuide(event.data.direction, event.data.x, event.data.y, event.data.fromIframe, event.data.target3DObjName);
     }
     else if (event.data.type === 'HIDE_CLICK_GUIDE') {
       hideClickGuide();
+    }
+    else if (event.data.type === 'SHOW_GUIDE_BY_SELECTOR') {
+      const targetEl = document.querySelector(event.data.selector); // 부모 창에서 버튼 찾기
+
+      if (targetEl) {
+        // 요소의 실제 화면상 위치(X, Y)와 크기를 자동으로 계산합니다.
+        const rect = targetEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        // 정확한 중앙 위치에 화살표를 띄웁니다.
+        showClickGuide(event.data.direction, centerX, centerY);
+      } else {
+        console.warn('해당 버튼을 찾을 수 없습니다:', event.data.selector);
+      }
     }
   });
 
@@ -333,6 +364,19 @@ function animate() {
   cssRenderer.render(scene, camera);
 }
 
+/**
+ * 화면에 일시적인 알림(토스트 메시지)을 표시합니다.
+ */
+export function showToast(message) {
+  const toastEl = document.getElementById('custom-toast');
+  if (!toastEl) return;
+  toastEl.textContent = message;
+  toastEl.classList.add('show');
+  setTimeout(() => {
+    toastEl.classList.remove('show');
+  }, 3000);
+}
+
 function createClickGuideDOM() {
   if (document.getElementById('click-guide-wrapper')) {
     _guideWrapper = document.getElementById('click-guide-wrapper');
@@ -362,14 +406,12 @@ function createClickGuideDOM() {
   wrapper.appendChild(overlay);
   document.body.appendChild(wrapper);
 
-  // ★ 리뷰 반영: 생성된 요소를 변수에 캐싱
   _guideWrapper = wrapper;
   _guideImgUp = imgUp;
   _guideImgRight = imgRight;
 }
 
 export function showClickGuide(direction, x, y, fromIframe = false, target3DObjName = null) {
-  // ★ 리뷰 반영: getElementById 반복 호출 대신 캐싱된 변수 사용
   if (!_guideWrapper || !_guideImgUp || !_guideImgRight) return;
 
   currentGuide = { direction, x, y, fromIframe, target3DObjName };

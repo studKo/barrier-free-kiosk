@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ★ 리뷰 반영: 페이지가 열리자마자 부모 시스템의 퀘스트 텍스트 갱신
     if (window.parent) {
-        window.parent.postMessage({ type: 'UPDATE_QUEST', text: '영수증이 출력되고 있습니다...' }, window.location.origin);
+        window.parent.postMessage({ type: 'UPDATE_QUEST', text: '잠시 기다려주세요. \n<span style="font-size: 0.8em; color: #575757;">영수증 및 처방전이 출력되는 중입니다.</span>' }, window.location.origin);
     }
 
     setTimeout(() => {

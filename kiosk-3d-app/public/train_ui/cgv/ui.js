@@ -1,5 +1,9 @@
-// 파일명: public/train_ui/cgv/cgvui.js
-// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
+// 파일명: public/train_ui/cgv/ui.js
+
+/**
+ * [초기 설정]
+ * 부모 창의 퀘스트 텍스트 스타일을 설정합니다.
+ */
 try {
     if (window.parent && window.parent.document) {
         const questText = window.parent.document.getElementById('quest-text-1');
@@ -9,9 +13,13 @@ try {
         }
     }
 } catch (e) {
-    console.log("줄바꿈이 적용되지 않을 수 있습니다.");
+    console.log("부모 창 스타일에 접근할 수 없습니다.");
 }
 
+/**
+ * [데이터 스테이트]
+ * 영화 시간표, 좌석 구역, 선택된 인원 및 영화 정보를 관리합니다.
+ */
 const schedules = [
     { title: "파묘", time: "10:30", age: "15", color: "#1a1a1a" },
     { title: "인사이드 아웃 2", time: "11:15", age: "All", color: "#3498db" },
@@ -33,36 +41,70 @@ let posX = 0, posY = 0;
 let currentMovie = "";
 let currentTime = "";
 let cardInsertAbortController = null;
+let button = document.querySelector('.btn-start-red');
+let rect = button ? button.getBoundingClientRect() : { left: 0, top: 0 };
 
+/**
+ * 부모 창에 토스트 메시지 표시를 요청합니다. (기존 alert 대체)
+ * @param {string} message - 표시할 메시지 내용
+ */
+function showToast(message) {
+    if (window.parent) {
+        window.parent.postMessage({
+            type: 'SHOW_TOAST',
+            message: message
+        }, window.location.origin);
+    }
+}
+
+/**
+ * 화면 ID를 받아 해당 화면을 활성화하고 퀘스트/가이드를 업데이트합니다.
+ * @param {string} screenId - 활성화할 화면의 ID
+ */
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) targetScreen.classList.add('active');
+
     if (screenId === 'menu-screen') {
+        button = document.querySelector('.menu-btn.active');
+        rect = button.getBoundingClientRect();
         updateQuest('티켓을 구매하기 위해 ‘티켓구매’를 눌러주세요!');
-        showGuide('up', 400, 400);
+        showGuide('right', rect.left, rect.top);
     }
     if (screenId === 'schedule-screen') {
+        button = document.querySelector('.schedule-grid');
+        rect = button.getBoundingClientRect();
         updateQuest('12개의 영화중 원하는 영화를 클릭하여 주세요!');
+        showGuide('right', rect.left, rect.top);
         renderSchedules();
-        hideGuide();
     }
     if (screenId === 'people-screen') {
         updateQuest('‘일반’,’청소년’,’우대’,’경로’로 4가지 타입의 금액이 있으면 총 8명까지 예매할 수 있습니다!');
         renderPeople();
+        button = document.querySelector('.btn-footer.btn-red');
+        rect = button.getBoundingClientRect();
+        showGuide('right', rect.left, rect.top);
     }
     if (screenId === 'seat-screen') {
-        showGuide('up', 500, 750);
         renderSeats();
+        button = document.querySelector('.btn-red.payment');
+        rect = button.getBoundingClientRect();
+        showGuide('right', rect.left-100, rect.top);
+    }
+    if(screenId === 'payment-screen'){
+        button = document.querySelector('#payment-screen .btn-footer.btn-red');
+        rect = button.getBoundingClientRect();
+        showGuide('right', rect.left, rect.top);
     }
 }
 
-function handleRefund() {
-    const pin = prompt("환불하실 티켓의 예매번호 15자리를 입력해주세요.");
-    if (pin) alert("확인되었습니다. 환불 처리를 진행합니다.");
-}
-
+/**
+ * 영화 시간표 목록을 생성하여 화면에 렌더링합니다.
+ */
 function renderSchedules() {
     const list = document.getElementById('schedule-list');
+    if (!list) return;
     list.innerHTML = '';
     schedules.forEach(s => {
         const div = document.createElement('div');
@@ -84,8 +126,12 @@ function renderSchedules() {
     });
 }
 
+/**
+ * 인원 선택 버튼들을 카테고리별로 생성합니다.
+ */
 function renderPeople() {
     const rows = document.getElementById('people-rows');
+    if (!rows) return;
     rows.innerHTML = '';
     ["일반", "청소년", "우대", "경로"].forEach(cat => {
         const row = document.createElement('div');
@@ -101,21 +147,38 @@ function renderPeople() {
     document.getElementById('total-count').innerText = Object.values(selection).reduce((a, b) => a + b, 0);
 }
 
+/**
+ * 인원 수를 업데이트하고 최대 인원(8명)을 체크합니다.
+ */
 function updateCount(cat, count) {
     const total = Object.values(selection).reduce((a, b) => a + b, 0) - selection[cat] + count;
-    if (total > 8) return alert("최대 8명!");
+    if (total > 8) {
+        showToast("최대 8명까지 선택 가능합니다."); // alert 대체
+        return;
+    }
     selection[cat] = count;
     renderPeople();
 }
 
+/**
+ * 인원 선택 완료 시 좌석 선택 화면으로 이동합니다.
+ */
 function completePeople() {
-    updateQuest('좌석 선택에서 좌석을 하나씩 선택하세요!');
-    if (Object.values(selection).reduce((a, b) => a + b, 0) === 0) alert("인원을 선택하세요.");
-    else showScreen('seat-screen');
+    const total = Object.values(selection).reduce((a, b) => a + b, 0);
+    if (total === 0) {
+        showToast("인원을 선택하세요."); // alert 대체
+    } else {
+        updateQuest('좌석을 하나씩 선택하세요!');
+        showScreen('seat-screen');
+    }
 }
 
+/**
+ * 좌석 배치도를 생성하고 좌석 선택 로직을 처리합니다.
+ */
 function renderSeats() {
     const map = document.getElementById('seat-map');
+    if (!map) return;
     map.innerHTML = '';
     const rowLabels = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
     const totalMax = Object.values(selection).reduce((a, b) => a + b, 0);
@@ -129,7 +192,6 @@ function renderSeats() {
             for (let c = 1; c <= zone.cols; c++) {
                 const seat = document.createElement('div');
                 seat.className = 'seat';
-                seat.id = `${zone.id}-${r}-${c}`;
                 seat.innerText = r + c;
 
                 seat.onclick = function () {
@@ -138,7 +200,7 @@ function renderSeats() {
                         this.classList.remove('selected');
                     } else {
                         if (currentSelected.length >= totalMax) {
-                            alert(`이미 ${totalMax}개의 좌석을 모두 선택하셨습니다.`);
+                            showToast(`이미 ${totalMax}개의 좌석을 모두 선택하셨습니다.`); // alert 대체
                             return;
                         }
                         this.classList.add('selected');
@@ -153,27 +215,39 @@ function renderSeats() {
     posX = 0; posY = 0; applyMapTransform();
 }
 
+/**
+ * 좌석 맵의 줌 및 위치를 적용합니다.
+ */
 function applyMapTransform() {
     const map = document.getElementById('seat-map');
-    map.style.transform = `scale(1.4) translate(${posX / 1.4}px, ${posY / 1.4}px)`;
+    if (map) map.style.transform = `scale(1.4) translate(${posX / 1.4}px, ${posY / 1.4}px)`;
 }
 
+/**
+ * 선택된 좌석 번호를 하단 정보 창에 표시합니다.
+ */
 function updateSeatInfo() {
     const sel = Array.from(document.querySelectorAll('.seat.selected')).map(s => s.innerText);
-    document.getElementById('seat-info').innerText = sel.join(', ') || '-';
+    const infoEl = document.getElementById('seat-info');
+    if (infoEl) infoEl.innerText = sel.join(', ') || '-';
 }
 
+/**
+ * 결제 전 최종 확인 화면을 구성합니다.
+ */
 function renderPayment() {
-    updateQuest('좌석을 다 골랐으면 ‘결제하기’ 버튼을 눌러주세요!')
     const selSeats = document.getElementById('seat-info').innerText;
-
-    if (selSeats === '-') return alert("좌석을 먼저 선택해 주세요.");
+    if (selSeats === '-') {
+        showToast("좌석을 먼저 선택해 주세요."); // alert 대체
+        return;
+    }
 
     const totalMax = Object.values(selection).reduce((a, b) => a + b, 0);
     const selectedCount = document.querySelectorAll('.seat.selected').length;
 
     if (selectedCount < totalMax) {
-        return alert("좌석을 다 선택하지 않으셨습니다!");
+        showToast("좌석을 다 선택하지 않으셨습니다!"); // alert 대체
+        return;
     }
 
     document.getElementById('pay-title').innerText = currentMovie;
@@ -191,11 +265,14 @@ function renderPayment() {
     document.getElementById('pay-people').innerText = peopleTxt.join(', ');
     document.getElementById('pay-amount').innerText = totalAmt.toLocaleString();
 
+    updateQuest('좌석을 다 골랐으면 ‘결제하기’ 버튼을 눌러주세요!');
     showScreen('payment-screen');
 }
 
+/**
+ * 카드 삽입 애니메이션과 실제 결제 완료 처리를 수행합니다.
+ */
 async function finishPayment() {
-    updateQuest('결제를 하려면 ‘최종 결제 완료’를 눌러주세요!');
     const payContent = document.querySelector('.pay-content');
     if (!payContent) return;
 
@@ -225,13 +302,14 @@ async function finishPayment() {
     const statusText = document.getElementById('payment-status');
     if (statusText) statusText.innerText = "결제가 완료되었습니다.";
 
-    setTimeout(() => { showScreen('home-screen'); }, 2000);
+    setTimeout(() => { location.reload(); }, 2000);
 }
 
+/**
+ * 부모 창으로부터 카드 삽입 이벤트를 기다리는 Promise를 반환합니다.
+ */
 function waitForCardInsert() {
-    if (cardInsertAbortController) {
-        cardInsertAbortController.abort();
-    }
+    if (cardInsertAbortController) cardInsertAbortController.abort();
     cardInsertAbortController = new AbortController();
 
     return new Promise((resolve) => {
@@ -247,10 +325,16 @@ function waitForCardInsert() {
     });
 }
 
+/**
+ * 부모 창에 퀘스트 텍스트 업데이트 메시지를 보냅니다.
+ */
 function updateQuest(text) {
     if (window.parent) window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
 }
 
+/**
+ * 부모 창에 클릭 가이드 표시 메시지를 보냅니다.
+ */
 function showGuide(direction, x, y) {
     if (window.parent) {
         window.parent.postMessage({
@@ -263,9 +347,8 @@ function showGuide(direction, x, y) {
     }
 }
 
-function hideGuide() {
-    if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
-}
-
+/**
+ * 초기 실행: 퀘스트를 설정하고 가이드를 표시합니다.
+ */
 updateQuest('‘시작하기’ 버튼을 눌러주세요!');
-showGuide('up', 400, 750);
+if (button) showGuide('right', rect.left, rect.top);

@@ -309,8 +309,17 @@ function animate() {
         const iframeW = cssObject.element.offsetWidth || 700;
         const iframeH = cssObject.element.offsetHeight || 900;
 
-        const localX = currentGuide.x - (iframeW / 2);
-        const localY = (iframeH / 2) - currentGuide.y;
+        // x와 y가 0~1 사이의 비율로 전달되었는지 자동 감지
+        const isRatio = (currentGuide.x >= 0 && currentGuide.x <= 1) && (currentGuide.y >= 0 && currentGuide.y <= 1);
+
+        let localX, localY;
+        if (isRatio) {
+          localX = (currentGuide.x * iframeW) - (iframeW / 2);
+          localY = (iframeH / 2) - (currentGuide.y * iframeH);
+        } else {
+          localX = currentGuide.x - (iframeW / 2);
+          localY = (iframeH / 2) - currentGuide.y;
+        }
 
         _targetPos.set(localX, localY, 0);
         _targetPos.applyMatrix4(cssObject.matrixWorld);

@@ -77,10 +77,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 바코드 스캔이나 주민번호 입력 후 동일하게 일시불 결제 유도
+    const isSecondVisit = sessionStorage.getItem('isSecondVisit');
+    if (isSecondVisit === 'yes') {
     updateQuest('일시불을 눌러 결제해주세요. \n<span style="font-size: 0.8em; color: #575757;">나온 금액을 확인하고 수납 여부를 물어보는 화면입니다.\n수납은 비용을 계산(납부)하는 것을 말합니다.\n현장에선 환자 성명과 진료과 등 정보가 맞는지 꼭 확인해주신 다음 결제해 주세요.</span>');
     // ★ 안전한 2D 타겟팅
-    showGuideOnTarget('up', '#lump-sum-btn', 0, 0, 300);
+    showGuideOnTarget('up', '#lump-sum-btn', -20, 20, 300);
     sessionStorage.removeItem('isSecondVisit');
+    } else { //이 부분 추가
+        updateQuest('이번엔 주민등록번호를 입력해서 이 화면으로 와 볼게요. 처음을 누르면 처음 화면으로 돌아갑니다.');
+        showGuideOnTarget('up', '#main-home-btn', -20, 20, 300); // 처음 버튼 가리키기
+    }
 
     if (lumpSumBtn && cardModal) {
         lumpSumBtn.addEventListener('click', () => {
@@ -103,7 +109,10 @@ document.addEventListener('DOMContentLoaded', () => {
         prevBtn.addEventListener('click', () => { cardModal.classList.add('hidden'); });
     }
     if (homeBtnModal) {
-        homeBtnModal.addEventListener('click', () => { window.location.href = 'index.html'; });
+        homeBtnModal.addEventListener('click', () => { 
+            hideGuide();
+            sessionStorage.setItem('isReturned', 'yes');
+            window.location.href = 'index.html'; });
     }
     if (mainHomeBtn) {
         mainHomeBtn.addEventListener('click', () => {

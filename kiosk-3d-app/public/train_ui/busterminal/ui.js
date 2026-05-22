@@ -688,7 +688,16 @@ window.addEventListener('message', (event) => {
 
         if (isCardInserted) {
           updateQuest('카드를 회수하고 확인을 눌러주세요');
-          showGuideOnTarget('up', '#btn-complete-confirm', 300);
+          if (window.parent) {
+            window.parent.postMessage({
+              type: 'SHOW_CLICK_GUIDE',
+              direction: 'up',
+              x: 0,
+              y: 0,
+              fromIframe: false,
+              target3DObjName: 'slotGlowMesh'
+            }, window.location.origin);
+          }
         } else {
           updateQuest('확인을 눌러주세요');
           showGuideOnTarget('up', '#btn-complete-confirm', 300);

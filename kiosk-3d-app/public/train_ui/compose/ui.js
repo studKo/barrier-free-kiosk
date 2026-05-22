@@ -1,4 +1,6 @@
-// 파일명: public/train_ui/compose/ui.js
+// ==========================================
+// ★ 부모 창의 튜토리얼 텍스트 줄바꿈(\n) 강제 허용 로직 ★
+// ==========================================
 try {
   if (window.parent && window.parent.document) {
     const questText = window.parent.document.getElementById('quest-text-1');
@@ -7,74 +9,46 @@ try {
       questText.style.lineHeight = '1.5';
     }
   }
-} catch (e) {
-  console.log("줄바꿈이 적용되지 않을 수 있습니다.");
-}
+} catch (e) {}
 
-// 헬퍼 함수 (사용자님 버스터미널 코드 100% 동일)
+// ==========================================
+// 1. 부모 창 연동 공통 헬퍼 함수
+// ==========================================
 let guideTimeoutId = null;
 
 function updateQuest(text) {
   if (window.parent) {
-    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, window.location.origin);
+    window.parent.postMessage({ type: 'UPDATE_QUEST', text: text }, '*');
   }
 }
 
-function showGuideOnTarget(direction, selector, delay = 0) {
+function showGuideOnTarget(direction, selector) {
   if (guideTimeoutId) {
     clearTimeout(guideTimeoutId);
     guideTimeoutId = null;
   }
-
-  const sendGuide = () => {
-    const el = document.querySelector(selector);
-    if (el && window.parent) {
-      const rect = el.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-
-      window.parent.postMessage({
-        type: 'SHOW_CLICK_GUIDE',
-        direction: direction,
-        x: x,
-        y: y,
-        fromIframe: true
-      }, window.location.origin);
-    }
-  };
-
-  if (delay > 0) {
-    guideTimeoutId = setTimeout(sendGuide, delay);
-  } else {
-    sendGuide();
+  const el = document.querySelector(selector);
+  if (el && window.parent) {
+    const rect = el.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    window.parent.postMessage({
+      type: 'SHOW_CLICK_GUIDE',
+      direction: direction,
+      x: x,
+      y: y,
+      fromIframe: true
+    }, '*');
   }
-}
-
-function showGuide(direction, x, y, fromIframe = true, delay = 0) {
-  if (guideTimeoutId) {
-    clearTimeout(guideTimeoutId);
-    guideTimeoutId = null;
-  }
-  const sendGuide = () => {
-    if (window.parent) {
-      window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction, x, y, fromIframe }, window.location.origin);
-    }
-  };
-  if (delay > 0) guideTimeoutId = setTimeout(sendGuide, delay);
-  else sendGuide();
 }
 
 function hideGuide() {
-  if (guideTimeoutId) {
-    clearTimeout(guideTimeoutId);
-    guideTimeoutId = null;
-  }
-  if (window.parent) {
-    window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
-  }
+  if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, '*');
 }
 
-// 메뉴 데이터
+// ==========================================
+// 2. 메뉴 데이터
+// ==========================================
 const menus = [
   { name: "아메리카노", price: 1500, desc: "컴포즈커피의 깔끔하고 진한 대표 커피", category: "커피" },
   { name: "카페라떼", price: 2900, desc: "부드러운 우유와 에스프레소의 조화", category: "커피" },
@@ -126,7 +100,9 @@ const menus = [
   { name: "티라미수케이크", price: 4500, desc: "부드러운 마스카포네 치즈와 커피의 조화", category: "푸드/디저트" }
 ];
 
-// DOM 요소 및 상태 관리
+// ==========================================
+// 3. DOM 요소 및 상태 관리
+// ==========================================
 const orderTypeScreen = document.getElementById("order-type-screen");
 const menuScreen = document.getElementById("menu-screen");
 const paymentWaitScreen = document.getElementById("payment-wait-screen");
@@ -134,7 +110,6 @@ const completeScreen = document.getElementById("complete-screen");
 
 const eatInBtn = document.getElementById("eat-in-btn");
 const takeOutBtn = document.getElementById("take-out-btn");
-const tutorialStartBtn = document.getElementById("tutorial-start-btn"); // 도움말 버튼
 const orderTypeLabel = document.getElementById("order-type-label");
 
 const categoryTabs = document.querySelectorAll(".tab");
@@ -156,57 +131,55 @@ const modalAddBtn = document.getElementById("modal-add-btn");
 const iceOptionGroup = document.getElementById("ice-option-group");
 
 let cart = [];
-let currentCategory = "커피";
-let orderCounter = 101;
+let currentCategory = "커피"; 
+let orderCounter = 101; 
 let selectedMenu = null;
 let selectedTemp = "HOT";
-let selectedIce = "기본";
+let selectedIce = "기본"; 
 let selectedExtra = "선택 안함";
 let extraPrice = 0;
 
-let isTutorialMode = false;
-let tutorialStep = 0;
+let isTutorialMode = true; // 무조건 실행을 위해 true 고정
+let tutorialStep = 1;
 
-// 로직 및 이벤트 리스너 (튜토리얼 연동 포함)
+// ==========================================
+// 4. 로직 및 이벤트 리스너 (튜토리얼 연동 포함)
+// ==========================================
 
-if (tutorialStartBtn) {
-  tutorialStartBtn.addEventListener("click", () => {
-    isTutorialMode = true;
-    tutorialStep = 1;
-
-    // 부모 창에 텍스트 갱신 및 포장해가기 버튼 안전 타겟팅
-    updateQuest("매장에서 먹을지, 포장해갈지 선택할 수 있습니다. 우선, '포장해가기'를 선택해보세요.");
-    showGuideOnTarget('up', '#take-out-btn', 300);
-  });
+// ★ 화면 로딩 시 자동으로 튜토리얼 1단계 시작
+function startTutorialAutomatically() {
+  isTutorialMode = true;
+  tutorialStep = 1;
+  updateQuest("매장에서 먹을지, 포장해갈지 선택할 수 있습니다. \n우선, '포장해가기'를 선택해보세요.");
+  setTimeout(() => { showGuideOnTarget("up", "#take-out-btn"); }, 500);
 }
 
 // 매장/포장 선택
 function startOrder(type) {
   if (isTutorialMode && tutorialStep === 1 && type === "포장해가기") {
     hideGuide();
-    tutorialStep = 2;
+    tutorialStep = 2; 
   }
 
   orderTypeLabel.textContent = `주문 방식: ${type}`;
   orderTypeScreen.classList.add("hidden");
   menuScreen.classList.remove("hidden");
-  renderMenus();
+  renderMenus(); 
 
   if (isTutorialMode && tutorialStep === 2) {
-    updateQuest("가장 위에 위치한 버튼으로 커피의 종류를 선택할 수 있습니다. 우선, 가장 기본적인 음료인 ‘아메리카노’를 선택해볼까요?");
-
+    updateQuest("가장 위에 위치한 버튼으로 커피의 종류를 선택할 수 있습니다. \n우선, 가장 기본적인 음료인 ‘아메리카노’를 선택해볼까요?");
+    
     setTimeout(() => {
       const cards = Array.from(document.querySelectorAll('.menu-card'));
       const americanoCard = cards.find(c => c.querySelector('h3').textContent.includes('아메리카노'));
       if (americanoCard) {
         const btn = americanoCard.querySelector('.add-btn');
-        if (btn) {
-          const rect = btn.getBoundingClientRect();
-          // iframe 내부 좌표이므로 fromIframe: true
-          showGuide('up', rect.left + rect.width / 2, rect.top + rect.height / 2, true);
+        if(btn) {
+            const rect = btn.getBoundingClientRect();
+            window.parent.postMessage({ type: 'SHOW_CLICK_GUIDE', direction: 'up', x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, fromIframe: true }, '*');
         }
       }
-    }, 500);
+    }, 500); 
   }
 }
 
@@ -246,6 +219,7 @@ function renderMenus() {
         hideGuide();
         tutorialStep = 3;
       }
+
       if (menu.category === "푸드/디저트") addDirectlyToCart(menu);
       else openOptionModal(menu);
     });
@@ -258,7 +232,7 @@ function renderMenus() {
 function openOptionModal(menu) {
   selectedMenu = menu;
   selectedTemp = "HOT";
-  selectedIce = "기본";
+  selectedIce = "기본"; 
   selectedExtra = "선택 안함";
   extraPrice = 0;
 
@@ -277,8 +251,8 @@ function openOptionModal(menu) {
   optionModal.classList.remove("hidden");
 
   if (isTutorialMode && tutorialStep === 3) {
-    updateQuest("옵션을 고른 후 아래의 '장바구니 담기' 버튼을 눌러주세요.");
-    showGuideOnTarget('up', '#modal-add-btn', 300);
+    updateQuest("추가 항목을 선택한 이후, 아래의 '장바구니 담기' 를 눌러주세요.");
+    setTimeout(() => { showGuideOnTarget("up", "#modal-add-btn"); }, 300);
   }
 }
 
@@ -300,10 +274,10 @@ optBtns.forEach(btn => {
       if (value === "ICED") iceOptionGroup.style.display = "block";
       else {
         iceOptionGroup.style.display = "none";
-        selectedIce = "기본";
+        selectedIce = "기본"; 
         document.querySelectorAll(`.opt-btn[data-type="ice"]`).forEach(b => {
           b.classList.remove("active");
-          if (b.dataset.value === "기본") b.classList.add("active");
+          if(b.dataset.value === "기본") b.classList.add("active");
         });
       }
     } else if (type === "ice") {
@@ -330,7 +304,7 @@ modalAddBtn.addEventListener("click", () => {
   let optionText = selectedTemp;
   if (selectedTemp === "ICED" && selectedIce !== "기본") optionText += `, ${selectedIce}`;
   if (selectedExtra !== "선택 안함") optionText += `, ${selectedExtra}`;
-
+  
   const cartItemName = `${selectedMenu.name} (${optionText})`;
   const finalPrice = selectedMenu.price + extraPrice;
 
@@ -338,8 +312,8 @@ modalAddBtn.addEventListener("click", () => {
   optionModal.classList.add("hidden");
 
   if (isTutorialMode && tutorialStep === 4) {
-    updateQuest("장바구니에 아메리카노가 담긴 모습입니다. 장바구니의 버튼을 눌러 수량을 늘리거나 줄일 수 있습니다. 전체 취소 버튼으로 장바구니의 물품을 없앨 수 있습니다. 구매(결제하기) 버튼을 눌러볼까요?");
-    showGuideOnTarget('up', '#pay-btn', 300);
+    updateQuest("장바구니에 아메리카노가 담긴 모습입니다. \n장바구니의 버튼을 눌러 수량을 늘리거나 줄일 수 있습니다. \n전체 취소 버튼으로 장바구니의 물품을 없앨 수 있습니다. \n이제 결제하기 버튼을 눌러볼까요?");
+    setTimeout(() => { showGuideOnTarget("up", "#pay-btn"); }, 300);
   }
 });
 
@@ -369,7 +343,7 @@ function removeCartItem(cartName) {
 }
 
 clearAllBtn.addEventListener("click", () => {
-  cart = [];
+  cart = []; 
   renderCart();
 });
 
@@ -382,7 +356,7 @@ function renderCart() {
 
     const div = document.createElement("div");
     div.className = "cart-item";
-
+    
     div.innerHTML = `
       <div class="cart-item-info">
         <span style="font-size: 15px; font-weight:bold; display:block; margin-bottom:3px; word-break:keep-all;">${item.cartName}</span>
@@ -410,27 +384,25 @@ function renderCart() {
 // 결제하기 버튼 클릭
 payBtn.addEventListener("click", () => {
   if (isTutorialMode && tutorialStep === 4) {
-    hideGuide();
+    hideGuide(); 
     tutorialStep = 5;
-    updateQuest("여기서 임시 카드를 꺼낼 수 있습니다. 카드가 추가되었습니다. 카드를 옮겨 결제를 완료해보세요!");
-    showGuide('right', 1300, 300, false, 300);
+    updateQuest("여기서 임시 카드를 꺼낼 수 있습니다. \n카드를 옮겨 결제를 완료해보세요!");
   }
 
   menuScreen.classList.add("hidden");
   paymentWaitScreen.classList.remove("hidden");
-  window.parent.postMessage({ type: 'PAYMENT_READY' }, window.location.origin);
+  window.parent.postMessage({ type: 'PAYMENT_READY' }, '*');
 });
 
 cancelPaymentBtn.addEventListener("click", () => {
   paymentWaitScreen.classList.add("hidden");
   menuScreen.classList.remove("hidden");
-  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
+  window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
 });
 
-// 부모 창(3D 환경)으로부터 카드 삽입 완료 메시지 수신
+// 부모 창으로부터 결제 완료 메시지 수신
 window.addEventListener('message', (event) => {
-  if (event.origin !== window.location.origin) return;
-  if (event.data && event.data.type === 'CARD_INSERTED') {
+  if (event.data && (event.data === 'cardInserted' || event.data.type === 'CARD_INSERTED')) {
 
     if (!paymentWaitScreen.classList.contains("hidden")) {
       paymentWaitScreen.classList.add("hidden");
@@ -439,18 +411,24 @@ window.addEventListener('message', (event) => {
       document.getElementById("order-number").textContent = `주문번호: ${orderCounter}`;
       orderCounter++;
 
-      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, window.location.origin);
+      // 메인 프로그램에 영수증 출력을 요청 (팀장님의 가이드 로직이 여기서 실행됨)
+      window.parent.postMessage({ type: 'PRINT_RECEIPT' }, '*');
 
       if (isTutorialMode && tutorialStep === 5) {
-        updateQuest("잘하셨습니다! 결제가 완료되었습니다.");
-
+        // 영수증이 출력되는 시간 동안 대기한 후 최종 완료 멘트로 업데이트
         setTimeout(() => {
-          updateQuest("");
-          isTutorialMode = false;
-        }, 4000);
+          updateQuest("잘하셨습니다! 결제가 완료되었습니다.");
+          hideGuide(); // 혹시 남아있을 수 있는 UI 가이드 끄기
+        }, 3000);
       }
 
+      // 최종 메시지를 충분히 보여준 뒤 키오스크 화면 초기화 및 튜토리얼 1단계부터 무한 반복
       setTimeout(() => {
+        if (isTutorialMode && tutorialStep === 5) {
+          updateQuest("");
+          isTutorialMode = false;
+        }
+
         completeScreen.classList.add("hidden");
         orderTypeScreen.classList.remove("hidden");
         cart = [];
@@ -460,11 +438,16 @@ window.addEventListener('message', (event) => {
         categoryTabs.forEach(t => t.classList.remove("active"));
         categoryTabs[0].classList.add("active");
 
-        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, window.location.origin);
-      }, 4000);
+        window.parent.postMessage({ type: 'PAYMENT_COMPLETE' }, '*');
+        
+        // 화면 리셋 후 튜토리얼 자동 재시작
+        startTutorialAutomatically();
+        
+      }, 6000); // 넉넉하게 6초 뒤에 리셋
     }
   }
 });
 
-// 최초 실행
+// 최초 로딩 시 장바구니 렌더링 후, 튜토리얼 자동 시작!
 renderCart();
+startTutorialAutomatically();

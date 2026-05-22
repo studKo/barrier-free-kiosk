@@ -1,5 +1,6 @@
 //맥도날드 (mcdonalds/ui.js)
 
+// 부모 창의 퀘스트 텍스트 줄바꿈 및 자간 설정
 try {
     if (window.parent && window.parent.document) {
         const questText = window.parent.document.getElementById('quest-text-1');
@@ -21,6 +22,12 @@ function showGuide(direction, x, y) {
 }
 function hideGuide() {
     if (window.parent) window.parent.postMessage({ type: 'HIDE_CLICK_GUIDE' }, window.location.origin);
+}
+function showComingSoon() {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `<div style="background:#fff;border-radius:16px;padding:40px 50px;text-align:center;font-size:22px;font-weight:700;">준비중입니다<br><span style="font-size:14px;font-weight:400;color:#888;margin-top:10px;display:block;">서비스 준비 중이에요</span><button onclick="this.closest('div').parentElement.remove()" style="margin-top:20px;padding:10px 30px;background:#FFBC0D;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;">확인</button></div>`;
+    document.body.appendChild(overlay);
 }
 
 const STATE = {
@@ -60,32 +67,32 @@ const setDrinkOptions = [
 
 const menuData = {
     recommend: [
-        { name: "빅맥® 세트", price: 7500, img: "사진/빅맥 세트.png" },
-        { name: "상하이 버거 세트", price: 7500, img: "사진/상하이 스파이시 버거.png" },
+        { name: "빅맥® 세트", price: 7600, img: "사진/빅맥 세트.png" },
+        { name: "상하이 버거 세트", price: 7700, img: "사진/상하이 스파이시 버거.png" },
         { name: "1955 버거 세트", price: 8400, img: "사진/1955버거 세트.png" },
-        { name: "슈슈 버거 세트", price: 6700, img: "사진/슈슈버거 세트.png" }
+        { name: "슈슈 버거 세트", price: 6000, img: "사진/슈슈버거 세트.png" }
     ],
     burger: [
-        { name: "빅맥®", price: 5500, type: "beef", img: "사진/빅맥.webp", setImg: "사진/빅맥 세트.png" },
-        { name: "1955 버거", price: 6400, type: "beef", img: "사진/1955버거.webp", setImg: "사진/1955버거 세트.png" },
-        { name: "베이컨 토마토 디럭스", price: 5800, type: "beef", img: "사진/베이컨 토마토 디럭스.webp", setImg: "사진/베이컨 토마토 디럭스 세트.png" },
-        { name: "더블 쿼터파운더 치즈", price: 7400, type: "beef", img: "사진/더블 쿼터파운드.webp", setImg: "사진/더블 쿼터파운드 세트.png" },
-        { name: "쿼터파운더 치즈", price: 5500, type: "beef", img: "사진/쿼터파운드 치즈.webp", setImg: "사진/쿼터파운드 세트.png" },
-        { name: "토마토 치즈 비프 버거", price: 4900, type: "beef", img: "사진/토마토 치즈.webp", setImg: "사진/토마토 치즈 세트.png" },
-        { name: "트리플 치즈 버거", price: 7000, type: "beef", img: "사진/트리플 치즈 버거.webp", setImg: "사진/트리플 치즈 세트.png" },
-        { name: "더블 치즈 버거", price: 5900, type: "beef", img: "사진/더블 치즈.webp", setImg: "사진/더블 치즈 세트.png" },
-        { name: "치즈 버거", price: 4100, type: "beef", img: "사진/치즈버거.webp", setImg: "사진/치즈 세트.png" },
-        { name: "햄버거", price: 3700, type: "beef", img: "사진/햄버거.png" },
-        { name: "더블 맥스파이시 상하이 버거", price: 9300, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/더블 상하이 세트.png" },
-        { name: "맥스파이시 상하이 버거", price: 5500, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/상하이 스파이시 버거.png" },
-        { name: "맥크리스피 치킨 디럭스", price: 6800, type: "chicken", img: "사진/맥크리스피 치킨 디럭스.webp", setImg: "사진/치킨 디럭스 세트.png" },
-        { name: "맥크리스피 치킨 클래식", price: 5900, type: "chicken", img: "사진/맥크리스피 클래식.webp", setImg: "사진/치킨 클래식 세트.png" },
-        { name: "맥치킨 모짜렐라", price: 5000, type: "chicken", img: "사진/맥치킨 모짜렐라.webp", setImg: "사진/맥치킨 모짜렐라 세트.png" },
-        { name: "맥치킨", price: 3500, type: "chicken", img: "사진/맥치킨.webp", setImg: "사진/맥치킨 세트.png" },
-        { name: "슈슈 버거", price: 4700, type: "seafood", img: "사진/슈슈버거.webp", setImg: "사진/슈슈버거 세트.png" },
-        { name: "슈비 버거", price: 5800, type: "seafood", img: "사진/슈비버거.webp", setImg: "사진/슈비 세트.png" },
-        { name: "더블 불고기 버거", price: 4500, type: "bulgogi", img: "사진/더블 불고기.webp", setImg: "사진/더블 불고기 세트.png" },
-        { name: "불고기 버거", price: 3500, type: "bulgogi", img: "사진/불고기.webp", setImg: "사진/불고기 세트.png" }
+        { name: "빅맥®", price: 5700, setPrice: 7600, type: "beef", img: "사진/빅맥.webp", setImg: "사진/빅맥 세트.png" },
+        { name: "1955 버거", price: 6700, setPrice: 8400, type: "beef", img: "사진/1955버거.webp", setImg: "사진/1955버거 세트.png" },
+        { name: "베이컨 토마토 디럭스", price: 5800, setPrice: 8000, type: "beef", img: "사진/베이컨 토마토 디럭스.webp", setImg: "사진/베이컨 토마토 디럭스 세트.png" },
+        { name: "더블 쿼터파운더 치즈", price: 7700, setPrice: 9600, type: "beef", img: "사진/더블 쿼터파운드.webp", setImg: "사진/더블 쿼터파운드 세트.png" },
+        { name: "쿼터파운더 치즈", price: 5900, setPrice: 7900, type: "beef", img: "사진/쿼터파운드 치즈.webp", setImg: "사진/쿼터파운드 세트.png" },
+        { name: "토마토 치즈 비프 버거", price: 4000, setPrice: 5600, type: "beef", img: "사진/토마토 치즈.webp", setImg: "사진/토마토 치즈 세트.png" },
+        { name: "트리플 치즈 버거", price: 6100, setPrice: 7500, type: "beef", img: "사진/트리플 치즈 버거.webp", setImg: "사진/트리플 치즈 세트.png" },
+        { name: "더블 치즈 버거", price: 5000, setPrice: 6300, type: "beef", img: "사진/더블 치즈.webp", setImg: "사진/더블 치즈 세트.png" },
+        { name: "치즈 버거", price: 3200, setPrice: 5000, type: "beef", img: "사진/치즈버거.webp", setImg: "사진/치즈 세트.png" },
+        { name: "햄버거", price: 2800, type: "beef", img: "사진/햄버거.png" },
+        { name: "더블 맥스파이시 상하이 버거", price: 9300, setPrice: 11200, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/더블 상하이 세트.png" },
+        { name: "맥스파이시 상하이 버거", price: 5900, setPrice: 7700, type: "chicken", img: "사진/맥스파이시.webp", setImg: "사진/상하이 스파이시 버거.png" },
+        { name: "맥크리스피 치킨 디럭스", price: 6800, setPrice: 8400, type: "chicken", img: "사진/맥크리스피 치킨 디럭스.webp", setImg: "사진/치킨 디럭스 세트.png" },
+        { name: "맥크리스피 치킨 클래식", price: 5900, setPrice: 7400, type: "chicken", img: "사진/맥크리스피 클래식.webp", setImg: "사진/치킨 클래식 세트.png" },
+        { name: "맥치킨 모짜렐라", price: 5000, setPrice: 7300, type: "chicken", img: "사진/맥치킨 모짜렐라.webp", setImg: "사진/맥치킨 모짜렐라 세트.png" },
+        { name: "맥치킨", price: 3500, setPrice: 5600, type: "chicken", img: "사진/맥치킨.webp", setImg: "사진/맥치킨 세트.png" },
+        { name: "슈슈 버거", price: 4700, setPrice: 6000, type: "seafood", img: "사진/슈슈버거.webp", setImg: "사진/슈슈버거 세트.png" },
+        { name: "슈비 버거", price: 6200, setPrice: 8500, type: "seafood", img: "사진/슈비버거.webp", setImg: "사진/슈비 세트.png" },
+        { name: "더블 불고기 버거", price: 4700, setPrice: 6800, type: "bulgogi", img: "사진/더블 불고기.webp", setImg: "사진/더블 불고기 세트.png" },
+        { name: "불고기 버거", price: 3800, setPrice: 5500, type: "bulgogi", img: "사진/불고기.webp", setImg: "사진/불고기 세트.png" }
     ],
     happysnack: [
         { name: "아이스 드립 커피 Medium", price: 1500, type: "drink", img: "사진/아이스 드립 M.png" },
@@ -95,8 +102,8 @@ const menuData = {
         { name: "한입 초코 츄러스 3조각", price: 2500, type: "snack", img: "사진/초코 츄러스.png" }
     ],
     side: [
-        { name: "후렌치 후라이(L)", price: 2700, type: "fries", img: "사진/후렌치_후라이_Large.png" },
-        { name: "후렌치 후라이(M)", price: 2000, type: "fries", img: "사진/후렌치_후라이_Medium.png" },
+        { name: "후렌치 후라이(L)", price: 3200, type: "fries", img: "사진/후렌치_후라이_Large.png" },
+        { name: "후렌치 후라이(M)", price: 2500, type: "fries", img: "사진/후렌치_후라이_Medium.png" },
         { name: "맥너겟® 6조각", price: 5000, type: "chicken", img: "사진/맥너겟 6.png" },
         { name: "맥너겟® 4조각", price: 3700, type: "chicken", img: "사진/맥너겟 4.png" },
         { name: "골든 모짜렐라 치즈스틱 2조각", price: 2500, type: "cheese", img: "사진/치즈 2.png" },
@@ -121,15 +128,15 @@ const menuData = {
         { name: "디카페인 카푸치노", price: 3600, type: "decaf", img: "사진/디카페인 카푸치노.png" }
     ],
     dessert: [
-        { name: "스트로베리콘", price: 3000, type: "icecream", img: "사진/스트로베리.png" },
-        { name: "아이스크림콘", price: 3000, type: "icecream", img: "사진/아이스크림.png" },
-        { name: "초코 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/초코 선데.png" },
-        { name: "딸기 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/딸기 선데.png" },
-        { name: "바닐라 선데이 아이스크림", price: 3000, type: "icecream", img: "사진/바닐라 선데.png" },
-        { name: "오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/오레오.png" },
-        { name: "딸기 오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/딸기 오레오.png" },
-        { name: "초코 오레오 맥플러리", price: 3000, type: "mcflurry", img: "사진/초코 오레오.png" },
-        { name: "베리 스트로베리 맥플러리", price: 3000, type: "mcflurry", img: "사진/베리 스트로베리.png" },
+        { name: "스트로베리콘", price: 1900, type: "icecream", img: "사진/스트로베리.png" },
+        { name: "아이스크림콘", price: 1500, type: "icecream", img: "사진/아이스크림.png" },
+        { name: "초코 선데이 아이스크림", price: 2400, type: "icecream", img: "사진/초코 선데.png" },
+        { name: "딸기 선데이 아이스크림", price: 2400, type: "icecream", img: "사진/딸기 선데.png" },
+        { name: "바닐라 선데이 아이스크림", price: 2200, type: "icecream", img: "사진/바닐라 선데.png" },
+        { name: "오레오 맥플러리", price: 3600, type: "mcflurry", img: "사진/오레오.png" },
+        { name: "딸기 오레오 맥플러리", price: 3600, type: "mcflurry", img: "사진/딸기 오레오.png" },
+        { name: "초코 오레오 맥플러리", price: 3600, type: "mcflurry", img: "사진/초코 오레오.png" },
+        { name: "베리 스트로베리 맥플러리", price: 3600, type: "mcflurry", img: "사진/베리 스트로베리.png" },
         { name: "한입 초코 츄러스 3조각", price: 2500, type: "other", img: "사진/초코 츄러스.png" }
     ],
     drink: [
@@ -169,7 +176,7 @@ function renderStartScreen() {
             <!-- 3. 하단 버튼 영역 (섹션 간 여백 있음) -->
             <div class="start-bottom">
                 <!-- 포인트 적립 박스 -->
-                <div class="start-point-box">
+                <div class="start-point-box" onclick="showComingSoon()" style="cursor:pointer;">
                     <div class="start-point-title" style="font-size: 18px;">포인트를 적립하세요</div>
                     <div class="start-point-sub" style="font-size: 12px;">결제 전 선택 필수</div>
                     <div class="start-qr" style="background:#fff; padding:8px; border-radius:8px; margin: 10px 0;">
@@ -192,11 +199,11 @@ function renderStartScreen() {
                     </div>
                     <!-- 아래: 언어 및 도움 기능 -->
                     <div class="start-side-btns">
-                        <div class="start-sub-btn">
+                        <div class="start-sub-btn" onclick="showComingSoon()" style="cursor:pointer;">
                             <span style="background:#444; color:#fff; padding:2px 5px; border-radius:4px; font-size:10px;">AZ</span>
                             <span>언어 선택<br><small>Languages</small></span>
                         </div>
-                        <div class="start-sub-btn">
+                        <div class="start-sub-btn" onclick="showComingSoon()" style="cursor:pointer;">
                             <span style="font-size:18px;">♿</span>
                             <span>도움 기능<br><small>Accessibility</small></span>
                         </div>
@@ -254,7 +261,7 @@ function showDiningModal() {
         </div>
     `;
     hideGuide();
-    setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.\n"매장에서 식사" = 이 맥도날드 안에서 드실 때 / "포장" = 음식을 봉투에 담아 집에 가져가실 때. 해당하는 그림을 눌러주세요.'); }, 800);
+    setTimeout(() => { updateQuest('매장에서 식사하실지 포장하실지를 선택해서 눌러주세요.\n<span style="font-size:0.5em;">"매장에서 식사" = 이 맥도날드 안에서 드실 때 / "포장" = 음식을 봉투에 담아 집에 가져가실 때. 해당하는 그림을 눌러주세요.</span>'); }, 800);
 }
 
 function selectDiningMethod(method) {
@@ -294,7 +301,7 @@ function startMainKiosk() {
     initDragScroll(kGrid);
     initThumbDrag();
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.'); }, 800);
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n<span style="font-size:0.5em;">왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.</span>'); }, 800);
 }
 
 function renderSidebar() {
@@ -342,7 +349,7 @@ function renderGrid() {
     items.forEach((item) => {
         const setImgData = item.setImg ? item.setImg : '';
         gridHtml += `
-            <div class="k-card" onclick="handleItemClick('${item.name}', ${item.price}, '${item.img}', '${STATE.currentCategory}', '${setImgData}')">
+            <div class="k-card" onclick="handleItemClick('${item.name}', ${item.price}, ${item.setPrice || 0}, '${item.img}', '${STATE.currentCategory}', '${setImgData}')">
                 <img class="k-img" src="${item.img}" alt="${item.name}">
                 <div class="k-name">${item.name}</div>
                 <div class="k-price-wrap"><div class="k-price">₩${item.price.toLocaleString()}</div></div>
@@ -359,7 +366,7 @@ function renderBottom() {
     const btnClass = totalQty > 0 ? 'k-checkout active' : 'k-checkout';
 
     container.innerHTML = `
-        <div class="k-bottom-qr"><div class="qr-text">포인트를 적립하세요<br>결제 전 선택 필수</div></div>
+        <div class="k-bottom-qr" onclick="showComingSoon()" style="cursor:pointer;"><div class="qr-text">포인트를 적립하세요<br>결제 전 선택 필수</div></div>
         <div class="k-bottom-center">
             <div class="cart-price-row">
                 <div class="cart-icon-wrap"><div class="cart-badge" id="k-count">${totalQty}</div></div>
@@ -404,25 +411,24 @@ function renderModals() {
 function changeCategory(categoryKey) {
     STATE.currentCategory = categoryKey;
     STATE.currentFilter = 'all';
-    renderSidebar(); renderHeader(); renderGrid(); initDragScroll(document.getElementById('k-grid'));
-
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.'); }, 800);
+    renderSidebar(); renderHeader(); renderGrid();
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n<span style="font-size:0.5em;">왼쪽 메뉴: 버거(햄버거류) / 해피스낵(소용량 세트) / 사이드(감자튀김 등) / 커피 / 디저트(아이스크림 등) / 음료\n버거는 상단에서 고기 종류별로 볼 수 있어요.\n화면을 위아래로 쓸어내리면 더 많은 메뉴를 볼 수 있습니다.</span>'); }, 800);
 }
 function filterSubCategory(type) { STATE.currentFilter = type; renderHeader(); renderGrid(); }
 
-function handleItemClick(name, price, img, category, setImg) {
+function handleItemClick(name, price, setPrice, img, category, setImg) {
     if (category === 'burger' && !name.includes('세트')) {
-        STATE.tempSelectedItem = { name, price, img, setImg: setImg ? setImg : "사진/기본_세트.png" };
+        STATE.tempSelectedItem = { name, price, setPrice, img, setImg: setImg ? setImg : "사진/기본_세트.png" };
         document.getElementById('modal-item-name').innerText = name;
         document.getElementById('modal-single-img').src = img;
         document.getElementById('modal-set-img').src = STATE.tempSelectedItem.setImg;
         document.getElementById('modal-single-price').innerText = '₩' + price.toLocaleString();
-        document.getElementById('modal-set-price').innerText = '₩' + (price + 2000).toLocaleString();
+        document.getElementById('modal-set-price').innerText = '₩' + (setPrice || price).toLocaleString();
         document.getElementById('set-modal').style.display = 'flex';
 
         hideGuide();
-        setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.\n단품 = 버거만 / 세트 = 버거 + 감자튀김 + 음료 (세트가 더 저렴해요)'); }, 800);
+        setTimeout(() => { updateQuest('단품으로 드실지 세트로 드실지 선택해주세요.\n<span style="font-size:0.5em;">단품 = 버거만 / 세트 = 버거 + 감자튀김 + 음료 (세트가 더 저렴해요)</span>'); }, 800);
     } else {
         addToCart({ name: name, price: price, img: img });
     }
@@ -509,7 +515,7 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('원하시는 사이드메뉴를 선택해주세요.\n사이드 = 버거와 함께 나오는 곁들임 음식이에요. (예: 감자튀김, 치즈스틱 등) 원하시는 것 하나를 눌러주세요.');
+            updateQuest('원하시는 사이드메뉴를 선택해주세요.\n<span style="font-size:0.5em;">사이드 = 버거와 함께 나오는 곁들임 음식이에요. (예: 감자튀김, 치즈스틱 등) 원하시는 것 하나를 눌러주세요.</span>');
         }, 800);
     }
     else if (step === 2) {
@@ -533,11 +539,11 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('원하시는 음료를 선택해주세요.\n콜라, 사이다, 커피 등 마시고 싶은 음료를 하나 골라 눌러주세요.');
+            updateQuest('원하시는 음료를 선택해주세요.\n<span style="font-size:0.5em;">콜라, 사이다, 커피 등 마시고 싶은 음료를 하나 골라 눌러주세요.</span>');
         }, 800);
     }
     else if (step === 3) {
-        const finalPrice = STATE.tempSelectedItem.price + 2000 + STATE.tempSetSelections.side.price + STATE.tempSetSelections.drink.price;
+        const finalPrice = (STATE.tempSelectedItem.setPrice || STATE.tempSelectedItem.price) + STATE.tempSetSelections.side.price + STATE.tempSetSelections.drink.price;
         const totalKcal = (STATE.tempSelectedItem.kcal || 582) + (STATE.tempSetSelections.side.kcal || 324) + (STATE.tempSetSelections.drink.kcal || 0);
 
         const fullScreenHtml = `
@@ -600,7 +606,7 @@ function openProcessStep(step) {
                 <!-- 최하단 -->
 		<div class="confirm-bottom-bar">
                		<button class="confirm-home-btn" onclick="resetCartConfirm()">처음으로</button>
-                		<button class="confirm-help-btn">♿ 도움기능...</button>
+                		<button class="confirm-help-btn" onclick="showComingSoon()">도움기능...</button>
             	</div>
 
             <div class="confirm-legal">
@@ -613,7 +619,7 @@ function openProcessStep(step) {
 
         setTimeout(() => {
             hideGuide();
-            updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.\n선택하신 음식들이 화면에 나와 있어요. 잘못 고르셨으면 "수정"을 누르시고, 맞으시면 아래 노란 "장바구니에 담기" 버튼을 눌러주세요.');
+            updateQuest('음식과 사이드, 음료가 맞는지 확인 후 장바구니에 담기를 눌러주세요.\n<span style="font-size:0.5em;">선택하신 음식들이 화면에 나와 있어요. 잘못 고르셨으면 "수정"을 누르시고, 맞으시면 아래 노란 "장바구니에 담기" 버튼을 눌러주세요.</span>');
             showGuide('up', 530, 780);
         }, 800);
         return;
@@ -625,7 +631,7 @@ function openProcessStep(step) {
             <div class="step-header">
                 <div class="step-header-info">
                     <div class="header-menu-name">${STATE.tempSelectedItem.name} 세트</div>
-                    <div class="header-menu-cal">₩${(STATE.tempSelectedItem.price + 2000).toLocaleString()} 582 Kcal</div>
+                    <div class="header-menu-cal">₩${(STATE.tempSelectedItem.setPrice || STATE.tempSelectedItem.price).toLocaleString()} 582 Kcal</div>
                 </div>
             </div>
             <div class="step-body">
@@ -655,7 +661,7 @@ function selectProcessOption(step, name, price, img) {
 
 function addSetToCartFinal() {
     const finalName = `${STATE.tempSelectedItem.name} 세트<span style="font-size:13px; color:#888; font-weight:600; display:block; margin-top:4px;">사이드: ${STATE.tempSetSelections.side.name}</span><span style="font-size:13px; color:#888; font-weight:600; display:block;">음료: ${STATE.tempSetSelections.drink.name}</span>`;
-    const finalPrice = STATE.tempSelectedItem.price + 2000 + STATE.tempSetSelections.side.price + STATE.tempSetSelections.drink.price;
+    const finalPrice = (STATE.tempSelectedItem.setPrice || STATE.tempSelectedItem.price) + STATE.tempSetSelections.side.price + STATE.tempSetSelections.drink.price;
     addToCart({ name: finalName, price: finalPrice, img: STATE.tempSelectedItem.setImg });
     closeProcessModal();
 }
@@ -666,8 +672,7 @@ function addToCart(newItem) {
     renderBottom();
 
     hideGuide();
-    setTimeout(() => { updateQuest('어른을 눌러주세요\n<span style="font-size: 0.7em; color: #666;">(아동도 선택 가능합니다)</span>'); }, 800);
-
+    setTimeout(() => { updateQuest('음식들을 선택하신 후 주문내역 확인/결제하기를 눌러주세요.'); }, 800);
     setTimeout(() => { showGuide('up', 610, 860); }, 800);
 }
 
@@ -724,16 +729,18 @@ function openCartModal() {
             </div>
         </div></div>`;
     cartModalInner.innerHTML = cartHtml;
+    const cartList = cartModalInner.querySelector('.cart-list-new');
+    if (cartList) initDragScroll(cartList);
 
     hideGuide();
-    setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.\n더 드실 음식이 있으시면 "추가 주문", 다 고르셨으면 "주문 완료"를 눌러주세요. 주문 완료를 눌러야 결제로 넘어갑니다.'); }, 800);
+    setTimeout(() => { updateQuest('추가주문을 원하신다면 추가주문을, 결제를 원하신다면 주문 완료를 눌러주세요.\n<span style="font-size:0.5em;">더 드실 음식이 있으시면 "추가 주문", 다 고르셨으면 "주문 완료"를 눌러주세요. 주문 완료를 눌러야 결제로 넘어갑니다.</span>'); }, 800);
     setTimeout(() => { showGuide('up', 560, 830); }, 800);
 }
 function closeCartModal() {
     document.getElementById('cart-modal').style.display = 'none';
     // 추가주문으로 돌아왔을 때 메뉴 선택 안내 다시 표시
     hideGuide();
-    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n화면에 보이는 음식 사진 중 원하시는 것을 손가락으로 눌러주시면 됩니다. 왼쪽 메뉴에서 종류를 바꿀 수 있어요.\n음식이 많아 화면에 다 안 보일 수 있어요. 화면을 손가락으로 위아래로 쓸어내리면 더 많은 메뉴를 보실 수 있습니다.'); }, 800);
+    setTimeout(() => { updateQuest('드시고 싶은 음식을 골라주세요.\n<span style="font-size:0.5em;">화면에 보이는 음식 사진 중 원하시는 것을 손가락으로 눌러주시면 됩니다. 왼쪽 메뉴에서 종류를 바꿀 수 있어요.\n음식이 많아 화면에 다 안 보일 수 있어요. 화면을 손가락으로 위아래로 쓸어내리면 더 많은 메뉴를 보실 수 있습니다.</span>'); }, 800);
 }
 
 // 장바구니 아이템 삭제 함수 (취소 버튼)
@@ -803,7 +810,7 @@ function openPaymentMethod() {
     cartModalInner.innerHTML = payHtml;
 
     hideGuide();
-    setTimeout(() => { updateQuest('결제수단을 선택해주세요.\n지금은 신용카드(체크카드 포함)로만 결제 가능합니다. "신용카드"를 눌러주세요.'); }, 800);
+    setTimeout(() => { updateQuest('결제수단을 선택해주세요.\n<span style="font-size:0.5em;">지금은 신용카드(체크카드 포함)로만 결제 가능합니다. "신용카드"를 눌러주세요.</span>'); }, 800);
     setTimeout(() => { showGuide('up', 170, 610); }, 800);
 }
 

@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const isReturned = sessionStorage.getItem('isReturned');
   if (isReturned === 'yes') {
     updateQuest('키패드의 숫자를 눌러 주민등록번호를 입력해 주세요.\n<span style="font-size: 0.8em; color: #575757;">키패드는 숫자와 기호 버튼이 모여있어 입력할 수 있는 것을 말합니다. 연습이니 임의의 숫자를 적어주셔도 됩니다.</span>');
-    showGuideOnTarget('right', '#btn-zero', 0, 0, 300);
+    showGuideOnTarget('right', '#btn-four', -150, 0, 300);
     sessionStorage.removeItem('isReturned');
   } else {
     sessionStorage.removeItem('isSecondVisit');
@@ -146,11 +146,11 @@ function updateDisplay() {
   if (display) display.value = displayVal;
 
   if (realJumin.length === 1) {
-    updateQuest('정정을 눌러 지울 수 있습니다. 계속 입력해 주세요.');
-    showGuideOnTarget('right', '.clear', 0, 0, 100);
+    updateQuest('[정정]을 눌러 지울 수 있습니다. 계속 입력해 주세요.');
+    showGuideOnTarget('right', '.clear', -150, -20, 100);
   } else if (realJumin.length === 13) {
-    updateQuest('잘 입력하셨다면, 확인을 눌러주세요.');
-    showGuideOnTarget('up', '#confirm-btn', 0, 0, 100);
+    updateQuest('잘 입력하셨다면, [확인]을 눌러주세요.');
+    showGuideOnTarget('up', '#confirm-btn', -20, 20, 100);
   } else if (realJumin.length === 0) {
     updateQuest('숫자를 눌러 주민등록번호를 입력해 주세요.');
     hideGuide();

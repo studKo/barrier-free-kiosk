@@ -25,7 +25,7 @@
 조원들은 저장소를 Clone 받은 후 아래의 절차를 따라 로컬 환경을 세팅해 주세요.
 
 ### 1️⃣ 필수 요구사항 (Prerequisites)
-- [Node.js](https://nodejs.org/) (v16 이상 권장)
+- [Node.js](https://nodejs.org/) 22.23.4 / 24.22.1 이상 (Vite 7 최소 요구 + 2026.10 보안 패치 반영)
 - Git
 
 ### 2️⃣ 설치 및 실행 가이드

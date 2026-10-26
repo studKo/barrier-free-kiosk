@@ -67,7 +67,7 @@
 
 ## 실행 방법
 
-[Node.js](https://nodejs.org/)가 설치되어 있어야 합니다.
+[Node.js](https://nodejs.org/) 22.23.4 / 24.22.1 이상(보안 패치 버전)이 설치되어 있어야 합니다.
 
 ```bash
 cd kiosk-3d-app
